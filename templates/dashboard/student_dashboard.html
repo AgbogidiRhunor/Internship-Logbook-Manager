@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard — SIWES Logbook{% endblock %}
+{% block page_title %}Student Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<!-- Status Cards -->
+<div class="stats-grid">
+  <div class="stat-card stat-card-blue">
+    <div class="stat-label">Days Logged</div>
+    <div class="stat-value">{{ days_logged }}</div>
+    <div class="stat-sub">of {{ total_days }} total days</div>
+  </div>
+  <div class="stat-card stat-card-teal">
+    <div class="stat-label">Days Remaining</div>
+    <div class="stat-value">{{ days_remaining }}</div>
+    <div class="stat-sub">until {{ profile.internship_end_date }}</div>
+  </div>
+  <div class="stat-card stat-card-navy">
+    <div class="stat-label">Start Date</div>
+    <div class="stat-value stat-value-sm">{{ profile.internship_start_date }}</div>
+    <div class="stat-sub">{{ profile.get_internship_duration_display }} internship</div>
+  </div>
+  <div class="stat-card {% if grade %}stat-card-green{% else %}stat-card-amber{% endif %}">
+    <div class="stat-label">Grading Status</div>
+    <div class="stat-value stat-value-sm">
+      {% if grade %}
+        <span class="badge badge-success">Graded</span>
+      {% else %}
+        <span class="badge badge-warning">Not Graded</span>
+      {% endif %}
+    </div>
+    {% if grade %}<div class="stat-sub">{{ grade.letter_grade }} — {{ grade.overall_score }}/100</div>{% endif %}
+  </div>
+</div>
+
+<!-- Internship Progress -->
+<div class="card mt-4">
+  <div class="card-header">
+    <h2 class="card-title">Internship Progress</h2>
+    <span class="progress-pct">{{ progress }}%</span>
+  </div>
+  <div class="card-body">
+    <div class="progress-track">
+      <div class="progress-fill" style="width: {{ progress }}%"></div>
+    </div>
+    <div class="progress-labels">
+      <span>{{ profile.internship_start_date }}</span>
+      <span>{{ profile.internship_end_date }}</span>
+    </div>
+  </div>
+</div>
+
+{% if grade %}
+<!-- Grade Card -->
+<div class="card mt-4 grade-card">
+  <div class="card-header">
+    <h2 class="card-title">Your Grade</h2>
+    <span class="grade-badge grade-{{ grade.letter_grade }}">{{ grade.letter_grade }}</span>
+  </div>
+  <div class="card-body">
+    <div class="grade-score">{{ grade.overall_score }}<span>/100</span></div>
+    <p class="grade-comment">{{ grade.lecturer_comment }}</p>
+    <small class="text-muted">Graded {{ grade.graded_at|date:"d M Y" }} by {{ grade.graded_by.get_full_name }}</small>
+  </div>
+</div>
+{% endif %}
+
+<!-- Recent Log Entries -->
+<div class="card mt-4">
+  <div class="card-header">
+    <h2 class="card-title">Recent Log Entries</h2>
+    <a href="{% url 'logbook:log_create' %}" class="btn btn-primary btn-sm">+ New Entry</a>
+  </div>
+  <div class="card-body p-0">
+    {% if recent_entries %}
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Work Title</th>
+          <th>Week</th>
+          <th>Day</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in recent_entries %}
+        <tr>
+          <td><span class="date-chip">{{ entry.entry_date }}</span></td>
+          <td>{{ entry.work_title|truncatechars:50 }}</td>
+          <td>Week {{ entry.internship_week }}</td>
+          <td>{{ entry.day_of_week }}</td>
+          <td>
+            <a href="{% url 'logbook:log_detail' entry.pk %}" class="btn btn-xs btn-outline">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <p>No log entries yet.</p>
+      <a href="{% url 'logbook:log_create' %}" class="btn btn-primary">Log Your First Day</a>
+    </div>
+    {% endif %}
+  </div>
+  {% if recent_entries %}
+  <div class="card-footer">
+    <a href="{% url 'logbook:log_list' %}">View all entries →</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Internship Details -->
+<div class="card mt-4">
+  <div class="card-header"><h2 class="card-title">Internship Details</h2></div>
+  <div class="card-body">
+    <div class="detail-grid">
+      <div class="detail-item"><span class="detail-label">Company</span><span class="detail-value">{{ profile.company_name }}</span></div>
+      <div class="detail-item"><span class="detail-label">Supervisor</span><span class="detail-value">{{ profile.industrial_supervisor_name }}</span></div>
+      <div class="detail-item"><span class="detail-label">University</span><span class="detail-value">{{ profile.university }}</span></div>
+      <div class="detail-item"><span class="detail-label">Faculty</span><span class="detail-value">{{ profile.faculty }}</span></div>
+      <div class="detail-item"><span class="detail-label">Department</span><span class="detail-value">{{ profile.department }}</span></div>
+      <div class="detail-item"><span class="detail-label">Matric No.</span><span class="detail-value">{{ profile.matric_number }}</span></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

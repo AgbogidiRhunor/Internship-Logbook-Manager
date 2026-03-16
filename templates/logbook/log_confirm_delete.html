@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Delete Entry — SIWES{% endblock %}
+{% block page_title %}Delete Log Entry{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <div class="card-header"><h2 class="card-title">Confirm Delete</h2></div>
+  <div class="card-body">
+    <p>Delete log entry for <strong>{{ entry.entry_date }}</strong> — <em>{{ entry.work_title }}</em>?</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-actions">
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{% url 'logbook:log_list' %}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

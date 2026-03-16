@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Confirm Delete — SIWES{% endblock %}
+{% block page_title %}Confirm Delete{% endblock %}
+{% block content %}
+<div class="card form-card">
+  <div class="card-header">
+    <h2 class="card-title">Delete {{ type }}</h2>
+  </div>
+  <div class="card-body">
+    <div class="delete-warning">
+      <p>Are you sure you want to delete <strong>{{ obj }}</strong>?</p>
+      <p class="text-danger">This action cannot be undone. All related faculties and departments will also be removed.</p>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-actions">
+        <button type="submit" class="btn btn-danger">Yes, delete</button>
+        <a href="{% url 'institutions:university_list' %}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,5 @@
+{% if is_graded %}
+  <span class="badge badge-success">Graded{% if grade %} — {{ grade.letter_grade }}{% endif %}</span>
+{% else %}
+  <span class="badge badge-warning">Not Graded</span>
+{% endif %}

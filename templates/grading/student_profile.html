@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}{{ student.full_name }} — SIWES{% endblock %}
+{% block page_title %}Student Profile{% endblock %}
+
+{% block content %}
+<div class="profile-header card">
+  <div class="card-body">
+    <div class="profile-hero">
+      <div class="profile-avatar">{{ student.surname|first }}{{ student.other_names|first }}</div>
+      <div class="profile-info">
+        <h2>{{ student.full_name }}</h2>
+        <p class="text-muted">{{ student.matric_number }} &bull; {{ student.university }}</p>
+        <p class="text-muted">{{ student.faculty }} &bull; {{ student.department }}</p>
+        <div class="profile-badges">
+          {% if grade %}
+          <span class="badge badge-success">Graded: {{ grade.letter_grade }} ({{ grade.overall_score }}/100)</span>
+          {% else %}
+          <span class="badge badge-warning">Not Yet Graded</span>
+          {% endif %}
+          <span class="badge badge-info">{{ entries.count }} Log Entries</span>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <a href="{% url 'grading:grade_student' student.pk %}" class="btn btn-primary">
+          {% if grade %}Update Grade{% else %}Grade Student{% endif %}
+        </a>
+        <a href="{% url 'grading:student_list' %}" class="btn btn-outline">← Back</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="profile-panels mt-4">
+  <!-- Internship details -->
+  <div class="card">
+    <div class="card-header"><h3 class="card-title">Internship Details</h3></div>
+    <div class="card-body">
+      <div class="detail-grid">
+        <div class="detail-item"><span class="detail-label">Company</span><span class="detail-value">{{ student.company_name }}</span></div>
+        <div class="detail-item"><span class="detail-label">Supervisor</span><span class="detail-value">{{ student.industrial_supervisor_name }}</span></div>
+        <div class="detail-item"><span class="detail-label">Duration</span><span class="detail-value">{{ student.get_internship_duration_display }}</span></div>
+        <div class="detail-item"><span class="detail-label">Start</span><span class="detail-value">{{ student.internship_start_date }}</span></div>
+        <div class="detail-item"><span class="detail-label">End</span><span class="detail-value">{{ student.internship_end_date }}</span></div>
+        <div class="detail-item"><span class="detail-label">Days Logged</span><span class="detail-value">{{ student.days_logged }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grade record -->
+  {% if grade %}
+  <div class="card">
+    <div class="card-header"><h3 class="card-title">Grade Record</h3></div>
+    <div class="card-body">
+      <div class="grade-display">
+        <div class="grade-big grade-{{ grade.letter_grade }}">{{ grade.letter_grade }}</div>
+        <div>
+          <p><strong>Score:</strong> {{ grade.overall_score }}/100</p>
+          <p><strong>Comment:</strong> {{ grade.lecturer_comment }}</p>
+          <p><small>Graded {{ grade.graded_at|date:"d M Y H:i" }}</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Full Logbook -->
+<div class="card mt-4">
+  <div class="card-header"><h3 class="card-title">Full Logbook ({{ entries.count }} entries)</h3></div>
+  <div class="card-body p-0">
+    <table class="data-table">
+      <thead>
+        <tr><th>Date</th><th>Work Title</th><th>Month</th><th>Week</th><th>Day</th><th>Photo</th></tr>
+      </thead>
+      <tbody>
+        {% for entry in entries %}
+        <tr>
+          <td><span class="date-chip">{{ entry.entry_date }}</span></td>
+          <td>{{ entry.work_title }}</td>
+          <td>{{ entry.internship_month }}</td>
+          <td>{{ entry.internship_week }}</td>
+          <td>{{ entry.day_of_week }}</td>
+          <td>{% if entry.technical_photo %}<span class="badge badge-info">Yes</span>{% else %}—{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="empty-cell">No log entries yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

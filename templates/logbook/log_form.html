@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Log Entry — SIWES{% endblock %}
+{% block page_title %}{{ action }} Log Entry{% endblock %}
+{% block nav_new_log %}{% if action == "Create" %}active{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+  <div class="card-header">
+    <h2 class="card-title">{{ action }} Daily Log Entry</h2>
+    <a href="{% url 'logbook:log_list' %}" class="btn btn-sm btn-outline">← Back</a>
+  </div>
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="form-error-banner">
+        {% for err in form.non_field_errors %}{{ err }}<br>{% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label>Entry Date *</label>
+        {{ form.entry_date }}
+        {% if form.entry_date.errors %}<span class="field-error">{{ form.entry_date.errors.0 }}</span>{% endif %}
+        <small class="field-hint">Must be within your internship dates: {{ request.user.student_profile.internship_start_date }} – {{ request.user.student_profile.internship_end_date }}</small>
+      </div>
+
+      <div class="form-group">
+        <label>Work Title *</label>
+        {{ form.work_title }}
+        {% if form.work_title.errors %}<span class="field-error">{{ form.work_title.errors.0 }}</span>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label>Activity Description * <small class="field-hint">(max 5000 chars)</small></label>
+        {{ form.activity_description }}
+        {% if form.activity_description.errors %}<span class="field-error">{{ form.activity_description.errors.0 }}</span>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label>Tools Used *</label>
+        {{ form.tools_used }}
+        {% if form.tools_used.errors %}<span class="field-error">{{ form.tools_used.errors.0 }}</span>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label>Challenges Encountered <span class="optional">(optional)</span></label>
+        {{ form.challenges_encountered }}
+      </div>
+
+      <div class="form-group">
+        <label>Lessons Learned <span class="optional">(optional)</span></label>
+        {{ form.lessons_learned }}
+      </div>
+
+      <div class="form-group">
+        <label>Technical Photo <span class="optional">(optional — JPEG/PNG/GIF/WebP, max 5MB)</span></label>
+        {% if entry and entry.technical_photo %}
+        <div class="current-photo">
+          <img src="{{ entry.technical_photo.url }}" alt="Current photo" style="max-height:120px;border-radius:6px;">
+          <small>Current photo. Upload a new one to replace it.</small>
+        </div>
+        {% endif %}
+        {{ form.technical_photo }}
+        {% if form.technical_photo.errors %}<span class="field-error">{{ form.technical_photo.errors.0 }}</span>{% endif %}
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Entry</button>
+        <a href="{% url 'logbook:log_list' %}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

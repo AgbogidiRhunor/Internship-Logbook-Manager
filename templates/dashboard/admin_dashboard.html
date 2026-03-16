@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — SIWES Logbook{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+{% block nav_adash %}active{% endblock %}
+
+{% block content %}
+<div class="stats-grid stats-grid-3">
+  <div class="stat-card stat-card-blue">
+    <div class="stat-label">Total Students</div>
+    <div class="stat-value">{{ total_students }}</div>
+  </div>
+  <div class="stat-card stat-card-teal">
+    <div class="stat-label">Active Lecturers</div>
+    <div class="stat-value">{{ total_lecturers }}</div>
+  </div>
+  <div class="stat-card {% if pending_approvals %}stat-card-danger{% else %}stat-card-green{% endif %}">
+    <div class="stat-label">Pending Approvals</div>
+    <div class="stat-value">{{ pending_approvals }}</div>
+    {% if pending_approvals %}<a href="{% url 'accounts:pending_lecturers' %}" class="stat-action">Review now →</a>{% endif %}
+  </div>
+  <div class="stat-card stat-card-navy">
+    <div class="stat-label">Log Entries</div>
+    <div class="stat-value">{{ total_logs }}</div>
+  </div>
+  <div class="stat-card stat-card-green">
+    <div class="stat-label">Grades Issued</div>
+    <div class="stat-value">{{ total_grades }}</div>
+  </div>
+  <div class="stat-card stat-card-amber">
+    <div class="stat-label">Universities</div>
+    <div class="stat-value">{{ total_universities }}</div>
+    <a href="{% url 'institutions:university_list' %}" class="stat-action">Manage →</a>
+  </div>
+</div>
+
+<div class="admin-panels mt-4">
+  <!-- Quick Actions -->
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Quick Actions</h2></div>
+    <div class="card-body">
+      <div class="action-list">
+        <a href="{% url 'accounts:pending_lecturers' %}" class="action-item">
+          <span class="action-icon">👤</span>
+          <span>Review lecturer approvals</span>
+          {% if pending_approvals %}<span class="badge badge-danger">{{ pending_approvals }}</span>{% endif %}
+        </a>
+        <a href="{% url 'institutions:university_list' %}" class="action-item">
+          <span class="action-icon">🏛️</span>
+          <span>Manage institutions</span>
+        </a>
+        <a href="{% url 'institutions:university_create' %}" class="action-item">
+          <span class="action-icon">➕</span>
+          <span>Add new university</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Recent Log Activity</h2></div>
+    <div class="card-body p-0">
+      <table class="data-table">
+        <thead>
+          <tr><th>Student</th><th>Date</th><th>Title</th></tr>
+        </thead>
+        <tbody>
+          {% for entry in recent_logs %}
+          <tr>
+            <td>{{ entry.student.get_full_name }}</td>
+            <td>{{ entry.entry_date }}</td>
+            <td>{{ entry.work_title|truncatechars:40 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="empty-cell">No log entries yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

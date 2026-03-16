@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Awaiting Approval — SIWES Logbook{% endblock %}
+
+{% block auth_content %}
+<div class="auth-card">
+  <div class="auth-header">
+    <div class="auth-logo pending">⏳</div>
+    <h1 class="auth-title">Account Pending</h1>
+  </div>
+  <div class="approval-message">
+    <p>Your lecturer account is <strong>awaiting admin approval</strong>.</p>
+    <p>You will be able to log in once an administrator reviews and approves your registration.</p>
+    <p>Please check back later or contact your institution's SIWES coordinator.</p>
+  </div>
+  <div class="auth-links">
+    <a href="{% url 'accounts:login' %}" class="btn btn-outline btn-full">Back to Login</a>
+  </div>
+</div>
+{% endblock %}
