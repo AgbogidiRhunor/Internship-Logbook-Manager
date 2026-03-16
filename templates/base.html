@@ -11,7 +11,7 @@
 <body class="role-{{ request.user.role|default:'guest'|lower }}">
 
 {% if request.user.is_authenticated %}
-<!-- ── Sidebar Layout ─────────────────────────────────────────── -->
+<!-- Sidebar Layout  -->
 <div class="app-shell">
 
   <aside class="sidebar" id="sidebar">
@@ -112,16 +112,17 @@
     </div>
   </main>
 
-</div><!-- /.app-shell -->
+</div>
 
 {% else %}
-<!-- ── Auth Layout ────────────────────────────────────────────── -->
+<!-- Auth Layout -->
 <div class="auth-layout">
   {% block auth_content %}{% endblock %}
 </div>
 {% endif %}
 
 <script src="/static/js/main.js"></script>
+<script src="/static/js/responsive_tables.js"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

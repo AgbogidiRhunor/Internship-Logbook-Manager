@@ -1,9 +1,3 @@
-"""
-core/management/commands/seed_data.py
-Seeds initial Nigerian university data.
-Run: python manage.py seed_data
-All seeded data remains fully editable through the admin interface.
-"""
 from django.core.management.base import BaseCommand
 from institutions.models import University, Faculty, Department
 
@@ -350,6 +344,74 @@ SEED_DATA = {
                 "Pharmaceutics and Industrial Pharmacy",
                 "Pharmacognosy",
                 "Pharmacology and Toxicology",
+            ],
+        },
+    },
+    "Benson Idahosa University": {
+        "state": "Edo",
+        "abbr": "BIU",
+        "faculties": {
+            "Faculty of Engineering": [
+                "Civil Engineering",
+                "Electrical Engineering",
+                "Mechanical Engineering",
+                "Chemical Engineering",
+                "Agricultural Engineering",
+                "Computer Engineering",
+                "Water Resources and Environmental Engineering",
+            ],
+            "Faculty of Science": [
+                "Computer Science",
+                "Mathematics",
+                "Physics",
+                "Chemistry",
+                "Biological Sciences",
+                "Statistics",
+            ],
+            "Faculty of Social Sciences": [
+                "Economics",
+                "Political Science",
+                "Sociology",
+                "Mass Communication",
+                "Geography",
+            ],
+            "Faculty of Administration": [
+                "Accounting",
+                "Business Administration",
+                "Finance",
+                "Public Administration",
+            ],
+            "Faculty of Law": [
+                "Commercial Law",
+                "Constitutional Law and Jurisprudence",
+                "International Law",
+                "Private Law",
+            ],
+            "Faculty of Agriculture": [
+                "Agronomy",
+                "Animal Science",
+                "Agricultural Economics and Rural Sociology",
+                "Crop Protection",
+                "Soil Science",
+                "Food Science and Technology",
+            ],
+            "Faculty of Veterinary Medicine": [
+                "Veterinary Anatomy",
+                "Veterinary Medicine",
+                "Veterinary Surgery",
+            ],
+            "Faculty of Education": [
+                "Education Administration",
+                "Education Arts",
+                "Education Science",
+                "Physical and Health Education",
+            ],
+            "Faculty of Environmental Design": [
+                "Architecture",
+                "Building",
+                "Estate Management",
+                "Land Surveying",
+                "Urban and Regional Planning",
             ],
         },
     },
