@@ -5,19 +5,13 @@ from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
 
-# ── Internal helper ───────────────────────────────────────────────
 
 def _send(subject: str, html_body: str, recipient_list: list):
-    """
-    Send a single transactional email.
-    Falls back to plain text automatically.
-    Swallows all exceptions so a mail failure never breaks a request.
-    """
     if not recipient_list:
         return
 
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'SIWES Logbook <noreply@siwes.edu.ng>')
-    plain_body  = strip_tags(html_body)
+    plain_body = strip_tags(html_body)
 
     try:
         msg = EmailMultiAlternatives(
@@ -27,7 +21,7 @@ def _send(subject: str, html_body: str, recipient_list: list):
             to=recipient_list,
         )
         msg.attach_alternative(html_body, 'text/html')
-        msg.send(fail_silently=False)
+        msg.send(fail_silently=True)
         logger.info('Email sent: "%s" -> %s', subject, recipient_list)
     except Exception as exc:
         logger.error('Email failed: "%s" -> %s | %s', subject, recipient_list, exc)
@@ -142,10 +136,8 @@ def _badge(text: str, color: str, bg: str) -> str:
             f'font-weight:700;">{text}</span>')
 
 
-# ═══════════════════════════════════════════════════════════════════
-# PUBLIC NOTIFICATION FUNCTIONS
-# ═══════════════════════════════════════════════════════════════════
 
+# PUBLIC NOTIFICATION FUNCTIONS
 def notify_admins_new_lecturer(lecturer_user):
     """
     Sent to: All admin users
