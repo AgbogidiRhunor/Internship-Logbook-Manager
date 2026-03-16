@@ -10,7 +10,7 @@ def _send(subject: str, html_body: str, recipient_list: list):
     if not recipient_list:
         return
 
-    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'SIWES Logbook <noreply@siwes.edu.ng>')
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', f'SIWES Logbook <{settings.EMAIL_HOST_USER}>')
     plain_body = strip_tags(html_body)
 
     try:
@@ -21,8 +21,13 @@ def _send(subject: str, html_body: str, recipient_list: list):
             to=recipient_list,
         )
         msg.attach_alternative(html_body, 'text/html')
-        msg.send(fail_silently=True)
-        logger.info('Email sent: "%s" -> %s', subject, recipient_list)
+        sent_count = msg.send(fail_silently=True)
+
+        if sent_count:
+            logger.info('Email sent: "%s" -> %s', subject, recipient_list)
+        else:
+            logger.error('Email not sent: "%s" -> %s', subject, recipient_list)
+
     except Exception as exc:
         logger.error('Email failed: "%s" -> %s | %s', subject, recipient_list, exc)
 
