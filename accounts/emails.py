@@ -6,6 +6,19 @@ from django.utils.html import strip_tags
 logger = logging.getLogger(__name__)
 
 
+def _get_admin_notification_emails() -> list:
+    configured = getattr(settings, 'ADMIN_NOTIFICATION_EMAILS', [])
+
+    if isinstance(configured, str):
+        emails = [email.strip() for email in configured.split(',') if email.strip()]
+    elif isinstance(configured, (list, tuple, set)):
+        emails = [str(email).strip() for email in configured if str(email).strip()]
+    else:
+        emails = []
+
+    return list(dict.fromkeys(emails))
+
+
 def _send(subject: str, html_body: str, recipient_list: list):
     if not recipient_list:
         return
@@ -33,7 +46,6 @@ def _send(subject: str, html_body: str, recipient_list: list):
 
 
 def _base_html(title: str, body_html: str) -> str:
-    """Minimal branded HTML wrapper for all emails."""
     return f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -49,7 +61,6 @@ def _base_html(title: str, body_html: str) -> str:
         <table width="600" cellpadding="0" cellspacing="0"
                style="background:#ffffff;border-radius:12px;overflow:hidden;
                       box-shadow:0 4px 16px rgba(0,0,0,.08);">
-          <!-- Header -->
           <tr>
             <td style="background:#0a2240;padding:28px 36px;">
               <table width="100%" cellpadding="0" cellspacing="0">
@@ -68,13 +79,11 @@ def _base_html(title: str, body_html: str) -> str:
               </table>
             </td>
           </tr>
-          <!-- Body -->
           <tr>
             <td style="padding:36px 36px 28px;">
               {body_html}
             </td>
           </tr>
-          <!-- Footer -->
           <tr>
             <td style="background:#f8fafc;padding:18px 36px;
                        border-top:1px solid #e2e8f0;
@@ -101,7 +110,6 @@ def _p(text: str) -> str:
 
 
 def _info_table(rows: list) -> str:
-    """Render a key-value info block."""
     cells = ''.join(
         f"""<tr>
               <td style="padding:8px 12px;font-size:13px;font-weight:600;
@@ -136,44 +144,37 @@ def _button(label: str, url: str, color: str = '#0d9488') -> str:
 
 
 def _badge(text: str, color: str, bg: str) -> str:
-    return (f'<span style="display:inline-block;background:{bg};color:{color};'
-            f'padding:3px 12px;border-radius:20px;font-size:12px;'
-            f'font-weight:700;">{text}</span>')
+    return (
+        f'<span style="display:inline-block;background:{bg};color:{color};'
+        f'padding:3px 12px;border-radius:20px;font-size:12px;'
+        f'font-weight:700;">{text}</span>'
+    )
 
 
-
-# PUBLIC NOTIFICATION FUNCTIONS
 def notify_admins_new_lecturer(lecturer_user):
-    """
-    Sent to: All admin users
-    Trigger: A new lecturer completes registration and is awaiting approval.
-    """
     from accounts.models import CustomUser, UserRole
 
-    admins = CustomUser.objects.filter(
-        role=UserRole.ADMIN, is_active=True
-    ).exclude(username='').values_list('username', flat=True)
-
-    # We need admin email addresses — admins register via createsuperuser
-    # which doesn't capture email. Pull from any profile or fall back to
-    # DEFAULT_FROM_EMAIL's domain for notification.
     admin_emails = list(
         CustomUser.objects.filter(
-            role=UserRole.ADMIN, is_active=True
+            role=UserRole.ADMIN,
+            is_active=True
         ).exclude(
             email=''
         ).values_list('email', flat=True)
     )
 
-    # Fallback: also check EMAIL_HOST_USER so admin always gets notified
-    host_user = getattr(settings, 'EMAIL_HOST_USER', '')
-    if host_user and host_user not in admin_emails:
-        admin_emails.append(host_user)
+    configured_admin_emails = _get_admin_notification_emails()
+
+    for email in configured_admin_emails:
+        if email not in admin_emails:
+            admin_emails.append(email)
+
+    admin_emails = [email for email in admin_emails if email and '@' in email]
 
     if not admin_emails:
         logger.warning(
             'notify_admins_new_lecturer: no admin email addresses found. '
-            'Add an email to admin accounts or check EMAIL_HOST_USER.'
+            'Add emails to admin accounts or set ADMIN_NOTIFICATION_EMAILS.'
         )
         return
 
@@ -184,15 +185,19 @@ def notify_admins_new_lecturer(lecturer_user):
         _h1('New Lecturer Registration')
         + _p('A new lecturer has registered and is awaiting your approval:')
         + _info_table([
-            ('Full Name',   full_name),
-            ('Username',    lecturer_user.username),
-            ('University',  str(lp.university) if lp else '—'),
-            ('Faculty',     lp.faculty.name if lp else '—'),
-            ('Department',  lp.department.name if lp else '—'),
-            ('Registered',  lecturer_user.created_at.strftime('%d %b %Y %H:%M')),
+            ('Full Name', full_name),
+            ('Username', lecturer_user.username),
+            ('University', str(lp.university) if lp else '—'),
+            ('Faculty', lp.faculty.name if lp else '—'),
+            ('Department', lp.department.name if lp else '—'),
+            ('Registered', lecturer_user.created_at.strftime('%d %b %Y %H:%M')),
         ])
         + _p('Log in to the admin panel to review and approve or reject this account.')
-        + _button('Review Pending Approvals', f"{getattr(settings, 'SITE_URL', '')}/accounts/admin/pending-lecturers/", '#0a2240')
+        + _button(
+            'Review Pending Approvals',
+            f"{getattr(settings, 'SITE_URL', '')}/accounts/admin/pending-lecturers/",
+            '#0a2240'
+        )
     )
 
     _send(
@@ -203,10 +208,6 @@ def notify_admins_new_lecturer(lecturer_user):
 
 
 def notify_lecturer_approved(lecturer_user):
-    """
-    Sent to: The lecturer whose account was just approved.
-    Trigger: Admin clicks Approve on a pending lecturer.
-    """
     email = getattr(lecturer_user, 'email', '')
     if not email:
         logger.warning(
@@ -228,10 +229,10 @@ def notify_lecturer_approved(lecturer_user):
             'You can now log in and begin supervising your students.'
         )
         + _info_table([
-            ('Username',    lecturer_user.username),
-            ('University',  str(lp.university) if lp else '—'),
-            ('Faculty',     lp.faculty.name if lp else '—'),
-            ('Department',  lp.department.name if lp else '—'),
+            ('Username', lecturer_user.username),
+            ('University', str(lp.university) if lp else '—'),
+            ('Faculty', lp.faculty.name if lp else '—'),
+            ('Department', lp.department.name if lp else '—'),
         ])
         + _button('Log In Now', f"{getattr(settings, 'SITE_URL', '')}/accounts/login/")
     )
@@ -244,10 +245,6 @@ def notify_lecturer_approved(lecturer_user):
 
 
 def notify_lecturer_rejected(lecturer_user):
-    """
-    Sent to: The lecturer whose account was rejected.
-    Trigger: Admin clicks Reject on a pending lecturer.
-    """
     email = getattr(lecturer_user, 'email', '')
     if not email:
         logger.warning(
@@ -267,10 +264,10 @@ def notify_lecturer_rejected(lecturer_user):
         + _p(
             'Unfortunately, your SIWES Logbook Manager lecturer registration could not be approved '
             'at this time. This may be because the details provided could not be verified by '
-            'your institution\'s SIWES coordinator.'
+            "your institution's SIWES coordinator."
         )
         + _p(
-            'If you believe this is an error, please contact your institution\'s SIWES office '
+            "If you believe this is an error, please contact your institution's SIWES office "
             'and ask them to register you directly.'
         )
     )
@@ -283,10 +280,6 @@ def notify_lecturer_rejected(lecturer_user):
 
 
 def notify_student_graded(student_profile):
-    """
-    Sent to: The student whose logbook has just been graded.
-    Trigger: Lecturer submits a grade via the grading form.
-    """
     email = getattr(student_profile.user, 'email', '')
     if not email:
         logger.warning(
@@ -314,12 +307,12 @@ def notify_student_graded(student_profile):
         + _p(f'Dear {student_profile.full_name},')
         + _p('Your SIWES internship logbook has been reviewed and graded by your supervising lecturer.')
         + _info_table([
-            ('Score',       f'{grade.overall_score} / 100'),
-            ('Grade',       _badge(grade.letter_grade, fg, bg)),
-            ('Graded By',   grade.graded_by.get_full_name()),
-            ('Graded On',   grade.graded_at.strftime('%d %b %Y')),
-            ('Company',     student_profile.company_name),
-            ('Duration',    student_profile.get_internship_duration_display()),
+            ('Score', f'{grade.overall_score} / 100'),
+            ('Grade', _badge(grade.letter_grade, fg, bg)),
+            ('Graded By', grade.graded_by.get_full_name()),
+            ('Graded On', grade.graded_at.strftime('%d %b %Y')),
+            ('Company', student_profile.company_name),
+            ('Duration', student_profile.get_internship_duration_display()),
         ])
         + f'<div style="background:#f8fafc;border-left:4px solid #0d9488;'
           f'padding:14px 18px;margin:18px 0;border-radius:0 6px 6px 0;">'
@@ -338,10 +331,6 @@ def notify_student_graded(student_profile):
 
 
 def notify_user_suspended(user):
-    """
-    Sent to: Any user whose account has been suspended by an admin.
-    Trigger: Admin suspends a user account.
-    """
     email = getattr(user, 'email', '')
     if not email:
         return
@@ -356,7 +345,7 @@ def notify_user_suspended(user):
             'You will not be able to log in until your account is reactivated.'
         )
         + _p(
-            'If you believe this is a mistake, please contact your institution\'s '
+            "If you believe this is a mistake, please contact your institution's "
             'SIWES coordinator.'
         )
     )
