@@ -1,6 +1,6 @@
 import logging
-from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
@@ -19,25 +19,71 @@ def _get_admin_notification_emails() -> list:
     return list(dict.fromkeys(emails))
 
 
+def _send_via_smtp(subject: str, html_body: str, recipient_list: list):
+    from_email = getattr(
+        settings,
+        'DEFAULT_FROM_EMAIL',
+        f'SIWES Logbook <{getattr(settings, "EMAIL_HOST_USER", "")}>',
+    )
+    plain_body = strip_tags(html_body)
+
+    msg = EmailMultiAlternatives(
+        subject=subject,
+        body=plain_body,
+        from_email=from_email,
+        to=recipient_list,
+    )
+    msg.attach_alternative(html_body, 'text/html')
+
+    sent_count = msg.send(fail_silently=True)
+
+    if sent_count:
+        logger.info('Email sent via SMTP: "%s" -> %s', subject, recipient_list)
+    else:
+        logger.error('Email not sent via SMTP: "%s" -> %s', subject, recipient_list)
+
+
+def _send_via_resend_api(subject: str, html_body: str, recipient_list: list):
+    import resend
+
+    resend.api_key = settings.RESEND_API_KEY
+
+    payload = {
+        'from': settings.DEFAULT_FROM_EMAIL,
+        'to': recipient_list,
+        'subject': subject,
+        'html': html_body,
+        'text': strip_tags(html_body),
+    }
+
+    response = resend.Emails.send(payload)
+    logger.info('Email sent via Resend API: "%s" -> %s | %s', subject, recipient_list, response)
+
+
 def _send(subject: str, html_body: str, recipient_list: list):
     if not recipient_list:
         return
 
-    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', f'SIWES Logbook <{settings.EMAIL_HOST_USER}>')
-    plain_body = strip_tags(html_body)
+    cleaned_recipients = [
+        email.strip()
+        for email in recipient_list
+        if isinstance(email, str) and email.strip() and '@' in email
+    ]
+
+    if not cleaned_recipients:
+        logger.warning('No valid email recipients found for subject "%s".', subject)
+        return
 
     try:
-        msg = EmailMultiAlternatives(
-            subject=subject,
-            body=plain_body,
-            from_email=from_email,
-            to=recipient_list,
-    )
-        msg.attach_alternative(html_body, 'text/html')
-        sent_count = msg.send(fail_silently=False)
-        logger.info('Email sent: "%s" -> %s', subject, recipient_list)
+        email_provider = getattr(settings, 'EMAIL_PROVIDER', 'smtp').lower()
+
+        if email_provider == 'resend_api':
+            _send_via_resend_api(subject, html_body, cleaned_recipients)
+        else:
+            _send_via_smtp(subject, html_body, cleaned_recipients)
+
     except Exception as exc:
-        logger.error('Email failed: "%s" -> %s | %s', subject, recipient_list, exc)
+        logger.error('Email failed: "%s" -> %s | %s', subject, cleaned_recipients, exc)
 
 
 def _base_html(title: str, body_html: str) -> str:
@@ -152,9 +198,9 @@ def notify_admins_new_lecturer(lecturer_user):
     admin_emails = list(
         CustomUser.objects.filter(
             role=UserRole.ADMIN,
-            is_active=True
+            is_active=True,
         ).exclude(
-            email=''
+            email='',
         ).values_list('email', flat=True)
     )
 
@@ -191,7 +237,7 @@ def notify_admins_new_lecturer(lecturer_user):
         + _button(
             'Review Pending Approvals',
             f"{getattr(settings, 'SITE_URL', '')}/accounts/admin/pending-lecturers/",
-            '#0a2240'
+            '#0a2240',
         )
     )
 
