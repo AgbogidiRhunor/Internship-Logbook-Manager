@@ -32,15 +32,10 @@ def _send(subject: str, html_body: str, recipient_list: list):
             body=plain_body,
             from_email=from_email,
             to=recipient_list,
-        )
+    )
         msg.attach_alternative(html_body, 'text/html')
-        sent_count = msg.send(fail_silently=True)
-
-        if sent_count:
-            logger.info('Email sent: "%s" -> %s', subject, recipient_list)
-        else:
-            logger.error('Email not sent: "%s" -> %s', subject, recipient_list)
-
+        sent_count = msg.send(fail_silently=False)
+        logger.info('Email sent: "%s" -> %s', subject, recipient_list)
     except Exception as exc:
         logger.error('Email failed: "%s" -> %s | %s', subject, recipient_list, exc)
 
