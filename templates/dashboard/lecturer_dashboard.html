@@ -1,31 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Lecturer Dashboard — SIWES Logbook{% endblock %}
+{% block title %}Lecturer Dashboard — SIWES{% endblock %}
 {% block page_title %}Lecturer Dashboard{% endblock %}
 {% block nav_ldash %}active{% endblock %}
 
 {% block content %}
 <div class="stats-grid">
   <div class="stat-card stat-card-blue">
-    <div class="stat-label">Total Students</div>
+    <div class="stat-label">Assigned Students</div>
     <div class="stat-value">{{ total_students }}</div>
-    <div class="stat-sub">in your dept &amp; faculty</div>
+    <div class="stat-sub">In your department</div>
   </div>
-  <div class="stat-card stat-card-green">
+  <div class="stat-card stat-card-teal">
     <div class="stat-label">Graded</div>
     <div class="stat-value">{{ graded_count }}</div>
+    <div class="stat-sub">Completed evaluations</div>
   </div>
-  <div class="stat-card stat-card-amber">
+  <div class="stat-card stat-card-danger">
     <div class="stat-label">Awaiting Grade</div>
     <div class="stat-value">{{ not_graded_count }}</div>
+    <div class="stat-sub">Needs attention</div>
   </div>
 </div>
 
 <div class="card mt-4">
   <div class="card-header">
-    <h2 class="card-title">Your Students</h2>
+    <h2 class="card-title">Recent Students</h2>
     <div class="card-actions">
-      <a href="{% url 'grading:export_csv' %}" class="btn btn-sm btn-outline">CSV Export</a>
-      <a href="{% url 'grading:export_pdf' %}" class="btn btn-sm btn-outline">PDF Export</a>
       <a href="{% url 'grading:student_list' %}" class="btn btn-sm btn-primary">View All</a>
     </div>
   </div>
@@ -33,17 +33,17 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th>Name</th>
+          <th>Student Name</th>
           <th>Matric No.</th>
           <th>Company</th>
           <th>Status</th>
-          <th></th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
-        {% for student in recent_students %}
+        {% for student in students|slice:":10" %}
         <tr>
-          <td>{{ student.full_name }}</td>
+          <td><span class="font-medium">{{ student.full_name }}</span></td>
           <td><code>{{ student.matric_number }}</code></td>
           <td>{{ student.company_name|truncatechars:30 }}</td>
           <td>
@@ -54,26 +54,14 @@
             {% endif %}
           </td>
           <td>
-            <a href="{% url 'grading:student_profile' student.pk %}" class="btn btn-xs btn-outline">View</a>
+            <a href="{% url 'grading:student_profile' student.pk %}" class="btn btn-xs btn-outline">Profile</a>
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="empty-cell">No students found in your department.</td></tr>
+        <tr><td colspan="5" class="empty-cell">No students found.</td></tr>
         {% endfor %}
       </tbody>
     </table>
-  </div>
-</div>
-
-<div class="card mt-4">
-  <div class="card-header"><h2 class="card-title">Your Profile</h2></div>
-  <div class="card-body">
-    <div class="detail-grid">
-      <div class="detail-item"><span class="detail-label">Name</span><span class="detail-value">{{ profile.full_name }}</span></div>
-      <div class="detail-item"><span class="detail-label">University</span><span class="detail-value">{{ profile.university }}</span></div>
-      <div class="detail-item"><span class="detail-label">Faculty</span><span class="detail-value">{{ profile.faculty }}</span></div>
-      <div class="detail-item"><span class="detail-label">Department</span><span class="detail-value">{{ profile.department }}</span></div>
-    </div>
   </div>
 </div>
 {% endblock %}
