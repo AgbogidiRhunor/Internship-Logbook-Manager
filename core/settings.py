@@ -148,7 +148,6 @@ ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_PROVIDER = config('EMAIL_PROVIDER', default='smtp').lower()
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
@@ -158,9 +157,8 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config(
     'DEFAULT_FROM_EMAIL',
-    default='SIWES Logbook <onboarding@resend.dev>'
+    default=f'SIWES Logbook <{config("EMAIL_HOST_USER", default="")}>'
 )
-RESEND_API_KEY = config('RESEND_API_KEY', default='')
 EMAIL_TIMEOUT = 10
 ADMIN_NOTIFICATION_EMAILS = config(
     'ADMIN_NOTIFICATION_EMAILS',
