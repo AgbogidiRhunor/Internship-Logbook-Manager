@@ -2,58 +2,33 @@
 {% block title %}My Logbook — SIWES{% endblock %}
 {% block page_title %}My Logbook{% endblock %}
 {% block nav_logbook %}active{% endblock %}
-
 {% block content %}
 <div class="card">
   <div class="card-header">
     <h2 class="card-title">Log Entries</h2>
     <a href="{% url 'logbook:log_create' %}" class="btn btn-primary btn-sm">+ New Entry</a>
   </div>
-
-  <!-- Filters -->
   <div class="filter-bar">
     <form method="get" class="filter-form">
       <select name="month" onchange="this.form.submit()">
         <option value="">All Months</option>
-        {% for m in months_range %}
-        <option value="{{ m }}" {% if filter_month == m|stringformat:"s" %}selected{% endif %}>Month {{ m }}</option>
-        {% endfor %}
+        {% for m in months_range %}<option value="{{ m }}" {% if filter_month == m|stringformat:"s" %}selected{% endif %}>Month {{ m }}</option>{% endfor %}
       </select>
-
       <select name="week" onchange="this.form.submit()">
         <option value="">All Weeks</option>
-        {% for w in weeks_range %}
-        <option value="{{ w }}" {% if filter_week == w|stringformat:"s" %}selected{% endif %}>Week {{ w }}</option>
-        {% endfor %}
+        {% for w in weeks_range %}<option value="{{ w }}" {% if filter_week == w|stringformat:"s" %}selected{% endif %}>Week {{ w }}</option>{% endfor %}
       </select>
-
       <select name="day" onchange="this.form.submit()">
         <option value="">All Days</option>
-        {% for val, label in day_choices %}
-        <option value="{{ val }}" {% if filter_day == val %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
+        {% for val, label in day_choices %}<option value="{{ val }}" {% if filter_day == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
       </select>
-
-      {% if filter_month or filter_week or filter_day %}
-      <a href="{% url 'logbook:log_list' %}" class="btn btn-sm btn-outline">Clear</a>
-      {% endif %}
+      {% if filter_month or filter_week or filter_day %}<a href="{% url 'logbook:log_list' %}" class="btn btn-sm btn-outline">Clear</a>{% endif %}
     </form>
   </div>
-
   <div class="card-body p-0">
     {% if entries %}
     <table class="data-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Work Title</th>
-          <th>Month</th>
-          <th>Week</th>
-          <th>Day</th>
-          <th>Photo</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Date</th><th>Work Title</th><th>Month</th><th>Week</th><th>Day</th><th>Photo</th><th>Actions</th></tr></thead>
       <tbody>
         {% for entry in entries %}
         <tr>
@@ -74,6 +49,7 @@
     </table>
     {% else %}
     <div class="empty-state">
+      <div class="empty-state-icon">📝</div>
       <p>No entries found{% if filter_month or filter_week or filter_day %} for the selected filter{% endif %}.</p>
       <a href="{% url 'logbook:log_create' %}" class="btn btn-primary">Log a Day</a>
     </div>

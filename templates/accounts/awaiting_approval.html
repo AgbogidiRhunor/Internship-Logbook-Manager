@@ -1,18 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Awaiting Approval — SIWES Logbook{% endblock %}
-
 {% block auth_content %}
-<div class="auth-card">
-  <div class="auth-header">
-    <div class="auth-logo pending">⏳</div>
-    <h1 class="auth-title">Account Pending</h1>
+<div class="auth-left">
+  <div class="auth-bg-image" style="background-image:url('https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&q=80')"></div>
+  <div class="auth-left-content">
+    <div class="auth-left-brand">
+      <div class="auth-left-logo">SL</div>
+      <div class="auth-left-brand-text">
+        <span class="auth-left-brand-name">SIWES Logbook</span>
+        <span class="auth-left-brand-sub">Industrial Training Management</span>
+      </div>
+    </div>
+    <div class="auth-left-hero">
+      <h1>Almost <span>There</span></h1>
+      <p>Your registration has been received. Our administrators review all lecturer accounts to maintain the integrity of the platform.</p>
+    </div>
   </div>
-  <div class="approval-message">
-    <p>Your lecturer account is <strong>awaiting admin approval</strong>.</p>
-    <p>You will be able to log in once an administrator reviews and approves your registration.</p>
-    <p>Please check back later or contact your institution's SIWES coordinator.</p>
-  </div>
-  <div class="auth-links">
+</div>
+<div class="auth-right">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo-mark">⏳</div>
+      <h1 class="auth-title">Account Pending</h1>
+      <p class="auth-subtitle">Your registration is under review</p>
+    </div>
+    <div class="approval-message">
+      <div class="approval-icon">🔍</div>
+      <p>Your lecturer account is <strong>awaiting admin approval</strong>.</p>
+      <p>You will receive an email notification once an administrator reviews your registration.</p>
+      <p>If you have not heard back within 48 hours, please contact your institution's SIWES coordinator.</p>
+    </div>
     <a href="{% url 'accounts:login' %}" class="btn btn-outline btn-full">Back to Login</a>
   </div>
 </div>

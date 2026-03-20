@@ -1,22 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Students — SIWES Logbook{% endblock %}
+{% block title %}Students — SIWES{% endblock %}
 {% block page_title %}My Students{% endblock %}
 {% block nav_students %}active{% endblock %}
-
 {% block content %}
 <div class="card">
   <div class="card-header">
     <h2 class="card-title">Students</h2>
     <div class="card-actions">
-      <a href="{% url 'grading:export_csv' %}" class="btn btn-sm btn-outline">⬇ CSV</a>
-      <a href="{% url 'grading:export_pdf' %}" class="btn btn-sm btn-outline">⬇ PDF</a>
+      <a href="{% url 'grading:export_csv' %}" class="btn btn-sm btn-outline">CSV Export</a>
+      <a href="{% url 'grading:export_pdf' %}" class="btn btn-sm btn-outline">PDF Export</a>
     </div>
   </div>
-
-  <!-- Search and filter bar -->
   <div class="filter-bar">
     <form method="get" class="filter-form">
-      <input type="text" name="q" value="{{ q }}" placeholder="Search by name or matric…" class="search-input">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search name or matric..." class="search-input">
       <select name="graded" onchange="this.form.submit()">
         <option value="">All students</option>
         <option value="yes" {% if graded_filter == 'yes' %}selected{% endif %}>Graded only</option>
@@ -26,44 +23,25 @@
       {% if q or graded_filter %}<a href="{% url 'grading:student_list' %}" class="btn btn-sm btn-outline">Clear</a>{% endif %}
     </form>
   </div>
-
   <div class="card-body p-0">
     <table class="data-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Matric No.</th>
-          <th>Department</th>
-          <th>Company</th>
-          <th>Duration</th>
-          <th>Logs</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Name</th><th>Matric No.</th><th>Department</th><th>Company</th><th>Logs</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody>
         {% for student in students %}
         <tr>
-          <td>{{ student.full_name }}</td>
+          <td><strong>{{ student.full_name }}</strong></td>
           <td><code>{{ student.matric_number }}</code></td>
           <td>{{ student.department.name }}</td>
           <td>{{ student.company_name|truncatechars:25 }}</td>
-          <td>{{ student.get_internship_duration_display }}</td>
           <td>{{ student.days_logged }}</td>
-          <td>
-            {% if student.is_graded %}
-              <span class="badge badge-success">Graded — {{ student.grade_record.letter_grade }}</span>
-            {% else %}
-              <span class="badge badge-warning">Pending</span>
-            {% endif %}
-          </td>
-          <td>
+          <td>{% if student.is_graded %}<span class="badge badge-success">Graded — {{ student.grade_record.letter_grade }}</span>{% else %}<span class="badge badge-warning">Pending</span>{% endif %}</td>
+          <td class="actions-cell">
             <a href="{% url 'grading:student_profile' student.pk %}" class="btn btn-xs btn-outline">View</a>
             <a href="{% url 'grading:grade_student' student.pk %}" class="btn btn-xs btn-primary">Grade</a>
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="8" class="empty-cell">No students found.</td></tr>
+        <tr><td colspan="7" class="empty-cell">No students found.</td></tr>
         {% endfor %}
       </tbody>
     </table>

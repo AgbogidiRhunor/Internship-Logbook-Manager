@@ -1,48 +1,38 @@
 {% extends "base.html" %}
 {% block title %}Pending Approvals — SIWES{% endblock %}
 {% block page_title %}Lecturer Approvals{% endblock %}
-
+{% block nav_adash %}{% endblock %}
 {% block content %}
+<div class="page-header">
+  <h1>Lecturer Approvals</h1>
+  <p>Review and approve or reject pending lecturer registrations</p>
+</div>
 <div class="card">
   <div class="card-header">
-    <h2 class="card-title">Pending Lecturer Registrations</h2>
+    <h2 class="card-title">Pending Registrations</h2>
     <span class="badge badge-warning">{{ pending.count }} pending</span>
   </div>
   <div class="card-body p-0">
     <table class="data-table">
       <thead>
-        <tr>
-          <th>Name</th>
-          <th>Username</th>
-          <th>University</th>
-          <th>Faculty</th>
-          <th>Department</th>
-          <th>Registered</th>
-          <th>Actions</th>
-        </tr>
+        <tr><th>Name</th><th>Username</th><th>University</th><th>Faculty</th><th>Department</th><th>Registered</th><th>Actions</th></tr>
       </thead>
       <tbody>
         {% for lecturer in pending %}
         <tr>
-          <td>{{ lecturer.lecturer_profile.full_name }}</td>
+          <td><strong>{{ lecturer.lecturer_profile.full_name }}</strong></td>
           <td><code>{{ lecturer.username }}</code></td>
           <td>{{ lecturer.lecturer_profile.university }}</td>
           <td>{{ lecturer.lecturer_profile.faculty.name }}</td>
           <td>{{ lecturer.lecturer_profile.department.name }}</td>
           <td>{{ lecturer.created_at|date:"d M Y" }}</td>
           <td class="actions-cell">
-            <a href="{% url 'accounts:approve_lecturer' lecturer.pk %}"
-               class="btn btn-xs btn-success"
-               onclick="return confirm('Approve {{ lecturer.username }}?')">Approve</a>
-            <a href="{% url 'accounts:reject_lecturer' lecturer.pk %}"
-               class="btn btn-xs btn-danger-outline"
-               onclick="return confirm('Reject {{ lecturer.username }}?')">Reject</a>
+            <a href="{% url 'accounts:approve_lecturer' lecturer.pk %}" class="btn btn-xs btn-success" onclick="return confirm('Approve {{ lecturer.username }}?')">Approve</a>
+            <a href="{% url 'accounts:reject_lecturer' lecturer.pk %}" class="btn btn-xs btn-danger-outline" onclick="return confirm('Reject {{ lecturer.username }}?')">Reject</a>
           </td>
         </tr>
         {% empty %}
-        <tr>
-          <td colspan="7" class="empty-cell">No pending lecturer approvals.</td>
-        </tr>
+        <tr><td colspan="7" class="empty-cell">No pending approvals. All caught up!</td></tr>
         {% endfor %}
       </tbody>
     </table>

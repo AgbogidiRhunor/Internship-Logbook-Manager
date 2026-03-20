@@ -1,7 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Log Entry — {{ entry.entry_date }}{% endblock %}
-{% block page_title %}Log Entry Detail{% endblock %}
-
+{% block title %}{{ entry.work_title }} — SIWES{% endblock %}
+{% block page_title %}Log Entry{% endblock %}
 {% block content %}
 <div class="card">
   <div class="card-header">
@@ -15,37 +14,14 @@
     </div>
   </div>
   <div class="card-body">
-    <div class="log-detail-section">
-      <h3>Activity Description</h3>
-      <p>{{ entry.activity_description|linebreaksbr }}</p>
-    </div>
-    <div class="log-detail-section">
-      <h3>Tools Used</h3>
-      <p>{{ entry.tools_used|linebreaksbr }}</p>
-    </div>
-    {% if entry.challenges_encountered %}
-    <div class="log-detail-section">
-      <h3>Challenges Encountered</h3>
-      <p>{{ entry.challenges_encountered|linebreaksbr }}</p>
-    </div>
-    {% endif %}
-    {% if entry.lessons_learned %}
-    <div class="log-detail-section">
-      <h3>Lessons Learned</h3>
-      <p>{{ entry.lessons_learned|linebreaksbr }}</p>
-    </div>
-    {% endif %}
-    {% if entry.technical_photo %}
-    <div class="log-detail-section">
-      <h3>Technical Photo</h3>
-      <img src="{{ entry.technical_photo.url }}" alt="Technical photo" class="log-photo">
-    </div>
-    {% endif %}
+    <div class="log-detail-section"><h3>Activity Description</h3><p>{{ entry.activity_description|linebreaksbr }}</p></div>
+    <div class="log-detail-section"><h3>Tools Used</h3><p>{{ entry.tools_used|linebreaksbr }}</p></div>
+    {% if entry.challenges_encountered %}<div class="log-detail-section"><h3>Challenges Encountered</h3><p>{{ entry.challenges_encountered|linebreaksbr }}</p></div>{% endif %}
+    {% if entry.lessons_learned %}<div class="log-detail-section"><h3>Lessons Learned</h3><p>{{ entry.lessons_learned|linebreaksbr }}</p></div>{% endif %}
+    {% if entry.technical_photo %}<div class="log-detail-section"><h3>Technical Photo</h3><img src="{{ entry.technical_photo.url }}" alt="Technical photo" class="log-photo"></div>{% endif %}
     <div class="log-meta">
       <small>Created: {{ entry.created_at|date:"d M Y H:i" }}</small>
-      {% if entry.updated_at != entry.created_at %}
-      <small>Updated: {{ entry.updated_at|date:"d M Y H:i" }}</small>
-      {% endif %}
+      {% if entry.updated_at != entry.created_at %}<small>Updated: {{ entry.updated_at|date:"d M Y H:i" }}</small>{% endif %}
     </div>
   </div>
 </div>

@@ -1,77 +1,54 @@
 {% extends "base.html" %}
-{% block title %}{{ action }} Log Entry{% endblock %}
-{% block page_title %}{{ action }} Entry{% endblock %}
-
+{% block title %}{{ action }} Log Entry — SIWES{% endblock %}
+{% block page_title %}{{ action }} Log Entry{% endblock %}
+{% block nav_new_log %}{% if action == "Create" %}active{% endif %}{% endblock %}
 {% block content %}
-<div class="card" style="max-width: 800px; margin: 0 auto;">
+<div class="card form-card">
   <div class="card-header">
-    <div>
-      <h2 class="card-title">{{ action }} Daily Log</h2>
-      <p class="text-muted">Fill in your industrial activities for the day.</p>
-    </div>
+    <h2 class="card-title">{{ action }} Daily Log Entry</h2>
+    <a href="{% url 'logbook:log_list' %}" class="btn btn-sm btn-outline">← Back</a>
   </div>
-
   <div class="card-body">
-    <div class="stepper-wrap" data-stepper>
-      <div class="stepper-tabs">
-        <button type="button" class="step-pill is-active" data-step-target="0">1. Details</button>
-        <button type="button" class="step-pill" data-step-target="1">2. Activities</button>
-        <button type="button" class="step-pill" data-step-target="2">3. Media</button>
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-error-banner">{% for e in form.non_field_errors %}{{ e }}<br>{% endfor %}</div>{% endif %}
+      <div class="form-group">
+        <label>Entry Date *</label>{{ form.entry_date }}
+        {% if form.entry_date.errors %}<span class="field-error">{{ form.entry_date.errors.0 }}</span>{% endif %}
+        <small class="field-hint">Must be within your internship: {{ request.user.student_profile.internship_start_date }} – {{ request.user.student_profile.internship_end_date }}</small>
       </div>
-
-      <div class="stepper-progress">
-        <div class="stepper-progress-bar" data-step-progress style="width: 33%;"></div>
+      <div class="form-group">
+        <label>Work Title *</label>{{ form.work_title }}
+        {% if form.work_title.errors %}<span class="field-error">{{ form.work_title.errors.0 }}</span>{% endif %}
       </div>
-
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        
-        <section class="step-panel is-active" data-step-panel="0">
-          <div class="form-group">
-            <label>Entry Date</label>
-            {{ form.entry_date }}
-          </div>
-          <div class="form-group">
-            <label>Work Title</label>
-            {{ form.work_title }}
-            <small class="field-hint">Brief summary of the day's primary task.</small>
-          </div>
-        </section>
-
-        <section class="step-panel" data-step-panel="1">
-          <div class="form-group">
-            <label>Activity Description</label>
-            {{ form.activity_description }}
-          </div>
-          <div class="form-group">
-            <label>Tools Used</label>
-            {{ form.tools_used }}
-          </div>
-        </section>
-
-        <section class="step-panel" data-step-panel="2">
-          <div class="form-group">
-            <label>Technical Photo (Optional)</label>
-            {{ form.technical_photo }}
-            {% if entry.technical_photo %}
-              <div class="mt-2"><img src="{{ entry.technical_photo.url }}" width="100" class="rounded"></div>
-            {% endif %}
-          </div>
-          <div class="step-review-box">
-            <h4>Almost Done!</h4>
-            <p>Review your entries using the tabs above before saving.</p>
-          </div>
-        </section>
-
-        <div class="stepper-actions mt-4" style="display: flex; justify-content: space-between;">
-          <button type="button" class="btn btn-outline" data-step-prev disabled>Previous</button>
-          <div>
-            <button type="button" class="btn btn-primary" data-step-next>Next Step</button>
-            <button type="submit" class="btn btn-primary" data-step-submit style="display:none;">Save Log Entry</button>
-          </div>
-        </div>
-      </form>
-    </div>
+      <div class="form-group">
+        <label>Activity Description * <small class="field-hint" style="display:inline">(max 5000 chars)</small></label>
+        {{ form.activity_description }}
+        {% if form.activity_description.errors %}<span class="field-error">{{ form.activity_description.errors.0 }}</span>{% endif %}
+      </div>
+      <div class="form-group">
+        <label>Tools Used *</label>{{ form.tools_used }}
+        {% if form.tools_used.errors %}<span class="field-error">{{ form.tools_used.errors.0 }}</span>{% endif %}
+      </div>
+      <div class="form-group">
+        <label>Challenges Encountered <span class="optional">(optional)</span></label>{{ form.challenges_encountered }}
+      </div>
+      <div class="form-group">
+        <label>Lessons Learned <span class="optional">(optional)</span></label>{{ form.lessons_learned }}
+      </div>
+      <div class="form-group">
+        <label>Technical Photo <span class="optional">(optional — JPEG/PNG, max 5MB)</span></label>
+        {% if entry and entry.technical_photo %}
+        <div class="current-photo"><img src="{{ entry.technical_photo.url }}" alt="Current photo" style="max-height:120px;border-radius:8px;margin-bottom:8px"><small class="text-muted">Upload a new photo to replace the current one.</small></div>
+        {% endif %}
+        {{ form.technical_photo }}
+        {% if form.technical_photo.errors %}<span class="field-error">{{ form.technical_photo.errors.0 }}</span>{% endif %}
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Entry</button>
+        <a href="{% url 'logbook:log_list' %}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}

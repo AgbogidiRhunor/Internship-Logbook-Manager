@@ -4,7 +4,7 @@
 {% block content %}
 <div class="card form-card">
   <div class="card-header">
-    <h2 class="card-title">{{ action }} — {{ faculty.name }}</h2>
+    <h2 class="card-title">{{ action }}</h2>
     <a href="{% url 'institutions:university_list' %}" class="btn btn-sm btn-outline">← Back</a>
   </div>
   <div class="card-body">
@@ -12,8 +12,7 @@
       {% csrf_token %}
       {% for field in form %}
       <div class="form-group">
-        <label>{{ field.label }}</label>
-        {{ field }}
+        <label>{{ field.label }}</label>{{ field }}
         {% if field.errors %}<span class="field-error">{{ field.errors.0 }}</span>{% endif %}
       </div>
       {% endfor %}

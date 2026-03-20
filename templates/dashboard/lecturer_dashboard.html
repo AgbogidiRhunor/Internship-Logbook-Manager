@@ -2,63 +2,55 @@
 {% block title %}Lecturer Dashboard — SIWES{% endblock %}
 {% block page_title %}Lecturer Dashboard{% endblock %}
 {% block nav_ldash %}active{% endblock %}
-
 {% block content %}
+<div class="page-header">
+  <h1>Welcome, {{ profile.surname }}</h1>
+  <p>{{ profile.department }} — {{ profile.faculty }} — {{ profile.university }}</p>
+</div>
 <div class="stats-grid">
   <div class="stat-card stat-card-blue">
-    <div class="stat-label">Assigned Students</div>
+    <div class="stat-icon"><svg viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM6 8a2 2 0 11-4 0 2 2 0 014 0zM1 18v-1a7 7 0 0114 0v1"/></svg></div>
+    <div class="stat-label">Total Students</div>
     <div class="stat-value">{{ total_students }}</div>
-    <div class="stat-sub">In your department</div>
+    <div class="stat-sub">in your department</div>
   </div>
-  <div class="stat-card stat-card-teal">
+  <div class="stat-card stat-card-green">
+    <div class="stat-icon"><svg viewBox="0 0 20 20"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
     <div class="stat-label">Graded</div>
     <div class="stat-value">{{ graded_count }}</div>
-    <div class="stat-sub">Completed evaluations</div>
+    <div class="stat-sub">students graded</div>
   </div>
-  <div class="stat-card stat-card-danger">
+  <div class="stat-card stat-card-amber">
+    <div class="stat-icon"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l3 3"/></svg></div>
     <div class="stat-label">Awaiting Grade</div>
     <div class="stat-value">{{ not_graded_count }}</div>
-    <div class="stat-sub">Needs attention</div>
+    <div class="stat-sub">need grading</div>
   </div>
 </div>
 
 <div class="card mt-4">
   <div class="card-header">
-    <h2 class="card-title">Recent Students</h2>
+    <h2 class="card-title">Your Students</h2>
     <div class="card-actions">
+      <a href="{% url 'grading:export_csv' %}" class="btn btn-sm btn-outline">CSV Export</a>
+      <a href="{% url 'grading:export_pdf' %}" class="btn btn-sm btn-outline">PDF Export</a>
       <a href="{% url 'grading:student_list' %}" class="btn btn-sm btn-primary">View All</a>
     </div>
   </div>
   <div class="card-body p-0">
     <table class="data-table">
-      <thead>
-        <tr>
-          <th>Student Name</th>
-          <th>Matric No.</th>
-          <th>Company</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Name</th><th>Matric No.</th><th>Company</th><th>Status</th><th></th></tr></thead>
       <tbody>
-        {% for student in students|slice:":10" %}
+        {% for student in recent_students %}
         <tr>
-          <td><span class="font-medium">{{ student.full_name }}</span></td>
+          <td><strong>{{ student.full_name }}</strong></td>
           <td><code>{{ student.matric_number }}</code></td>
           <td>{{ student.company_name|truncatechars:30 }}</td>
-          <td>
-            {% if student.is_graded %}
-              <span class="badge badge-success">Graded</span>
-            {% else %}
-              <span class="badge badge-warning">Pending</span>
-            {% endif %}
-          </td>
-          <td>
-            <a href="{% url 'grading:student_profile' student.pk %}" class="btn btn-xs btn-outline">Profile</a>
-          </td>
+          <td>{% if student.is_graded %}<span class="badge badge-success">Graded</span>{% else %}<span class="badge badge-warning">Pending</span>{% endif %}</td>
+          <td><a href="{% url 'grading:student_profile' student.pk %}" class="btn btn-xs btn-outline">View</a></td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="empty-cell">No students found.</td></tr>
+        <tr><td colspan="5" class="empty-cell">No students found in your department.</td></tr>
         {% endfor %}
       </tbody>
     </table>
