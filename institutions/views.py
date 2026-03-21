@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -5,6 +6,16 @@ from django.http import HttpResponseForbidden, JsonResponse
 
 from .models import University, Faculty, Department
 from .forms import UniversityForm, FacultyForm, DepartmentForm
+
+try:
+    from django_ratelimit.decorators import ratelimit
+except ImportError:
+    def ratelimit(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
+
+logger = logging.getLogger(__name__)
 
 
 def _admin_required(view_func):
@@ -15,16 +26,16 @@ def _admin_required(view_func):
     return wrapper
 
 
-# Universities 
 @login_required
 @_admin_required
 def university_list(request):
-    universities = University.objects.prefetch_related('faculties').order_by('name')
+    universities = University.objects.prefetch_related('faculties__departments').order_by('name')
     return render(request, 'institutions/university_list.html', {'universities': universities})
 
 
 @login_required
 @_admin_required
+@ratelimit(key='ip', rate='30/m', method='POST', block=True)
 def university_create(request):
     form = UniversityForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -36,6 +47,7 @@ def university_create(request):
 
 @login_required
 @_admin_required
+@ratelimit(key='ip', rate='30/m', method='POST', block=True)
 def university_edit(request, pk):
     university = get_object_or_404(University, pk=pk)
     form = UniversityForm(request.POST or None, instance=university)
@@ -57,9 +69,9 @@ def university_delete(request, pk):
     return render(request, 'institutions/confirm_delete.html', {'obj': university, 'type': 'University'})
 
 
-# Faculties 
 @login_required
 @_admin_required
+@ratelimit(key='ip', rate='30/m', method='POST', block=True)
 def faculty_create(request, university_id):
     university = get_object_or_404(University, pk=university_id)
     form = FacultyForm(request.POST or None, initial={'university': university})
@@ -76,6 +88,7 @@ def faculty_create(request, university_id):
 
 @login_required
 @_admin_required
+@ratelimit(key='ip', rate='30/m', method='POST', block=True)
 def faculty_edit(request, pk):
     faculty = get_object_or_404(Faculty, pk=pk)
     form = FacultyForm(request.POST or None, instance=faculty)
@@ -99,9 +112,9 @@ def faculty_delete(request, pk):
     return render(request, 'institutions/confirm_delete.html', {'obj': faculty, 'type': 'Faculty'})
 
 
-# Departments 
 @login_required
 @_admin_required
+@ratelimit(key='ip', rate='30/m', method='POST', block=True)
 def department_create(request, faculty_id):
     faculty = get_object_or_404(Faculty, pk=faculty_id)
     form = DepartmentForm(request.POST or None, initial={'faculty': faculty})
@@ -118,6 +131,7 @@ def department_create(request, faculty_id):
 
 @login_required
 @_admin_required
+@ratelimit(key='ip', rate='30/m', method='POST', block=True)
 def department_edit(request, pk):
     dept = get_object_or_404(Department, pk=pk)
     form = DepartmentForm(request.POST or None, instance=dept)
@@ -141,19 +155,33 @@ def department_delete(request, pk):
     return render(request, 'institutions/confirm_delete.html', {'obj': dept, 'type': 'Department'})
 
 
-# AJAX: cascade faculty/department selects 
+# AJAX — authenticated, integer-validated, rate limited
+@login_required
+@ratelimit(key='ip', rate='60/m', method='GET', block=True)
 def get_faculties(request):
-    """Return JSON list of faculties for a given university_id (used in registration forms)."""
-    university_id = request.GET.get('university_id')
+    raw_id = request.GET.get('university_id', '')
+    try:
+        university_id = int(raw_id)
+        if university_id <= 0:
+            raise ValueError
+    except (ValueError, TypeError):
+        return JsonResponse({'faculties': []})
     faculties = Faculty.objects.filter(
         university_id=university_id, is_active=True
     ).values('id', 'name').order_by('name')
     return JsonResponse({'faculties': list(faculties)})
 
 
+@login_required
+@ratelimit(key='ip', rate='60/m', method='GET', block=True)
 def get_departments(request):
-    """Return JSON list of departments for a given faculty_id."""
-    faculty_id = request.GET.get('faculty_id')
+    raw_id = request.GET.get('faculty_id', '')
+    try:
+        faculty_id = int(raw_id)
+        if faculty_id <= 0:
+            raise ValueError
+    except (ValueError, TypeError):
+        return JsonResponse({'departments': []})
     departments = Department.objects.filter(
         faculty_id=faculty_id, is_active=True
     ).values('id', 'name').order_by('name')

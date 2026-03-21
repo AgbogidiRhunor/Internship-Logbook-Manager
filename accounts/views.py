@@ -1,8 +1,10 @@
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseForbidden
+from django.utils import timezone
 
 try:
     from django_ratelimit.decorators import ratelimit
@@ -21,16 +23,27 @@ from .emails import (
     notify_user_suspended,
 )
 
+logger = logging.getLogger(__name__)
+
+_LOCKOUT_THRESHOLD = 10
+_LOCKOUT_MINUTES = 30
+
+
+def _get_ip(request):
+    forwarded = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '')
+
 
 def _log_audit(actor, action, target_model='', target_id='', details='', request=None):
-    ip = None
-    if request:
-        ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR'))
-        if ip and ',' in ip:
-            ip = ip.split(',')[0].strip()
     AuditLog.objects.create(
-        actor=actor, action=action, target_model=target_model,
-        target_id=str(target_id), details=details, ip_address=ip,
+        actor=actor,
+        action=action,
+        target_model=target_model,
+        target_id=str(target_id),
+        details=details,
+        ip_address=_get_ip(request) if request else None,
     )
 
 
@@ -49,22 +62,69 @@ def home_redirect(request):
 
 
 @ratelimit(key='ip', rate='10/m', method='POST', block=True)
+@ratelimit(key='post:username', rate='5/m', method='POST', block=True)
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard:home')
+
     form = SIWESLoginForm(request, data=request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        user = form.get_user()
-        if user.is_lecturer and not user.lecturer_approved:
-            return render(request, 'accounts/awaiting_approval.html', {'user': user})
-        if not user.is_active:
-            messages.error(request, 'Your account has been suspended. Contact your SIWES coordinator.')
-            return redirect('accounts:login')
-        if not form.cleaned_data.get('remember_me'):
-            request.session.set_expiry(0)
-        login(request, user)
-        _log_audit(user, 'login', request=request)
-        return redirect('dashboard:home')
+
+    if request.method == 'POST':
+        username_raw = request.POST.get('username', '').strip().lower()
+
+        # Check account lockout before validating credentials
+        try:
+            candidate = CustomUser.objects.get(username=username_raw)
+            if candidate.is_locked:
+                remaining = int((candidate.locked_until - timezone.now()).total_seconds() // 60)
+                messages.error(
+                    request,
+                    f'Account temporarily locked due to too many failed attempts. '
+                    f'Try again in {remaining} minute(s).'
+                )
+                _log_audit(None, 'login_blocked_locked', details=f'username={username_raw[:3]}*** ip={_get_ip(request)}', request=request)
+                return render(request, 'accounts/login.html', {'form': form})
+        except CustomUser.DoesNotExist:
+            candidate = None
+
+        if form.is_valid():
+            user = form.get_user()
+
+            if user.is_lecturer and not user.lecturer_approved:
+                _log_audit(user, 'login_blocked_unapproved', request=request)
+                return render(request, 'accounts/awaiting_approval.html', {'user': user})
+
+            if not user.is_active:
+                _log_audit(user, 'login_blocked_suspended', request=request)
+                messages.error(request, 'Your account has been suspended. Contact your SIWES coordinator.')
+                return redirect('accounts:login')
+
+            # Successful login — clear lockout counter
+            user.reset_failed_login()
+
+            if not form.cleaned_data.get('remember_me'):
+                request.session.set_expiry(0)
+
+            login(request, user)
+            _log_audit(user, 'login_success', request=request)
+            return redirect('dashboard:home')
+        else:
+            # Failed login — increment counter on the account if it exists
+            ip = _get_ip(request)
+            logger.warning(
+                'Failed login | ip=%s | hint=%s',
+                ip,
+                username_raw[:3] + '***' if username_raw else '',
+            )
+            if candidate:
+                candidate.record_failed_login()
+                if candidate.is_locked:
+                    _log_audit(None, 'account_locked', 'CustomUser', candidate.pk,
+                               details=f'ip={ip}', request=request)
+                    logger.warning('Account locked: %s*** after repeated failures from %s',
+                                   username_raw[:3], ip)
+            _log_audit(None, 'login_failed', details=f'ip={ip}', request=request)
+
     return render(request, 'accounts/login.html', {'form': form})
 
 
@@ -83,6 +143,7 @@ def student_register(request):
     if request.method == 'POST' and form.is_valid():
         user = form.save()
         login(request, user)
+        _log_audit(user, 'student_registered', request=request)
         messages.success(request, 'Account created successfully. Welcome to SIWES Logbook!')
         return redirect('dashboard:home')
     return render(request, 'accounts/student_register.html', {'form': form})
@@ -95,7 +156,7 @@ def lecturer_register(request):
     form = LecturerRegistrationForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         lecturer_user = form.save()
-        # EMAIL 1: notify all admins a new lecturer is awaiting approval
+        _log_audit(lecturer_user, 'lecturer_registered_pending', request=request)
         notify_admins_new_lecturer(lecturer_user)
         messages.info(
             request,
@@ -130,7 +191,6 @@ def approve_lecturer(request, user_id):
     user.lecturer_approved = True
     user.save(update_fields=['lecturer_approved'])
     _log_audit(request.user, 'approve_lecturer', 'CustomUser', user_id, request=request)
-    # EMAIL 2: notify lecturer their account is approved
     notify_lecturer_approved(user)
     messages.success(request, f'Lecturer {user.username} approved and notified by email.')
     return redirect('accounts:pending_lecturers')
@@ -143,7 +203,6 @@ def reject_lecturer(request, user_id):
     user.is_active = False
     user.save(update_fields=['is_active'])
     _log_audit(request.user, 'reject_lecturer', 'CustomUser', user_id, request=request)
-    # EMAIL 3: notify lecturer their account is rejected
     notify_lecturer_rejected(user)
     messages.warning(request, f'Lecturer {user.username} rejected and notified by email.')
     return redirect('accounts:pending_lecturers')
@@ -156,7 +215,6 @@ def suspend_user(request, user_id):
     user.is_active = False
     user.save(update_fields=['is_active'])
     _log_audit(request.user, 'suspend_user', 'CustomUser', user_id, request=request)
-    # EMAIL 4: notify user their account is suspended
     notify_user_suspended(user)
     messages.warning(request, f'User {user.username} suspended.')
     return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))
@@ -167,7 +225,9 @@ def suspend_user(request, user_id):
 def reactivate_user(request, user_id):
     user = get_object_or_404(CustomUser, pk=user_id)
     user.is_active = True
-    user.save(update_fields=['is_active'])
+    user.failed_login_count = 0
+    user.locked_until = None
+    user.save(update_fields=['is_active', 'failed_login_count', 'locked_until'])
     _log_audit(request.user, 'reactivate_user', 'CustomUser', user_id, request=request)
     messages.success(request, f'User {user.username} reactivated.')
     return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))

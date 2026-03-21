@@ -35,12 +35,15 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'core.middleware.RequestSizeLimitMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.SecurityHeadersMiddleware',
+    'core.middleware.AuditLogMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -87,6 +90,14 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
+# Explicitly use Argon2 as primary hasher (stronger than PBKDF2)
+# Fallback chain ensures old PBKDF2 hashes still verify
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+]
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 8}},
@@ -102,6 +113,7 @@ USE_TZ = True
 STATIC_URL = config('STATIC_URL', default='/static/')
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
 if DEBUG:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 else:
@@ -110,8 +122,10 @@ else:
 MEDIA_URL = config('MEDIA_URL', default='/media/')
 MEDIA_ROOT = BASE_DIR / 'media'
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
-FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+# Hard limits on upload and request body size
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024   # 5 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024   # 5 MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 50               # Prevent field flooding
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -125,6 +139,34 @@ DEFAULT_FROM_EMAIL = f'SIWES Logbook <{config("EMAIL_HOST_USER", default="")}>'
 
 SITE_URL = config('SITE_URL', default='http://localhost:8000')
 
+# Session
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_NAME = 'siwes_session'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_AGE = 3600 * 8
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# CSRF
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+RATELIMIT_ENABLE = True
+RATELIMIT_USE_CACHE = 'default'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
+# Custom error handlers
+handler400 = 'core.views.error_400'
+handler403 = 'core.views.error_403'
+handler404 = 'core.views.error_404'
+handler429 = 'core.views.error_429'
+handler500 = 'core.views.error_500'
+
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -136,26 +178,29 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     X_FRAME_OPTIONS = 'DENY'
 
-SESSION_COOKIE_AGE = 3600 * 8
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-
-RATELIMIT_ENABLE = True
-RATELIMIT_USE_CACHE = 'default'
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    }
-}
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {'format': '[{asctime}] {levelname} {module} {message}', 'style': '{'},
+        'verbose': {
+            'format': '[{asctime}] {levelname} {name} {message}',
+            'style': '{',
+        },
     },
     'handlers': {
-        'console': {'class': 'logging.StreamHandler', 'formatter': 'verbose'},
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
     },
-    'root': {'handlers': ['console'], 'level': 'INFO'},
+    'loggers': {
+        'accounts':        {'handlers': ['console'], 'level': 'INFO',    'propagate': False},
+        'grading':         {'handlers': ['console'], 'level': 'INFO',    'propagate': False},
+        'logbook':         {'handlers': ['console'], 'level': 'INFO',    'propagate': False},
+        'institutions':    {'handlers': ['console'], 'level': 'INFO',    'propagate': False},
+        'core':            {'handlers': ['console'], 'level': 'INFO',    'propagate': False},
+        'django.security': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'django.request':  {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+    },
+    'root': {'handlers': ['console'], 'level': 'WARNING'},
 }

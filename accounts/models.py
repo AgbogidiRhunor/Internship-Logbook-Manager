@@ -1,7 +1,3 @@
-"""
-accounts/models.py
-Custom User model and profile models for SIWES Logbook Manager.
-"""
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
@@ -44,10 +40,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    lecturer_approved = models.BooleanField(
-        default=False,
-        help_text='Only relevant for LECTURER role. Admin must approve before access is granted.',
-    )
+    lecturer_approved = models.BooleanField(default=False)
+    failed_login_count = models.PositiveSmallIntegerField(default=0)
+    locked_until = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     USERNAME_FIELD = 'username'
@@ -76,10 +71,27 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     @property
     def can_access(self):
-        """Lecturer access requires approval. Students and admins always have access."""
         if self.is_lecturer:
             return self.lecturer_approved and self.is_active
         return self.is_active
+
+    @property
+    def is_locked(self):
+        if self.locked_until is None:
+            return False
+        return timezone.now() < self.locked_until
+
+    def record_failed_login(self):
+        self.failed_login_count += 1
+        if self.failed_login_count >= 10:
+            self.locked_until = timezone.now() + timezone.timedelta(minutes=30)
+        self.save(update_fields=['failed_login_count', 'locked_until'])
+
+    def reset_failed_login(self):
+        if self.failed_login_count > 0 or self.locked_until:
+            self.failed_login_count = 0
+            self.locked_until = None
+            self.save(update_fields=['failed_login_count', 'locked_until'])
 
     def get_full_name(self):
         if self.is_student and hasattr(self, 'student_profile'):
@@ -124,10 +136,7 @@ class StudentProfile(models.Model):
     year_of_study = models.PositiveSmallIntegerField()
     company_name = models.CharField(max_length=200)
     industrial_supervisor_name = models.CharField(max_length=200)
-    internship_duration = models.CharField(
-        max_length=1,
-        choices=InternshipDuration.choices,
-    )
+    internship_duration = models.CharField(max_length=1, choices=InternshipDuration.choices)
     internship_start_date = models.DateField()
     internship_end_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -157,7 +166,6 @@ class StudentProfile(models.Model):
 
     @property
     def days_remaining(self):
-        from django.utils import timezone
         today = timezone.now().date()
         if today > self.internship_end_date:
             return 0
@@ -215,7 +223,6 @@ class LecturerProfile(models.Model):
         return f'{self.surname} {self.other_names}'
 
     def get_students(self):
-        """Return all students in the same university/faculty/department."""
         return StudentProfile.objects.filter(
             university=self.university,
             faculty=self.faculty,
@@ -224,24 +231,28 @@ class LecturerProfile(models.Model):
 
 
 class AuditLog(models.Model):
-    """Records significant admin actions for accountability."""
     actor = models.ForeignKey(
         CustomUser,
         on_delete=models.SET_NULL,
         null=True,
         related_name='audit_logs',
     )
-    action = models.CharField(max_length=200)
+    action = models.CharField(max_length=200, db_index=True)
     target_model = models.CharField(max_length=100, blank=True)
     target_id = models.CharField(max_length=50, blank=True)
     details = models.TextField(blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         verbose_name = 'Audit Log'
         verbose_name_plural = 'Audit Logs'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['action', '-created_at']),
+            models.Index(fields=['ip_address', '-created_at']),
+        ]
 
     def __str__(self):
-        return f'{self.actor} — {self.action} @ {self.created_at:%Y-%m-%d %H:%M}'
+        return f'{self.actor} - {self.action} @ {self.created_at:%Y-%m-%d %H:%M}'

@@ -1,11 +1,20 @@
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseForbidden
-from django.db.models import Q
 
+from accounts.views import _log_audit
 from .models import DailyLogEntry
 from .forms import DailyLogEntryForm
+
+logger = logging.getLogger(__name__)
+
+_ALLOWED_DAYS = {
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+}
+_MAX_INTERNSHIP_MONTHS = 6
+_MAX_INTERNSHIP_WEEKS = 26
 
 
 def _student_required(view_func):
@@ -16,25 +25,49 @@ def _student_required(view_func):
     return wrapper
 
 
+def _owned_entry(pk, user):
+    entry = get_object_or_404(DailyLogEntry, pk=pk)
+    if entry.student_id != user.pk:
+        logger.warning(
+            'IDOR attempt: user %s tried to access log entry %s owned by user_id %s',
+            user.username, pk, entry.student_id,
+        )
+        _log_audit(user, 'idor_attempt_log_entry', 'DailyLogEntry', pk)
+        return None, HttpResponseForbidden('You cannot access another student\'s log.')
+    return entry, None
+
+
+def _safe_int_param(value, min_val, max_val):
+    try:
+        parsed = int(value)
+        if min_val <= parsed <= max_val:
+            return str(parsed)
+    except (ValueError, TypeError):
+        pass
+    return ''
+
+
 @login_required
 @_student_required
 def log_list(request):
     entries = DailyLogEntry.objects.filter(student=request.user)
 
-    month = request.GET.get('month')
-    week = request.GET.get('week')
-    day = request.GET.get('day')
+    month = _safe_int_param(request.GET.get('month', ''), 1, _MAX_INTERNSHIP_MONTHS)
+    week  = _safe_int_param(request.GET.get('week', ''),  1, _MAX_INTERNSHIP_WEEKS)
+    day   = request.GET.get('day', '').strip()
 
     if month:
         entries = entries.filter(internship_month=month)
     if week:
         entries = entries.filter(internship_week=week)
+    if day not in _ALLOWED_DAYS:
+        day = ''
     if day:
         entries = entries.filter(day_of_week=day)
 
     profile = request.user.student_profile
     months_range = range(1, int(profile.internship_duration) + 1)
-    weeks_range = range(1, (int(profile.internship_duration) * 4) + 2)
+    weeks_range  = range(1, (int(profile.internship_duration) * 4) + 2)
 
     from .models import DayOfWeek
     return render(request, 'logbook/log_list.html', {
@@ -57,25 +90,21 @@ def log_create(request):
         request.FILES or None,
         student_user=request.user,
     )
-
-    if request.method == 'POST':
-        form.instance.student = request.user
-        if form.is_valid():
-            entry = form.save()
-            messages.success(request, f'Log entry for {entry.entry_date} saved.')
-            return redirect('logbook:log_list')
-
+    if request.method == 'POST' and form.is_valid():
+        entry = form.save(commit=False)
+        entry.student = request.user
+        entry.save()
+        messages.success(request, f'Log entry for {entry.entry_date} saved.')
+        return redirect('logbook:log_list')
     return render(request, 'logbook/log_form.html', {'form': form, 'action': 'Create'})
 
 
 @login_required
 @_student_required
 def log_edit(request, pk):
-    entry = get_object_or_404(DailyLogEntry, pk=pk)
-    # Scope: student can only edit their own entries
-    if entry.student_id != request.user.pk:
-        return HttpResponseForbidden('You cannot edit another student\'s log.')
-
+    entry, err = _owned_entry(pk, request.user)
+    if err:
+        return err
     form = DailyLogEntryForm(
         request.POST or None,
         request.FILES or None,
@@ -92,9 +121,9 @@ def log_edit(request, pk):
 @login_required
 @_student_required
 def log_delete(request, pk):
-    entry = get_object_or_404(DailyLogEntry, pk=pk)
-    if entry.student_id != request.user.pk:
-        return HttpResponseForbidden('Access denied.')
+    entry, err = _owned_entry(pk, request.user)
+    if err:
+        return err
     if request.method == 'POST':
         entry.delete()
         messages.success(request, 'Log entry deleted.')
@@ -105,7 +134,7 @@ def log_delete(request, pk):
 @login_required
 @_student_required
 def log_detail(request, pk):
-    entry = get_object_or_404(DailyLogEntry, pk=pk)
-    if entry.student_id != request.user.pk:
-        return HttpResponseForbidden('Access denied.')
+    entry, err = _owned_entry(pk, request.user)
+    if err:
+        return err
     return render(request, 'logbook/log_detail.html', {'entry': entry})
