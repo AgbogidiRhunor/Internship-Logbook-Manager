@@ -184,13 +184,7 @@ textarea{resize:vertical;min-height:96px}
 .auth-layout{min-height:100vh;display:flex;position:relative;overflow:hidden}
 .auth-left{flex:1;position:relative;display:none}
 @media(min-width:1024px){.auth-left{display:block}}
-.auth-bg-image {
-  position: absolute;
-  inset: 0;
-  background-image: url("../img/login.jpg");
-  background-size: cover;
-  background-position: center;
-}
+.auth-bg-image{position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1562774053-701939374585?w=1200&q=80');background-size:cover;background-position:center}
 .auth-bg-image::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(26,26,46,0.88) 0%,rgba(233,69,96,0.4) 100%)}
 .auth-left-content{position:relative;z-index:2;padding:48px;height:100%;display:flex;flex-direction:column;justify-content:space-between}
 .auth-left-brand{display:flex;align-items:center;gap:14px}
@@ -307,3 +301,22 @@ code{background:var(--bg);padding:2px 7px;border-radius:5px;font-size:12px;borde
   .profile-actions{flex-direction:row}
   .auth-right{padding:32px 24px}
 }
+
+/* ── Pending Steps (awaiting approval page) ── */
+.pending-steps{display:flex;flex-direction:column;gap:0;margin:24px 0}
+.pending-step{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-left:2px solid var(--border);margin-left:16px;padding-left:20px;position:relative}
+.pending-step:last-child{border-left-color:transparent}
+.pending-step-icon{width:32px;height:32px;border-radius:50%;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--text-muted);flex-shrink:0;position:absolute;left:-17px;top:12px}
+.pending-step-done .pending-step-icon{background:var(--success);border-color:var(--success);color:#fff}
+.pending-step-active .pending-step-icon{background:var(--accent);border-color:var(--accent);color:#fff;animation:pulse-icon 2s ease-in-out infinite}
+.pending-step-body{flex:1;padding-top:4px}
+.pending-step-title{font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:2px}
+.pending-step-desc{font-size:12px;color:var(--text-muted)}
+.pending-notice{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:13px;color:var(--text-muted);margin:18px 0;line-height:1.6}
+@keyframes pulse-icon{0%,100%{box-shadow:0 0 0 0 rgba(233,69,96,0.4)}50%{box-shadow:0 0 0 6px rgba(233,69,96,0)}}
+
+/* ── Auth background — local static image ── */
+.auth-bg-pending{background-image:url('/static/img/lecturer.jpg');background-size:cover;background-position:center}
+
+/* Disabled select while cascade loading */
+select:disabled{background:#f9fafb;color:var(--text-muted);cursor:not-allowed;opacity:0.7}

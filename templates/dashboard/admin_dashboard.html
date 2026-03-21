@@ -7,6 +7,7 @@
   <h1>Platform Overview</h1>
   <p>System-wide analytics and administration tools</p>
 </div>
+
 <div class="stats-grid stats-grid-3">
   <div class="stat-card stat-card-blue">
     <div class="stat-icon"><svg viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM1 18v-1a7 7 0 0114 0v1"/></svg></div>
@@ -14,9 +15,10 @@
     <div class="stat-value">{{ total_students }}</div>
   </div>
   <div class="stat-card stat-card-teal">
-    <div class="stat-icon"><svg viewBox="0 0 20 20"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg></div>
+    <div class="stat-icon"><svg viewBox="0 0 20 20"><path d="M12 14l9-5-9-5-9 5 9 5z"/></svg></div>
     <div class="stat-label">Active Lecturers</div>
     <div class="stat-value">{{ total_lecturers }}</div>
+    <a href="{% url 'accounts:admin_lecturer_list' %}" class="stat-action">Manage</a>
   </div>
   <div class="stat-card {% if pending_approvals %}stat-card-danger{% else %}stat-card-green{% endif %}">
     <div class="stat-icon"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l3 3"/></svg></div>
@@ -48,19 +50,26 @@
     <div class="card-body">
       <div class="action-list">
         <a href="{% url 'accounts:pending_lecturers' %}" class="action-item">
-          <span class="action-icon">👤</span>
+          <span class="action-icon">⏳</span>
           <span>Review lecturer approvals</span>
           {% if pending_approvals %}<span class="badge badge-danger">{{ pending_approvals }}</span>{% endif %}
         </a>
+        <a href="{% url 'accounts:admin_lecturer_list' %}" class="action-item">
+          <span class="action-icon">👨‍🏫</span>
+          <span>Manage all lecturers</span>
+        </a>
         <a href="{% url 'institutions:university_list' %}" class="action-item">
-          <span class="action-icon">🏛️</span><span>Manage institutions</span>
+          <span class="action-icon">🏛️</span>
+          <span>Manage institutions</span>
         </a>
         <a href="{% url 'institutions:university_create' %}" class="action-item">
-          <span class="action-icon">➕</span><span>Add new university</span>
+          <span class="action-icon">➕</span>
+          <span>Add new university</span>
         </a>
       </div>
     </div>
   </div>
+
   <div class="card">
     <div class="card-header"><h2 class="card-title">Recent Log Activity</h2></div>
     <div class="card-body p-0">

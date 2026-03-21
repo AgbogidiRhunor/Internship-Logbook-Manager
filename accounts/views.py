@@ -17,16 +17,17 @@ except ImportError:
 from .forms import StudentRegistrationForm, LecturerRegistrationForm, SIWESLoginForm
 from .models import CustomUser, UserRole, AuditLog
 from .emails import (
+    notify_lecturer_registration_pending,
     notify_admins_new_lecturer,
     notify_lecturer_approved,
     notify_lecturer_rejected,
-    notify_user_suspended,
+    notify_student_suspended,
+    notify_student_reactivated,
+    notify_lecturer_suspended,
+    notify_lecturer_reactivated,
 )
 
 logger = logging.getLogger(__name__)
-
-_LOCKOUT_THRESHOLD = 10
-_LOCKOUT_MINUTES = 30
 
 
 def _get_ip(request):
@@ -72,7 +73,6 @@ def login_view(request):
     if request.method == 'POST':
         username_raw = request.POST.get('username', '').strip().lower()
 
-        # Check account lockout before validating credentials
         try:
             candidate = CustomUser.objects.get(username=username_raw)
             if candidate.is_locked:
@@ -82,7 +82,8 @@ def login_view(request):
                     f'Account temporarily locked due to too many failed attempts. '
                     f'Try again in {remaining} minute(s).'
                 )
-                _log_audit(None, 'login_blocked_locked', details=f'username={username_raw[:3]}*** ip={_get_ip(request)}', request=request)
+                _log_audit(None, 'login_blocked_locked',
+                           details=f'ip={_get_ip(request)}', request=request)
                 return render(request, 'accounts/login.html', {'form': form})
         except CustomUser.DoesNotExist:
             candidate = None
@@ -99,30 +100,21 @@ def login_view(request):
                 messages.error(request, 'Your account has been suspended. Contact your SIWES coordinator.')
                 return redirect('accounts:login')
 
-            # Successful login — clear lockout counter
             user.reset_failed_login()
-
             if not form.cleaned_data.get('remember_me'):
                 request.session.set_expiry(0)
-
             login(request, user)
             _log_audit(user, 'login_success', request=request)
             return redirect('dashboard:home')
         else:
-            # Failed login — increment counter on the account if it exists
             ip = _get_ip(request)
-            logger.warning(
-                'Failed login | ip=%s | hint=%s',
-                ip,
-                username_raw[:3] + '***' if username_raw else '',
-            )
+            logger.warning('Failed login | ip=%s | hint=%s', ip,
+                           username_raw[:3] + '***' if username_raw else '')
             if candidate:
                 candidate.record_failed_login()
                 if candidate.is_locked:
                     _log_audit(None, 'account_locked', 'CustomUser', candidate.pk,
                                details=f'ip={ip}', request=request)
-                    logger.warning('Account locked: %s*** after repeated failures from %s',
-                                   username_raw[:3], ip)
             _log_audit(None, 'login_failed', details=f'ip={ip}', request=request)
 
     return render(request, 'accounts/login.html', {'form': form})
@@ -157,6 +149,9 @@ def lecturer_register(request):
     if request.method == 'POST' and form.is_valid():
         lecturer_user = form.save()
         _log_audit(lecturer_user, 'lecturer_registered_pending', request=request)
+        # Email 1: to lecturer only — registration received
+        notify_lecturer_registration_pending(lecturer_user)
+        # Email 2: to admin only — new lecturer awaiting approval
         notify_admins_new_lecturer(lecturer_user)
         messages.info(
             request,
@@ -170,6 +165,8 @@ def lecturer_register(request):
 def awaiting_approval_view(request):
     return render(request, 'accounts/awaiting_approval.html')
 
+
+# Admin: Lecturer management 
 
 @login_required
 @_require_admin
@@ -191,6 +188,7 @@ def approve_lecturer(request, user_id):
     user.lecturer_approved = True
     user.save(update_fields=['lecturer_approved'])
     _log_audit(request.user, 'approve_lecturer', 'CustomUser', user_id, request=request)
+    # Email to lecturer only
     notify_lecturer_approved(user)
     messages.success(request, f'Lecturer {user.username} approved and notified by email.')
     return redirect('accounts:pending_lecturers')
@@ -203,6 +201,7 @@ def reject_lecturer(request, user_id):
     user.is_active = False
     user.save(update_fields=['is_active'])
     _log_audit(request.user, 'reject_lecturer', 'CustomUser', user_id, request=request)
+    # Email to lecturer only
     notify_lecturer_rejected(user)
     messages.warning(request, f'Lecturer {user.username} rejected and notified by email.')
     return redirect('accounts:pending_lecturers')
@@ -210,24 +209,109 @@ def reject_lecturer(request, user_id):
 
 @login_required
 @_require_admin
-def suspend_user(request, user_id):
-    user = get_object_or_404(CustomUser, pk=user_id)
+def suspend_lecturer(request, user_id):
+    user = get_object_or_404(CustomUser, pk=user_id, role=UserRole.LECTURER)
     user.is_active = False
     user.save(update_fields=['is_active'])
-    _log_audit(request.user, 'suspend_user', 'CustomUser', user_id, request=request)
-    notify_user_suspended(user)
-    messages.warning(request, f'User {user.username} suspended.')
+    _log_audit(request.user, 'suspend_lecturer', 'CustomUser', user_id, request=request)
+    # Email to lecturer only
+    notify_lecturer_suspended(user)
+    messages.warning(request, f'Lecturer {user.username} suspended.')
     return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))
 
 
 @login_required
 @_require_admin
-def reactivate_user(request, user_id):
-    user = get_object_or_404(CustomUser, pk=user_id)
+def reactivate_lecturer(request, user_id):
+    user = get_object_or_404(CustomUser, pk=user_id, role=UserRole.LECTURER)
     user.is_active = True
     user.failed_login_count = 0
     user.locked_until = None
     user.save(update_fields=['is_active', 'failed_login_count', 'locked_until'])
-    _log_audit(request.user, 'reactivate_user', 'CustomUser', user_id, request=request)
-    messages.success(request, f'User {user.username} reactivated.')
+    _log_audit(request.user, 'reactivate_lecturer', 'CustomUser', user_id, request=request)
+    # Email to lecturer only
+    notify_lecturer_reactivated(user)
+    messages.success(request, f'Lecturer {user.username} reinstated.')
     return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))
+
+
+# Lecturer: Student suspension 
+
+def _lecturer_can_manage_student(lecturer_user, student_user):
+    """Check lecturer and student share the same uni/faculty/dept."""
+    try:
+        lp = lecturer_user.lecturer_profile
+        sp = student_user.student_profile
+        return (
+            lp.university_id == sp.university_id and
+            lp.faculty_id    == sp.faculty_id and
+            lp.department_id == sp.department_id
+        )
+    except Exception:
+        return False
+
+
+@login_required
+def suspend_student(request, user_id):
+    if not request.user.is_lecturer or not request.user.lecturer_approved:
+        return HttpResponseForbidden('Access denied.')
+    student = get_object_or_404(CustomUser, pk=user_id, role=UserRole.STUDENT)
+    if not _lecturer_can_manage_student(request.user, student):
+        _log_audit(request.user, 'idor_attempt_suspend_student', 'CustomUser', user_id, request=request)
+        return HttpResponseForbidden('This student is outside your scope.')
+    student.is_active = False
+    student.save(update_fields=['is_active'])
+    _log_audit(request.user, 'suspend_student', 'CustomUser', user_id, request=request)
+    # Email to student only
+    notify_student_suspended(student)
+    messages.warning(request, f'Student {student.username} suspended.')
+    return redirect(request.META.get('HTTP_REFERER', '/grading/students/'))
+
+
+@login_required
+def reactivate_student(request, user_id):
+    if not request.user.is_lecturer or not request.user.lecturer_approved:
+        return HttpResponseForbidden('Access denied.')
+    student = get_object_or_404(CustomUser, pk=user_id, role=UserRole.STUDENT)
+    if not _lecturer_can_manage_student(request.user, student):
+        _log_audit(request.user, 'idor_attempt_reactivate_student', 'CustomUser', user_id, request=request)
+        return HttpResponseForbidden('This student is outside your scope.')
+    student.is_active = True
+    student.failed_login_count = 0
+    student.locked_until = None
+    student.save(update_fields=['is_active', 'failed_login_count', 'locked_until'])
+    _log_audit(request.user, 'reactivate_student', 'CustomUser', user_id, request=request)
+    # Email to student only
+    notify_student_reactivated(student)
+    messages.success(request, f'Student {student.username} reinstated.')
+    return redirect(request.META.get('HTTP_REFERER', '/grading/students/'))
+
+
+# Admin: generic user management (kept for admin dashboard) 
+
+@login_required
+@_require_admin
+def admin_lecturer_list(request):
+    """Admin view: list all lecturers with search."""
+    from django.db.models import Q
+    q = request.GET.get('q', '').strip()[:100]
+    lecturers = CustomUser.objects.filter(
+        role=UserRole.LECTURER
+    ).select_related(
+        'lecturer_profile__university',
+        'lecturer_profile__faculty',
+        'lecturer_profile__department',
+    ).order_by('username')
+
+    if q:
+        lecturers = lecturers.filter(
+            Q(username__icontains=q) |
+            Q(lecturer_profile__surname__icontains=q) |
+            Q(lecturer_profile__other_names__icontains=q) |
+            Q(email__icontains=q)
+        )
+
+    return render(request, 'accounts/admin_lecturer_list.html', {
+        'lecturers': lecturers,
+        'q': q,
+    })

@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.db.models import Q
 
-from accounts.models import StudentProfile
+from accounts.models import StudentProfile, CustomUser
 from accounts.views import _log_audit
 from logbook.models import DailyLogEntry
 from .models import GradeRecord
@@ -43,7 +43,9 @@ def _get_lecturer_students(lecturer_user):
         university=lp.university,
         faculty=lp.faculty,
         department=lp.department,
-    ).select_related('user', 'university', 'faculty', 'department').prefetch_related('grade_record')
+    ).select_related(
+        'user', 'university', 'faculty', 'department'
+    ).prefetch_related('grade_record').order_by('surname', 'other_names')
 
 
 def _in_scope(student, lecturer_user):
@@ -86,10 +88,7 @@ def student_list(request):
 def student_profile_view(request, student_id):
     student = get_object_or_404(StudentProfile, pk=student_id)
     if not _in_scope(student, request.user):
-        logger.warning(
-            'IDOR attempt: lecturer %s tried to view student %s outside scope',
-            request.user.username, student_id,
-        )
+        logger.warning('IDOR: lecturer %s tried to view student %s', request.user.username, student_id)
         _log_audit(request.user, 'idor_attempt_view_student', 'StudentProfile', student_id, request=request)
         return HttpResponseForbidden('This student is outside your scope.')
     entries = DailyLogEntry.objects.filter(student=student.user).order_by('-entry_date')
@@ -101,14 +100,25 @@ def student_profile_view(request, student_id):
 
 @login_required
 @_lecturer_required
+def student_entry_detail(request, student_id, entry_id):
+    """Lecturer views the full content of a single log entry."""
+    student = get_object_or_404(StudentProfile, pk=student_id)
+    if not _in_scope(student, request.user):
+        _log_audit(request.user, 'idor_attempt_view_entry', 'DailyLogEntry', entry_id, request=request)
+        return HttpResponseForbidden('This student is outside your scope.')
+    entry = get_object_or_404(DailyLogEntry, pk=entry_id, student=student.user)
+    return render(request, 'grading/entry_detail.html', {
+        'student': student, 'entry': entry,
+    })
+
+
+@login_required
+@_lecturer_required
 @ratelimit(key='ip', rate='30/m', method='POST', block=True)
 def grade_student(request, student_id):
     student = get_object_or_404(StudentProfile, pk=student_id)
     if not _in_scope(student, request.user):
-        logger.warning(
-            'IDOR attempt: lecturer %s tried to grade student %s outside scope',
-            request.user.username, student_id,
-        )
+        logger.warning('IDOR: lecturer %s tried to grade student %s', request.user.username, student_id)
         _log_audit(request.user, 'idor_attempt_grade_student', 'StudentProfile', student_id, request=request)
         return HttpResponseForbidden('This student is outside your scope.')
 

@@ -1,60 +1,96 @@
-/* cascade_selects.js
-   Dynamically populates Faculty and Department dropdowns
-   based on University and Faculty selections in registration forms.
-*/
 'use strict';
 
 (function () {
-  var universitySelect  = document.querySelector('[name="university"]');
-  var facultySelect     = document.querySelector('[name="faculty"]');
-  var departmentSelect  = document.querySelector('[name="department"]');
+  var uniSelect  = document.querySelector('[name="university"]');
+  var facSelect  = document.querySelector('[name="faculty"]');
+  var deptSelect = document.querySelector('[name="department"]');
 
-  if (!universitySelect || !facultySelect) return;
+  if (!uniSelect || !facSelect) return;
 
-  function setSelectOptions(select, items, placeholder) {
-    var current = select.value;
-    select.innerHTML = '<option value="">' + placeholder + '</option>';
+  // Store the values Django re-rendered after a validation error
+  var savedFacultyId    = facSelect.value;
+  var savedDeptId       = deptSelect ? deptSelect.value : '';
+
+  function clearSelect(sel, placeholder) {
+    sel.innerHTML = '<option value="">' + placeholder + '</option>';
+    sel.disabled = true;
+  }
+
+  function populateSelect(sel, items, placeholder, restoreId) {
+    sel.innerHTML = '<option value="">' + placeholder + '</option>';
     items.forEach(function (item) {
       var opt = document.createElement('option');
       opt.value = item.id;
       opt.textContent = item.name;
-      if (String(item.id) === current) opt.selected = true;
-      select.appendChild(opt);
+      if (String(item.id) === String(restoreId)) {
+        opt.selected = true;
+      }
+      sel.appendChild(opt);
     });
+    sel.disabled = items.length === 0;
   }
 
-  function loadFaculties(universityId) {
-    if (!universityId) {
-      setSelectOptions(facultySelect, [], '— Select Faculty —');
-      if (departmentSelect) setSelectOptions(departmentSelect, [], '— Select Department —');
-      return;
-    }
-    fetch('/institutions/ajax/faculties/?university_id=' + universityId)
-      .then(function (r) { return r.json(); })
+  function loadFaculties(universityId, restoreFacultyId, restoreDeptId) {
+    clearSelect(facSelect, '— Select Faculty —');
+    if (deptSelect) clearSelect(deptSelect, '— Select Department —');
+    if (!universityId) return;
+
+    fetch('/institutions/ajax/faculties/?university_id=' + encodeURIComponent(universityId), {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error('server error');
+        return r.json();
+      })
       .then(function (data) {
-        setSelectOptions(facultySelect, data.faculties, '— Select Faculty —');
-        if (departmentSelect) setSelectOptions(departmentSelect, [], '— Select Department —');
+        populateSelect(facSelect, data.faculties || [], '— Select Faculty —', restoreFacultyId);
+        // After restoring faculty, load its departments if needed
+        if (restoreFacultyId && facSelect.value) {
+          loadDepartments(facSelect.value, restoreDeptId);
+        }
+      })
+      .catch(function () {
+        facSelect.innerHTML = '<option value="">— Failed to load, refresh page —</option>';
+        facSelect.disabled = false;
       });
   }
 
-  function loadDepartments(facultyId) {
-    if (!facultyId || !departmentSelect) return;
-    fetch('/institutions/ajax/departments/?faculty_id=' + facultyId)
-      .then(function (r) { return r.json(); })
+  function loadDepartments(facultyId, restoreDeptId) {
+    if (!deptSelect) return;
+    clearSelect(deptSelect, '— Select Department —');
+    if (!facultyId) return;
+
+    fetch('/institutions/ajax/departments/?faculty_id=' + encodeURIComponent(facultyId), {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error('server error');
+        return r.json();
+      })
       .then(function (data) {
-        setSelectOptions(departmentSelect, data.departments, '— Select Department —');
+        populateSelect(deptSelect, data.departments || [], '— Select Department —', restoreDeptId || '');
+      })
+      .catch(function () {
+        deptSelect.innerHTML = '<option value="">— Failed to load, refresh page —</option>';
+        deptSelect.disabled = false;
       });
   }
 
-  universitySelect.addEventListener('change', function () {
-    loadFaculties(this.value);
+  // User interaction events
+  uniSelect.addEventListener('change', function () {
+    loadFaculties(this.value, '', '');
   });
 
-  facultySelect.addEventListener('change', function () {
-    loadDepartments(this.value);
+  facSelect.addEventListener('change', function () {
+    loadDepartments(this.value, '');
   });
 
-  // On page load with pre-selected values (edit / error redisplay)
-  if (universitySelect.value) loadFaculties(universitySelect.value);
-  if (facultySelect.value && departmentSelect) loadDepartments(facultySelect.value);
+  // On page load: restore previously selected values (after form validation error)
+  if (uniSelect.value) {
+    loadFaculties(uniSelect.value, savedFacultyId, savedDeptId);
+  } else {
+    // Nothing selected yet — disable dependents
+    facSelect.disabled = true;
+    if (deptSelect) deptSelect.disabled = true;
+  }
 })();

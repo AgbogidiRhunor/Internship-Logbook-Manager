@@ -11,17 +11,35 @@
         <p class="text-muted">{{ student.matric_number }} &bull; {{ student.university }}</p>
         <p class="text-muted">{{ student.faculty }} &bull; {{ student.department }}</p>
         <div class="profile-badges">
-          {% if grade %}<span class="badge badge-success">Graded: {{ grade.letter_grade }} ({{ grade.overall_score }}/100)</span>{% else %}<span class="badge badge-warning">Not Yet Graded</span>{% endif %}
+          {% if grade %}<span class="badge badge-success">Graded: {{ grade.letter_grade }} ({{ grade.overall_score }}/100)</span>
+          {% else %}<span class="badge badge-warning">Not Yet Graded</span>{% endif %}
           <span class="badge badge-info">{{ entries.count }} Log Entries</span>
+          {% if not student.user.is_active %}<span class="badge badge-danger">Suspended</span>{% endif %}
         </div>
       </div>
       <div class="profile-actions">
-        <a href="{% url 'grading:grade_student' student.pk %}" class="btn btn-primary">{% if grade %}Update Grade{% else %}Grade Student{% endif %}</a>
+        <a href="{% url 'grading:grade_student' student.pk %}" class="btn btn-primary">
+          {% if grade %}Update Grade{% else %}Grade Student{% endif %}
+        </a>
+        {% if student.user.is_active %}
+        <a href="{% url 'accounts:suspend_student' student.user.pk %}"
+           class="btn btn-danger-outline"
+           onclick="return confirm('Suspend {{ student.full_name }}? They will receive an email notification.')">
+          Suspend Student
+        </a>
+        {% else %}
+        <a href="{% url 'accounts:reactivate_student' student.user.pk %}"
+           class="btn btn-success"
+           onclick="return confirm('Reinstate {{ student.full_name }}? They will receive an email notification.')">
+          Reinstate Student
+        </a>
+        {% endif %}
         <a href="{% url 'grading:student_list' %}" class="btn btn-outline">← Back</a>
       </div>
     </div>
   </div>
 </div>
+
 <div class="profile-panels mt-4">
   <div class="card">
     <div class="card-header"><h3 class="card-title">Internship Details</h3></div>
@@ -36,6 +54,7 @@
       </div>
     </div>
   </div>
+
   {% if grade %}
   <div class="card grade-card">
     <div class="card-header"><h3 class="card-title">Grade Record</h3></div>
@@ -52,11 +71,14 @@
   </div>
   {% endif %}
 </div>
+
 <div class="card mt-4">
   <div class="card-header"><h3 class="card-title">Full Logbook ({{ entries.count }} entries)</h3></div>
   <div class="card-body p-0">
     <table class="data-table">
-      <thead><tr><th>Date</th><th>Work Title</th><th>Month</th><th>Week</th><th>Day</th><th>Photo</th></tr></thead>
+      <thead>
+        <tr><th>Date</th><th>Work Title</th><th>Month</th><th>Week</th><th>Day</th><th>Photo</th><th></th></tr>
+      </thead>
       <tbody>
         {% for entry in entries %}
         <tr>
@@ -66,9 +88,12 @@
           <td>{{ entry.internship_week }}</td>
           <td>{{ entry.day_of_week }}</td>
           <td>{% if entry.technical_photo %}<span class="badge badge-info">Yes</span>{% else %}—{% endif %}</td>
+          <td>
+            <a href="{% url 'grading:entry_detail' student.pk entry.pk %}" class="btn btn-xs btn-outline">View Entry</a>
+          </td>
         </tr>
         {% empty %}
-        <tr><td colspan="6" class="empty-cell">No log entries yet.</td></tr>
+        <tr><td colspan="7" class="empty-cell">No log entries yet.</td></tr>
         {% endfor %}
       </tbody>
     </table>

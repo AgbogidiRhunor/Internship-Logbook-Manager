@@ -155,8 +155,7 @@ def department_delete(request, pk):
     return render(request, 'institutions/confirm_delete.html', {'obj': dept, 'type': 'Department'})
 
 
-# AJAX — authenticated, integer-validated, rate limited
-@login_required
+# AJAX — public (needed for registration forms), integer-validated, rate limited
 @ratelimit(key='ip', rate='60/m', method='GET', block=True)
 def get_faculties(request):
     raw_id = request.GET.get('university_id', '')
@@ -172,7 +171,6 @@ def get_faculties(request):
     return JsonResponse({'faculties': list(faculties)})
 
 
-@login_required
 @ratelimit(key='ip', rate='60/m', method='GET', block=True)
 def get_departments(request):
     raw_id = request.GET.get('faculty_id', '')
