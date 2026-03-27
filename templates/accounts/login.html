@@ -2,7 +2,7 @@
 {% block title %}Sign In — SIWES Logbook{% endblock %}
 {% block auth_content %}
 <div class="auth-left">
-  <div class="auth-bg-image auth-bg-login"></div> 
+  <div class="auth-bg-image auth-bg-login"></div>
   <div class="auth-left-content">
     <div class="auth-left-brand">
       <div class="auth-left-logo">SL</div>
@@ -36,25 +36,24 @@
       <div class="form-error-banner">{{ form.non_field_errors.0 }}</div>
       {% endif %}
       <div class="form-group">
-        <label for="{{ form.username.id_for_label }}">Username</label>
+        <label>Username</label>
         {{ form.username }}
         {% if form.username.errors %}<span class="field-error">{{ form.username.errors.0 }}</span>{% endif %}
       </div>
       <div class="form-group">
-        <label for="{{ form.password.id_for_label }}">Password</label>
+        <label>Password</label>
         {{ form.password }}
         {% if form.password.errors %}<span class="field-error">{{ form.password.errors.0 }}</span>{% endif %}
       </div>
       <div class="form-row-between">
-        <label class="checkbox-label" for="id_remember_me">
-          <input type="checkbox" name="remember_me" id="id_remember_me"> Remember me
-        </label>
+        <label class="checkbox-label"><input type="checkbox" name="remember_me"> Remember me</label>
       </div>
       <button type="submit" class="btn btn-primary btn-full">Sign In</button>
     </form>
     <div class="auth-links">
       <p>New student? <a href="{% url 'accounts:student_register' %}">Create account</a></p>
       <p>Are you a lecturer? <a href="{% url 'accounts:lecturer_register' %}">Register here</a></p>
+      <p>School Coordinator? <a href="{% url 'accounts:coordinator_register' %}">Register here</a></p>
     </div>
   </div>
 </div>

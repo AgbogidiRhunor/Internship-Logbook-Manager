@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Institution Management — SIWES{% endblock %}
+{% block page_title %}Institution Management{% endblock %}
+{% block content %}
+<div class="card-header-standalone">
+  <div class="page-header" style="margin:0">
+    <h2>{{ university.name }}</h2>
+    <p>Manage faculties and departments for your university</p>
+  </div>
+  <a href="{% url 'institutions:coordinator_faculty_create' %}" class="btn btn-primary">+ Add Faculty</a>
+</div>
+
+{% for faculty in faculties %}
+<div class="card mt-4">
+  <div class="card-header">
+    <div>
+      <h3 class="card-title">{{ faculty.name }}</h3>
+      <small class="text-muted">{{ faculty.departments.count }} department{{ faculty.departments.count|pluralize }}</small>
+    </div>
+    <div class="card-actions">
+      <a href="{% url 'institutions:coordinator_department_create' faculty.pk %}" class="btn btn-xs btn-teal">+ Department</a>
+      <a href="{% url 'institutions:coordinator_faculty_edit' faculty.pk %}" class="btn btn-xs btn-outline">Edit</a>
+      <a href="{% url 'institutions:coordinator_faculty_delete' faculty.pk %}" class="btn btn-xs btn-danger-outline"
+         onclick="return confirm('Delete {{ faculty.name }}? All departments will also be removed.')">Delete</a>
+    </div>
+  </div>
+  {% if faculty.departments.all %}
+  <div class="card-body p-0">
+    <table class="data-table data-table-compact">
+      <thead><tr><th>Department</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for dept in faculty.departments.all %}
+        <tr>
+          <td><strong>{{ dept.name }}</strong></td>
+          <td>{% if dept.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-warning">Inactive</span>{% endif %}</td>
+          <td class="actions-cell">
+            <a href="{% url 'institutions:coordinator_department_edit' dept.pk %}" class="btn btn-xs btn-outline">Edit</a>
+            <a href="{% url 'institutions:coordinator_department_delete' dept.pk %}" class="btn btn-xs btn-danger-outline"
+               onclick="return confirm('Delete {{ dept.name }}?')">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% empty %}
+<div class="empty-state card mt-4">
+  <div class="empty-state-icon">🏛️</div>
+  <p>No faculties added yet.</p>
+  <a href="{% url 'institutions:coordinator_faculty_create' %}" class="btn btn-primary">Add First Faculty</a>
+</div>
+{% endfor %}
+{% endblock %}

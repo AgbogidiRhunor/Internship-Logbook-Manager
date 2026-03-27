@@ -184,3 +184,121 @@ def get_departments(request):
         faculty_id=faculty_id, is_active=True
     ).values('id', 'name').order_by('name')
     return JsonResponse({'departments': list(departments)})
+
+
+# Coordinator: Faculty and Department management 
+
+def _coordinator_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated or not request.user.is_coordinator:
+            return HttpResponseForbidden('Access denied.')
+        if not request.user.coordinator_approved:
+            return HttpResponseForbidden('Your coordinator account is not yet approved.')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+@login_required
+@_coordinator_required
+@ratelimit(key='ip', rate='30/m', method='POST', block=True)
+def coordinator_faculty_create(request):
+    university = request.user.coordinator_profile.university
+    form = FacultyForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        faculty = form.save(commit=False)
+        faculty.university = university
+        faculty.save()
+        messages.success(request, f'Faculty "{faculty.name}" added.')
+        return redirect('institutions:coordinator_institution_view')
+    return render(request, 'institutions/faculty_form.html', {
+        'form': form, 'university': university, 'action': 'Add Faculty',
+    })
+
+
+@login_required
+@_coordinator_required
+@ratelimit(key='ip', rate='30/m', method='POST', block=True)
+def coordinator_faculty_edit(request, pk):
+    faculty = get_object_or_404(Faculty, pk=pk)
+    if faculty.university_id != request.user.coordinator_profile.university_id:
+        return HttpResponseForbidden('This faculty does not belong to your university.')
+    form = FacultyForm(request.POST or None, instance=faculty)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Faculty updated.')
+        return redirect('institutions:coordinator_institution_view')
+    return render(request, 'institutions/faculty_form.html', {
+        'form': form, 'university': faculty.university, 'action': 'Edit Faculty',
+    })
+
+
+@login_required
+@_coordinator_required
+def coordinator_faculty_delete(request, pk):
+    faculty = get_object_or_404(Faculty, pk=pk)
+    if faculty.university_id != request.user.coordinator_profile.university_id:
+        return HttpResponseForbidden('This faculty does not belong to your university.')
+    if request.method == 'POST':
+        faculty.delete()
+        messages.success(request, 'Faculty deleted.')
+        return redirect('institutions:coordinator_institution_view')
+    return render(request, 'institutions/confirm_delete.html', {'obj': faculty, 'type': 'Faculty'})
+
+
+@login_required
+@_coordinator_required
+@ratelimit(key='ip', rate='30/m', method='POST', block=True)
+def coordinator_department_create(request, faculty_id):
+    faculty = get_object_or_404(Faculty, pk=faculty_id)
+    if faculty.university_id != request.user.coordinator_profile.university_id:
+        return HttpResponseForbidden('This faculty does not belong to your university.')
+    form = DepartmentForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        dept = form.save(commit=False)
+        dept.faculty = faculty
+        dept.save()
+        messages.success(request, f'Department "{dept.name}" added.')
+        return redirect('institutions:coordinator_institution_view')
+    return render(request, 'institutions/department_form.html', {
+        'form': form, 'faculty': faculty, 'action': 'Add Department',
+    })
+
+
+@login_required
+@_coordinator_required
+@ratelimit(key='ip', rate='30/m', method='POST', block=True)
+def coordinator_department_edit(request, pk):
+    dept = get_object_or_404(Department, pk=pk)
+    if dept.faculty.university_id != request.user.coordinator_profile.university_id:
+        return HttpResponseForbidden('This department does not belong to your university.')
+    form = DepartmentForm(request.POST or None, instance=dept)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Department updated.')
+        return redirect('institutions:coordinator_institution_view')
+    return render(request, 'institutions/department_form.html', {
+        'form': form, 'faculty': dept.faculty, 'action': 'Edit Department',
+    })
+
+
+@login_required
+@_coordinator_required
+def coordinator_department_delete(request, pk):
+    dept = get_object_or_404(Department, pk=pk)
+    if dept.faculty.university_id != request.user.coordinator_profile.university_id:
+        return HttpResponseForbidden('This department does not belong to your university.')
+    if request.method == 'POST':
+        dept.delete()
+        messages.success(request, 'Department deleted.')
+        return redirect('institutions:coordinator_institution_view')
+    return render(request, 'institutions/confirm_delete.html', {'obj': dept, 'type': 'Department'})
+
+
+@login_required
+@_coordinator_required
+def coordinator_institution_view(request):
+    university = request.user.coordinator_profile.university
+    faculties = Faculty.objects.filter(university=university).prefetch_related('departments').order_by('name')
+    return render(request, 'institutions/coordinator_institution.html', {
+        'university': university, 'faculties': faculties,
+    })

@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Coordinator Dashboard — SIWES{% endblock %}
+{% block page_title %}Coordinator Dashboard{% endblock %}
+{% block content %}
+
+<!-- Header -->
+<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px">
+  <div>
+    <h1 style="font-size:24px;font-weight:800;color:var(--text-primary);letter-spacing:-0.5px;margin-bottom:4px">
+      {{ university.name }}
+    </h1>
+    <p style="font-size:14px;color:var(--text-muted)">
+      School Coordinator — {{ profile.full_name }} &nbsp;&bull;&nbsp; Week of {{ week_start|date:"d M Y" }}
+    </p>
+  </div>
+  {% if pending_lecturers_count %}
+  <a href="{% url 'accounts:coordinator_pending_lecturers' %}" class="btn btn-primary">
+    Review {{ pending_lecturers_count }} Pending Lecturer{{ pending_lecturers_count|pluralize }}
+  </a>
+  {% endif %}
+</div>
+
+<!-- Core Metrics -->
+<div class="stats-grid stats-grid-3" style="margin-bottom:24px">
+  <div class="stat-card stat-card-blue">
+    <div class="stat-icon"><svg viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM1 18v-1a7 7 0 0114 0v1"/></svg></div>
+    <div class="stat-label">Total Students</div>
+    <div class="stat-value">{{ total_students }}</div>
+    <div class="stat-sub">{{ active_count }} active</div>
+  </div>
+  <div class="stat-card stat-card-teal">
+    <div class="stat-icon"><svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7 7h6M7 10h6M7 13h4"/></svg></div>
+    <div class="stat-label">Logs This Week</div>
+    <div class="stat-value">{{ logs_week }}</div>
+    <div class="stat-sub">{{ logs_today }} today &bull; {{ logs_month }} this month</div>
+  </div>
+  <div class="stat-card {% if compliance_pct >= 70 %}stat-card-green{% elif compliance_pct >= 40 %}stat-card-amber{% else %}stat-card-danger{% endif %}">
+    <div class="stat-icon"><svg viewBox="0 0 20 20"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+    <div class="stat-label">Submission Compliance</div>
+    <div class="stat-value">{{ compliance_pct }}%</div>
+    <div class="stat-sub">{{ submitted_this_week }} of {{ active_count }} submitted this week</div>
+  </div>
+</div>
+
+<!-- Compliance bar -->
+<div class="card" style="margin-bottom:24px">
+  <div class="card-header">
+    <h2 class="card-title">Weekly Submission Compliance</h2>
+    <span style="font-size:13px;color:var(--text-muted)">{{ submitted_this_week }}/{{ active_count }} students submitted this week</span>
+  </div>
+  <div class="card-body">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="flex:1">
+        <div class="progress-track">
+          <div class="progress-fill" style="width:{{ compliance_pct }}%;background:{% if compliance_pct >= 70 %}var(--success){% elif compliance_pct >= 40 %}var(--warning){% else %}var(--danger){% endif %}"></div>
+        </div>
+      </div>
+      <div style="font-size:22px;font-weight:800;color:{% if compliance_pct >= 70 %}var(--success){% elif compliance_pct >= 40 %}var(--warning){% else %}var(--danger){% endif %};min-width:52px;text-align:right">{{ compliance_pct }}%</div>
+    </div>
+    <div style="display:flex;gap:24px;margin-top:14px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted)">
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--success);display:inline-block"></span>
+        70%+ Good
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted)">
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--warning);display:inline-block"></span>
+        40-69% Needs attention
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted)">
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--danger);display:inline-block"></span>
+        Below 40% Critical
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Best / Worst Faculty -->
+{% if best_faculty or worst_faculty %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px">
+  {% if best_faculty %}
+  <div class="card" style="border-left:4px solid var(--success)">
+    <div class="card-header">
+      <h3 class="card-title" style="color:var(--success)">🏆 Best Performing Faculty</h3>
+    </div>
+    <div class="card-body">
+      <div style="font-size:20px;font-weight:800;color:var(--text-primary);margin-bottom:4px">{{ best_faculty.faculty.name }}</div>
+      <div style="font-size:32px;font-weight:900;color:var(--success);line-height:1">{{ best_faculty.compliance_pct }}%</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-top:6px">
+        {{ best_faculty.submitted_this_week }}/{{ best_faculty.student_count }} students submitted &bull;
+        Avg {{ best_faculty.avg_logs_per_student }} logs/student
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% if worst_faculty %}
+  <div class="card" style="border-left:4px solid var(--danger)">
+    <div class="card-header">
+      <h3 class="card-title" style="color:var(--danger)">⚠️ Needs Attention</h3>
+    </div>
+    <div class="card-body">
+      <div style="font-size:20px;font-weight:800;color:var(--text-primary);margin-bottom:4px">{{ worst_faculty.faculty.name }}</div>
+      <div style="font-size:32px;font-weight:900;color:var(--danger);line-height:1">{{ worst_faculty.compliance_pct }}%</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-top:6px">
+        {{ worst_faculty.submitted_this_week }}/{{ worst_faculty.student_count }} students submitted &bull;
+        Avg {{ worst_faculty.avg_logs_per_student }} logs/student
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- Faculty-Level Analytics -->
+<div class="card" style="margin-bottom:24px">
+  <div class="card-header">
+    <h2 class="card-title">Faculty-Level Analytics</h2>
+    <span style="font-size:12px;color:var(--text-muted)">Sorted by compliance rate</span>
+  </div>
+  <div class="card-body p-0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Faculty</th>
+          <th>Students</th>
+          <th>Submitted This Week</th>
+          <th>Avg Logs / Student</th>
+          <th>Compliance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for stat in faculty_stats %}
+        <tr>
+          <td><strong>{{ stat.faculty.name }}</strong></td>
+          <td>{{ stat.student_count }}</td>
+          <td>{{ stat.submitted_this_week }}</td>
+          <td>{{ stat.avg_logs_per_student }}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="flex:1;height:6px;background:var(--border);border-radius:4px;min-width:80px">
+                <div style="height:100%;border-radius:4px;width:{{ stat.compliance_pct }}%;background:{% if stat.compliance_pct >= 70 %}var(--success){% elif stat.compliance_pct >= 40 %}var(--warning){% else %}var(--danger){% endif %}"></div>
+              </div>
+              <span style="font-size:13px;font-weight:700;color:{% if stat.compliance_pct >= 70 %}var(--success){% elif stat.compliance_pct >= 40 %}var(--warning){% else %}var(--danger){% endif %};min-width:36px">{{ stat.compliance_pct }}%</span>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="empty-cell">No faculty data available.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Department Breakdown -->
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Department Breakdown</h2>
+    <span style="font-size:12px;color:var(--text-muted)">Submission rate per department this week</span>
+  </div>
+  <div class="card-body p-0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Department</th>
+          <th>Faculty</th>
+          <th>Students</th>
+          <th>Submitted</th>
+          <th>Compliance Rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for stat in dept_stats %}
+        <tr>
+          <td><strong>{{ stat.department.name }}</strong></td>
+          <td style="color:var(--text-muted)">{{ stat.faculty_name }}</td>
+          <td>{{ stat.student_count }}</td>
+          <td>{{ stat.submitted_this_week }}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="flex:1;height:6px;background:var(--border);border-radius:4px;min-width:80px">
+                <div style="height:100%;border-radius:4px;width:{{ stat.compliance_pct }}%;background:{% if stat.compliance_pct >= 70 %}var(--success){% elif stat.compliance_pct >= 40 %}var(--warning){% else %}var(--danger){% endif %}"></div>
+              </div>
+              <span style="font-size:13px;font-weight:700;color:{% if stat.compliance_pct >= 70 %}var(--success){% elif stat.compliance_pct >= 40 %}var(--warning){% else %}var(--danger){% endif %};min-width:36px">{{ stat.compliance_pct }}%</span>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="empty-cell">No department data available.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,22 +1,10 @@
-"""
-accounts/templatetags/role_tags.py
-Custom template tags and filters for role-based template logic.
-
-Usage:
-  {% load role_tags %}
-  {% if request.user|is_student %}...{% endif %}
-  {% if request.user|is_lecturer %}...{% endif %}
-  {% if request.user|is_admin %}...{% endif %}
-  {{ score|letter_grade }}
-  {{ days|progress_bar:total }}
-"""
 from django import template
 from django.utils.html import format_html
 
 register = template.Library()
 
 
-# ── Role filters ──────────────────────────────────────────────────
+# Role filters 
 
 @register.filter(name='is_student')
 def is_student(user):
@@ -38,7 +26,7 @@ def can_access(user):
     return getattr(user, 'can_access', False)
 
 
-# ── Grade display ─────────────────────────────────────────────────
+# Grade display
 
 @register.filter(name='letter_grade')
 def letter_grade(score):
@@ -65,7 +53,7 @@ def grade_css_class(letter):
     return mapping.get(str(letter).upper(), '')
 
 
-# ── Progress ──────────────────────────────────────────────────────
+# Progress 
 
 @register.simple_tag
 def progress_percentage(logged, total):
@@ -77,7 +65,7 @@ def progress_percentage(logged, total):
         return 0
 
 
-# ── Formatting ────────────────────────────────────────────────────
+# Formatting 
 
 @register.filter(name='matric_display')
 def matric_display(matric_number):

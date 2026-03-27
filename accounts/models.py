@@ -6,6 +6,7 @@ from django.utils import timezone
 class UserRole(models.TextChoices):
     STUDENT = 'STUDENT', 'Student'
     LECTURER = 'LECTURER', 'Lecturer'
+    COORDINATOR = 'COORDINATOR', 'School Coordinator'
     ADMIN = 'ADMIN', 'Admin'
 
 
@@ -25,6 +26,7 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_active', True)
         extra_fields.setdefault('role', UserRole.ADMIN)
         extra_fields.setdefault('lecturer_approved', True)
+        extra_fields.setdefault('coordinator_approved', True)
         return self.create_user(username, password, **extra_fields)
 
 
@@ -32,7 +34,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=80, unique=True, db_index=True)
     email = models.EmailField(max_length=254, blank=True, db_index=True)
     role = models.CharField(
-        max_length=10,
+        max_length=15,
         choices=UserRole.choices,
         default=UserRole.STUDENT,
         db_index=True,
@@ -41,6 +43,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     lecturer_approved = models.BooleanField(default=False)
+    coordinator_approved = models.BooleanField(default=False)
     failed_login_count = models.PositiveSmallIntegerField(default=0)
     locked_until = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
@@ -66,6 +69,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.role == UserRole.LECTURER
 
     @property
+    def is_coordinator(self):
+        return self.role == UserRole.COORDINATOR
+
+    @property
     def is_admin(self):
         return self.role == UserRole.ADMIN
 
@@ -73,6 +80,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def can_access(self):
         if self.is_lecturer:
             return self.lecturer_approved and self.is_active
+        if self.is_coordinator:
+            return self.coordinator_approved and self.is_active
         return self.is_active
 
     @property
@@ -98,6 +107,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             return f'{self.student_profile.surname} {self.student_profile.other_names}'
         if self.is_lecturer and hasattr(self, 'lecturer_profile'):
             return f'{self.lecturer_profile.surname} {self.lecturer_profile.other_names}'
+        if self.is_coordinator and hasattr(self, 'coordinator_profile'):
+            return f'{self.coordinator_profile.surname} {self.coordinator_profile.other_names}'
         return self.username
 
     def get_short_name(self):
@@ -111,27 +122,19 @@ class StudentProfile(models.Model):
         SIX_MONTHS = '6', '6 Months'
 
     user = models.OneToOneField(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='student_profile',
+        CustomUser, on_delete=models.CASCADE, related_name='student_profile',
     )
     surname = models.CharField(max_length=100)
     other_names = models.CharField(max_length=150)
     matric_number = models.CharField(max_length=30, unique=True, db_index=True)
     university = models.ForeignKey(
-        'institutions.University',
-        on_delete=models.PROTECT,
-        related_name='students',
+        'institutions.University', on_delete=models.PROTECT, related_name='students',
     )
     faculty = models.ForeignKey(
-        'institutions.Faculty',
-        on_delete=models.PROTECT,
-        related_name='students',
+        'institutions.Faculty', on_delete=models.PROTECT, related_name='students',
     )
     department = models.ForeignKey(
-        'institutions.Department',
-        on_delete=models.PROTECT,
-        related_name='students',
+        'institutions.Department', on_delete=models.PROTECT, related_name='students',
     )
     year_of_study = models.PositiveSmallIntegerField()
     company_name = models.CharField(max_length=200)
@@ -181,29 +184,39 @@ class StudentProfile(models.Model):
     def is_graded(self):
         return hasattr(self, 'grade_record') and self.grade_record is not None
 
+    @property
+    def last_log_date(self):
+        entry = self.user.log_entries.order_by('-entry_date').first()
+        return entry.entry_date if entry else None
+
+    @property
+    def is_inactive(self):
+        if not self.last_log_date:
+            return True
+        return (timezone.now().date() - self.last_log_date).days >= 3
+
+    @property
+    def has_duplicate_logs(self):
+        from django.db.models import Count
+        return self.user.log_entries.values('entry_date').annotate(
+            c=Count('id')
+        ).filter(c__gt=1).exists()
+
 
 class LecturerProfile(models.Model):
     user = models.OneToOneField(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='lecturer_profile',
+        CustomUser, on_delete=models.CASCADE, related_name='lecturer_profile',
     )
     surname = models.CharField(max_length=100)
     other_names = models.CharField(max_length=150)
     university = models.ForeignKey(
-        'institutions.University',
-        on_delete=models.PROTECT,
-        related_name='lecturers',
+        'institutions.University', on_delete=models.PROTECT, related_name='lecturers',
     )
     faculty = models.ForeignKey(
-        'institutions.Faculty',
-        on_delete=models.PROTECT,
-        related_name='lecturers',
+        'institutions.Faculty', on_delete=models.PROTECT, related_name='lecturers',
     )
     department = models.ForeignKey(
-        'institutions.Department',
-        on_delete=models.PROTECT,
-        related_name='lecturers',
+        'institutions.Department', on_delete=models.PROTECT, related_name='lecturers',
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -230,12 +243,33 @@ class LecturerProfile(models.Model):
         ).select_related('user', 'university', 'faculty', 'department')
 
 
+class CoordinatorProfile(models.Model):
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE, related_name='coordinator_profile',
+    )
+    surname = models.CharField(max_length=100)
+    other_names = models.CharField(max_length=150)
+    university = models.ForeignKey(
+        'institutions.University', on_delete=models.PROTECT, related_name='coordinators',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'School Coordinator Profile'
+        verbose_name_plural = 'School Coordinator Profiles'
+
+    def __str__(self):
+        return f'{self.surname} {self.other_names} — {self.university}'
+
+    @property
+    def full_name(self):
+        return f'{self.surname} {self.other_names}'
+
+
 class AuditLog(models.Model):
     actor = models.ForeignKey(
-        CustomUser,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='audit_logs',
+        CustomUser, on_delete=models.SET_NULL, null=True, related_name='audit_logs',
     )
     action = models.CharField(max_length=200, db_index=True)
     target_model = models.CharField(max_length=100, blank=True)

@@ -17,4 +17,12 @@ urlpatterns = [
     # AJAX
     path('ajax/faculties/', views.get_faculties, name='ajax_faculties'),
     path('ajax/departments/', views.get_departments, name='ajax_departments'),
+    # Coordinator institution management
+    path('coordinator/', views.coordinator_institution_view, name='coordinator_institution_view'),
+    path('coordinator/faculty/add/', views.coordinator_faculty_create, name='coordinator_faculty_create'),
+    path('coordinator/faculty/<int:pk>/edit/', views.coordinator_faculty_edit, name='coordinator_faculty_edit'),
+    path('coordinator/faculty/<int:pk>/delete/', views.coordinator_faculty_delete, name='coordinator_faculty_delete'),
+    path('coordinator/faculty/<int:faculty_id>/department/add/', views.coordinator_department_create, name='coordinator_department_create'),
+    path('coordinator/department/<int:pk>/edit/', views.coordinator_department_edit, name='coordinator_department_edit'),
+    path('coordinator/department/<int:pk>/delete/', views.coordinator_department_delete, name='coordinator_department_delete'),
 ]

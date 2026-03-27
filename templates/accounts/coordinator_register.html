@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}School Coordinator Registration — SIWES Logbook{% endblock %}
+{% block auth_content %}
+<div class="auth-left">
+  <div class="auth-bg-image auth-bg-lecturer"></div>
+  <div class="auth-left-content">
+    <div class="auth-left-brand">
+      <div class="auth-left-logo">SL</div>
+      <div class="auth-left-brand-text">
+        <span class="auth-left-brand-name">SIWES Logbook</span>
+        <span class="auth-left-brand-sub">Industrial Training Management</span>
+      </div>
+    </div>
+    <div class="auth-left-hero">
+      <h1>Manage Your <span>University</span></h1>
+      <p>Register as a School Coordinator to oversee lecturers, manage faculties and departments, and monitor university-wide SIWES compliance.</p>
+    </div>
+    <div class="auth-left-features">
+      <div class="auth-feature"><div class="auth-feature-icon">✅</div>Approve lecturer registrations</div>
+      <div class="auth-feature"><div class="auth-feature-icon">📊</div>University-wide analytics</div>
+      <div class="auth-feature"><div class="auth-feature-icon">🏛️</div>Manage faculties and departments</div>
+      <div class="auth-feature"><div class="auth-feature-icon">🔐</div>Account reviewed by admin before activation</div>
+    </div>
+  </div>
+</div>
+<div class="auth-right">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo-mark">SL</div>
+      <h1 class="auth-title">Coordinator Registration</h1>
+      <p class="auth-subtitle">Your account will be reviewed by admin before activation</p>
+    </div>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+      <div class="form-error-banner">{% for e in form.non_field_errors %}{{ e }}<br>{% endfor %}</div>
+      {% endif %}
+      <div class="form-section-title">Personal Information</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Surname *</label>{{ form.surname }}
+          {% if form.surname.errors %}<span class="field-error">{{ form.surname.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="form-group">
+          <label>Other Names *</label>{{ form.other_names }}
+          {% if form.other_names.errors %}<span class="field-error">{{ form.other_names.errors.0 }}</span>{% endif %}
+        </div>
+      </div>
+      <div class="form-group">
+        <label>University *</label>{{ form.university }}
+        {% if form.university.errors %}<span class="field-error">{{ form.university.errors.0 }}</span>{% endif %}
+      </div>
+      <div class="form-section-title">Account Credentials</div>
+      <div class="form-group">
+        <label>Email Address *</label>{{ form.email }}
+        {% if form.email.errors %}<span class="field-error">{{ form.email.errors.0 }}</span>{% endif %}
+        <small class="field-hint">You will be notified here when your account is reviewed.</small>
+      </div>
+      <div class="form-group">
+        <label>Username *</label>{{ form.username }}
+        {% if form.username.errors %}<span class="field-error">{{ form.username.errors.0 }}</span>{% endif %}
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Password *</label>{{ form.password }}
+          {% if form.password.errors %}<span class="field-error">{{ form.password.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="form-group">
+          <label>Confirm Password *</label>{{ form.password_confirm }}
+          {% if form.password_confirm.errors %}<span class="field-error">{{ form.password_confirm.errors.0 }}</span>{% endif %}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Submit Registration</button>
+    </form>
+    <div class="auth-links">
+      <p>Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
