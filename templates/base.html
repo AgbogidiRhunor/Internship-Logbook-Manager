@@ -40,6 +40,9 @@
           <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l3 3"/></svg>Pending Lecturers
           {% if pending_lecturers_count %}<span class="badge-pill">{{ pending_lecturers_count }}</span>{% endif %}
         </a>
+        <a href="{% url 'institutions:coordinator_lecturer_list' %}" class="nav-link">
+        <svg viewBox="0 0 20 20"><path d="M12 14l9-5-9-5-9 5 9 5z"/></svg>Lecturers
+        </a>
         <a href="{% url 'institutions:coordinator_institution_view' %}" class="nav-link">
           <svg viewBox="0 0 20 20"><path d="M3 9l7-7 7 7v9H3V9z"/><path d="M8 18V13h4v5"/></svg>Institutions
         </a>
