@@ -37,7 +37,7 @@ def _coordinator_required(view_func):
     return wrapper
 
 
-# ── Admin: University CRUD ────────────────────────────────────────
+# Admin: University CRUD 
 
 @login_required
 @_admin_required
@@ -182,7 +182,7 @@ def department_delete(request, pk):
     })
 
 
-# ── AJAX cascade (public — used in registration forms) ────────────
+# AJAX cascade (public — used in registration forms) 
 
 @ratelimit(key='ip', rate='60/m', method='GET', block=True)
 def get_faculties(request):
@@ -214,7 +214,7 @@ def get_departments(request):
     return JsonResponse({'departments': list(departments)})
 
 
-# ── Coordinator: Institution management ──────────────────────────
+# Coordinator: Institution management 
 
 @login_required
 @_coordinator_required
@@ -334,7 +334,7 @@ def coordinator_department_delete(request, pk):
     })
 
 
-# ── Coordinator: Lecturer management ─────────────────────────────
+# Coordinator: Lecturer management 
 
 @login_required
 @_coordinator_required

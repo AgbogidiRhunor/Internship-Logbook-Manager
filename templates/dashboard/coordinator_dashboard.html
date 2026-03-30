@@ -1,55 +1,50 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Coordinator Dashboard — SIWES{% endblock %}
 {% block page_title %}Coordinator Dashboard{% endblock %}
 {% block content %}
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-
 <style>
   .dash-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px}
   .dash-title{font-size:24px;font-weight:800;color:var(--text-primary);letter-spacing:-0.5px;margin:0 0 4px}
-  .dash-sub{font-size:13px;color:var(--text-muted)}
+  .dash-sub{font-size:13px;color:var(--text-muted);margin:0}
   .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
   @media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr}}
   @media(max-width:560px){.kpi-grid{grid-template-columns:1fr}}
-  .kpi{background:var(--bg-card);border-radius:var(--radius-xl);padding:24px;border:1px solid var(--border);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
+  .kpi{background:var(--bg-card);border-radius:var(--radius-xl);padding:24px 22px;border:1px solid var(--border);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
   .kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
-  .kpi-accent{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--radius-xl) var(--radius-xl) 0 0}
+  .kpi-accent{position:absolute;top:0;left:0;right:0;height:4px}
+  .kpi-icon{position:absolute;top:18px;right:18px;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
   .kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px}
   .kpi-value{font-size:36px;font-weight:900;letter-spacing:-1px;color:var(--text-primary);line-height:1;margin-bottom:4px}
   .kpi-sub{font-size:12px;color:var(--text-muted)}
-  .kpi-icon{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
   .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
   @media(max-width:800px){.charts-row{grid-template-columns:1fr}}
-  .chart-card{background:var(--bg-card);border-radius:var(--radius-xl);border:1px solid var(--border);overflow:hidden}
-  .chart-card-header{padding:18px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-  .chart-card-title{font-size:14px;font-weight:700;color:var(--text-primary)}
-  .chart-card-sub{font-size:11px;color:var(--text-muted)}
-  .chart-card-body{padding:16px 20px 20px}
-  .chart-wrap{position:relative}
+  .chart-card{background:var(--bg-card);border-radius:var(--radius-xl);border:1px solid var(--border);overflow:hidden;margin-bottom:0}
+  .chart-card-header{padding:16px 20px 12px;border-bottom:1px solid var(--border)}
+  .chart-card-title{font-size:14px;font-weight:700;color:var(--text-primary);margin:0 0 2px}
+  .chart-card-sub{font-size:11px;color:var(--text-muted);margin:0}
+  .chart-card-body{padding:18px 20px 20px}
   .highlight-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
   @media(max-width:700px){.highlight-row{grid-template-columns:1fr}}
-  .highlight-card{background:var(--bg-card);border-radius:var(--radius-xl);border:1px solid var(--border);padding:22px;position:relative;overflow:hidden}
-  .highlight-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:4px 10px;border-radius:20px;margin-bottom:12px}
-  .highlight-name{font-size:18px;font-weight:800;color:var(--text-primary);margin-bottom:4px}
-  .highlight-pct{font-size:42px;font-weight:900;line-height:1;margin-bottom:8px}
-  .highlight-meta{font-size:12px;color:var(--text-muted)}
+  .highlight-card{background:var(--bg-card);border-radius:var(--radius-xl);border:1px solid var(--border);padding:22px}
+  .highlight-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:20px;margin-bottom:12px}
+  .highlight-name{font-size:17px;font-weight:800;color:var(--text-primary);margin-bottom:4px}
+  .highlight-pct{font-size:44px;font-weight:900;line-height:1;margin-bottom:8px}
+  .highlight-meta{font-size:12px;color:var(--text-muted);line-height:1.6}
   .dept-table{width:100%;border-collapse:collapse}
-  .dept-table th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);padding:10px 16px;text-align:left;border-bottom:1px solid var(--border)}
+  .dept-table th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);padding:10px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
   .dept-table td{padding:12px 16px;font-size:13px;color:var(--text-primary);border-bottom:1px solid var(--border)}
-  .dept-table tr:last-child td{border-bottom:none}
-  .dept-table tr:hover td{background:var(--bg)}
-  .bar-cell{min-width:120px}
-  .bar-track{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
-  .bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
-  .pct-pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;min-width:38px;text-align:center}
-  .compliance-gauge{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0}
-  .gauge-number{font-size:56px;font-weight:900;letter-spacing:-2px;line-height:1}
-  .gauge-label{font-size:13px;color:var(--text-muted);margin-top:4px}
-  .gauge-detail{font-size:12px;color:var(--text-muted);margin-top:8px;text-align:center}
+  .dept-table tbody tr:last-child td{border-bottom:none}
+  .dept-table tbody tr:hover td{background:var(--bg)}
+  .bar-track{height:8px;background:var(--border);border-radius:4px;overflow:hidden;flex:1;min-width:80px}
+  .bar-fill{height:100%;border-radius:4px}
+  .pct-pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;min-width:36px;text-align:center}
+  .donut-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .donut-legend-item{display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:7px}
+  .donut-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 </style>
 
-<!-- Header -->
 <div class="dash-header">
   <div>
     <h1 class="dash-title">{{ university.name }}</h1>
@@ -62,7 +57,6 @@
   {% endif %}
 </div>
 
-<!-- KPI Cards -->
 <div class="kpi-grid">
   <div class="kpi">
     <div class="kpi-accent" style="background:linear-gradient(90deg,#3b82f6,#6366f1)"></div>
@@ -87,63 +81,52 @@
   </div>
 </div>
 
-<!-- Charts Row 1: Compliance Gauge + Faculty Bar Chart -->
 <div class="charts-row">
-
-  <!-- Compliance Donut + detail -->
   <div class="chart-card">
     <div class="chart-card-header">
-      <div>
-        <div class="chart-card-title">Weekly Compliance Overview</div>
-        <div class="chart-card-sub">Submitted vs not submitted this week</div>
-      </div>
+      <p class="chart-card-title">Weekly Submission Overview</p>
+      <p class="chart-card-sub">Submitted vs not submitted this week</p>
     </div>
-    <div class="chart-card-body" style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
-      <div class="chart-wrap" style="width:180px;height:180px;flex-shrink:0;margin:0 auto">
-        <canvas id="complianceChart"></canvas>
-      </div>
-      <div style="flex:1;min-width:120px">
-        <div class="compliance-gauge">
-          <div class="gauge-number" style="color:{% if compliance_pct >= 70 %}#16a34a{% elif compliance_pct >= 40 %}#d97706{% else %}#dc2626{% endif %}">{{ compliance_pct }}%</div>
-          <div class="gauge-label">Compliance Rate</div>
-          <div class="gauge-detail">
-            <span style="color:#16a34a;font-weight:700">{{ submitted_this_week }} submitted</span><br>
-            <span style="color:#ef4444;font-weight:700">{{ active_count|add:"-"|add:submitted_this_week }} did not submit</span>
+    <div class="chart-card-body">
+      <div class="donut-row">
+        <canvas id="cDonut" style="width:160px;height:160px;flex-shrink:0"></canvas>
+        <div>
+          <div class="donut-legend-item">
+            <div class="donut-legend-dot" style="background:#22c55e"></div>
+            <div><strong style="color:var(--text-primary)">{{ submitted_this_week }}</strong> <span style="color:var(--text-muted)">submitted</span></div>
+          </div>
+          <div class="donut-legend-item">
+            <div class="donut-legend-dot" style="background:#fca5a5"></div>
+            <div><strong id="notSubLabel" style="color:var(--text-primary)">—</strong> <span style="color:var(--text-muted)">did not submit</span></div>
+          </div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+            <div style="font-size:30px;font-weight:900;line-height:1;color:{% if compliance_pct >= 70 %}#16a34a{% elif compliance_pct >= 40 %}#d97706{% else %}#dc2626{% endif %}">{{ compliance_pct }}%</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">compliance rate</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Faculty Compliance Bar Chart -->
   <div class="chart-card">
     <div class="chart-card-header">
-      <div>
-        <div class="chart-card-title">Faculty Compliance Rates</div>
-        <div class="chart-card-sub">% of students who submitted this week</div>
-      </div>
+      <p class="chart-card-title">Faculty Compliance Rates</p>
+      <p class="chart-card-sub">% of students who submitted this week</p>
     </div>
     <div class="chart-card-body">
-      <div class="chart-wrap" style="height:180px">
-        <canvas id="facultyChart"></canvas>
-      </div>
+      <canvas id="cFacultyBar" style="width:100%;height:180px;display:block"></canvas>
     </div>
   </div>
-
 </div>
 
-<!-- Best / Worst highlight cards -->
 {% if best_faculty or worst_faculty %}
 <div class="highlight-row">
   {% if best_faculty %}
   <div class="highlight-card" style="border-left:4px solid #22c55e">
-    <div class="highlight-badge" style="background:#f0fdf4;color:#16a34a">🏆 Best Performing</div>
+    <div class="highlight-badge" style="background:#f0fdf4;color:#16a34a">🏆 Best Performing Faculty</div>
     <div class="highlight-name">{{ best_faculty.faculty.name }}</div>
     <div class="highlight-pct" style="color:#16a34a">{{ best_faculty.compliance_pct }}%</div>
-    <div class="highlight-meta">
-      {{ best_faculty.submitted_this_week }}/{{ best_faculty.student_count }} students submitted &nbsp;·&nbsp;
-      Avg {{ best_faculty.avg_logs_per_student }} logs/student
-    </div>
+    <div class="highlight-meta">{{ best_faculty.submitted_this_week }}/{{ best_faculty.student_count }} students submitted<br>Avg {{ best_faculty.avg_logs_per_student }} logs per student</div>
   </div>
   {% endif %}
   {% if worst_faculty %}
@@ -151,121 +134,53 @@
     <div class="highlight-badge" style="background:#fef2f2;color:#dc2626">⚠️ Needs Attention</div>
     <div class="highlight-name">{{ worst_faculty.faculty.name }}</div>
     <div class="highlight-pct" style="color:#ef4444">{{ worst_faculty.compliance_pct }}%</div>
-    <div class="highlight-meta">
-      {{ worst_faculty.submitted_this_week }}/{{ worst_faculty.student_count }} students submitted &nbsp;·&nbsp;
-      Avg {{ worst_faculty.avg_logs_per_student }} logs/student
-    </div>
+    <div class="highlight-meta">{{ worst_faculty.submitted_this_week }}/{{ worst_faculty.student_count }} students submitted<br>Avg {{ worst_faculty.avg_logs_per_student }} logs per student</div>
   </div>
   {% endif %}
 </div>
 {% endif %}
 
-<!-- Charts Row 2: Log trend + Dept pie -->
 <div class="charts-row">
-
-  <!-- Log volume — today / week / month grouped bar -->
   <div class="chart-card">
     <div class="chart-card-header">
-      <div>
-        <div class="chart-card-title">Log Volume</div>
-        <div class="chart-card-sub">Today · This week · This month</div>
-      </div>
+      <p class="chart-card-title">Log Volume</p>
+      <p class="chart-card-sub">Today · This week · This month</p>
     </div>
     <div class="chart-card-body">
-      <div class="chart-wrap" style="height:180px">
-        <canvas id="logVolumeChart"></canvas>
-      </div>
+      <canvas id="cLogVolume" style="width:100%;height:180px;display:block"></canvas>
     </div>
   </div>
 
-  <!-- Student distribution pie -->
   <div class="chart-card">
     <div class="chart-card-header">
-      <div>
-        <div class="chart-card-title">Student Distribution by Faculty</div>
-        <div class="chart-card-sub">Number of students per faculty</div>
-      </div>
+      <p class="chart-card-title">Students by Faculty</p>
+      <p class="chart-card-sub">Distribution of enrolled students</p>
     </div>
-    <div class="chart-card-body" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-      <div class="chart-wrap" style="width:160px;height:160px;flex-shrink:0;margin:0 auto">
-        <canvas id="studentDistChart"></canvas>
-      </div>
-      <div style="flex:1;min-width:100px">
-        {% for stat in faculty_stats %}
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px">
-          <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;background:hsl({{ forloop.counter0|add:"0" }}00,65%,55%)"></div>
-          <span style="flex:1;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ stat.faculty.name }}</span>
-          <strong style="color:var(--text-primary)">{{ stat.student_count }}</strong>
+    <div class="chart-card-body">
+      <div class="donut-row">
+        <canvas id="cStudentPie" style="width:140px;height:140px;flex-shrink:0"></canvas>
+        <div style="flex:1;min-width:0">
+          {% for stat in faculty_stats %}
+          <div class="donut-legend-item">
+            <div class="donut-legend-dot" id="pieDot{{ forloop.counter0 }}"></div>
+            <span style="flex:1;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ stat.faculty.name }}</span>
+            <strong style="color:var(--text-primary);margin-left:6px">{{ stat.student_count }}</strong>
+          </div>
+          {% endfor %}
         </div>
-        {% endfor %}
       </div>
     </div>
   </div>
-
 </div>
 
-<!-- Department Breakdown Table -->
 <div class="chart-card" style="margin-bottom:24px">
   <div class="chart-card-header">
-    <div>
-      <div class="chart-card-title">Department Breakdown</div>
-      <div class="chart-card-sub">Submission compliance per department this week</div>
-    </div>
+    <p class="chart-card-title">Faculty-Level Analytics</p>
+    <p class="chart-card-sub">Sorted by compliance — highest first</p>
   </div>
   <div style="overflow-x:auto">
     <table class="dept-table">
-      <thead>
-        <tr>
-          <th>Department</th>
-          <th>Faculty</th>
-          <th>Students</th>
-          <th>Submitted</th>
-          <th style="min-width:200px">Compliance Rate</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for stat in dept_stats %}
-        <tr>
-          <td><strong>{{ stat.department.name }}</strong></td>
-          <td style="color:var(--text-muted)">{{ stat.faculty_name }}</td>
-          <td>{{ stat.student_count }}</td>
-          <td>{{ stat.submitted_this_week }}</td>
-          <td class="bar-cell">
-            <div style="display:flex;align-items:center;gap:10px">
-              <div class="bar-track" style="flex:1">
-                <div class="bar-fill" style="width:{{ stat.compliance_pct }}%;background:{% if stat.compliance_pct >= 70 %}#22c55e{% elif stat.compliance_pct >= 40 %}#f59e0b{% else %}#ef4444{% endif %}"></div>
-              </div>
-              <span class="pct-pill" style="background:{% if stat.compliance_pct >= 70 %}#f0fdf4;color:#16a34a{% elif stat.compliance_pct >= 40 %}#fffbeb;color:#d97706{% else %}#fef2f2;color:#dc2626{% endif %}">{{ stat.compliance_pct }}%</span>
-            </div>
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="5" class="empty-cell" style="padding:32px;text-align:center;color:var(--text-muted)">No department data available.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- Faculty-level full table -->
-<div class="chart-card">
-  <div class="chart-card-header">
-    <div>
-      <div class="chart-card-title">Faculty-Level Analytics</div>
-      <div class="chart-card-sub">Sorted by compliance rate — highest first</div>
-    </div>
-  </div>
-  <div style="overflow-x:auto">
-    <table class="dept-table">
-      <thead>
-        <tr>
-          <th>Faculty</th>
-          <th>Students</th>
-          <th>Submitted This Week</th>
-          <th>Avg Logs / Student</th>
-          <th style="min-width:200px">Compliance</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Faculty</th><th>Students</th><th>Submitted</th><th>Avg Logs</th><th>Compliance</th></tr></thead>
       <tbody>
         {% for stat in faculty_stats %}
         <tr>
@@ -273,153 +188,82 @@
           <td>{{ stat.student_count }}</td>
           <td>{{ stat.submitted_this_week }}</td>
           <td>{{ stat.avg_logs_per_student }}</td>
-          <td class="bar-cell">
+          <td>
             <div style="display:flex;align-items:center;gap:10px">
-              <div class="bar-track" style="flex:1">
-                <div class="bar-fill" style="width:{{ stat.compliance_pct }}%;background:{% if stat.compliance_pct >= 70 %}#22c55e{% elif stat.compliance_pct >= 40 %}#f59e0b{% else %}#ef4444{% endif %}"></div>
-              </div>
-              <span class="pct-pill" style="background:{% if stat.compliance_pct >= 70 %}#f0fdf4;color:#16a34a{% elif stat.compliance_pct >= 40 %}#fffbeb;color:#d97706{% else %}#fef2f2;color:#dc2626{% endif %}">{{ stat.compliance_pct }}%</span>
+              <div class="bar-track"><div class="bar-fill" style="width:{{ stat.compliance_pct }}%;background:{% if stat.compliance_pct >= 70 %}#22c55e{% elif stat.compliance_pct >= 40 %}#f59e0b{% else %}#ef4444{% endif %}"></div></div>
+              <span class="pct-pill" style="{% if stat.compliance_pct >= 70 %}background:#f0fdf4;color:#16a34a{% elif stat.compliance_pct >= 40 %}background:#fffbeb;color:#d97706{% else %}background:#fef2f2;color:#dc2626{% endif %}">{{ stat.compliance_pct }}%</span>
             </div>
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="empty-cell" style="padding:32px;text-align:center;color:var(--text-muted)">No faculty data available.</td></tr>
+        <tr><td colspan="5" style="padding:32px;text-align:center;color:var(--text-muted)">No faculty data available.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
 
+<div class="chart-card">
+  <div class="chart-card-header">
+    <p class="chart-card-title">Department Breakdown</p>
+    <p class="chart-card-sub">Submission compliance per department this week</p>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="dept-table">
+      <thead><tr><th>Department</th><th>Faculty</th><th>Students</th><th>Submitted</th><th>Compliance</th></tr></thead>
+      <tbody>
+        {% for stat in dept_stats %}
+        <tr>
+          <td><strong>{{ stat.department.name }}</strong></td>
+          <td style="color:var(--text-muted)">{{ stat.faculty_name }}</td>
+          <td>{{ stat.student_count }}</td>
+          <td>{{ stat.submitted_this_week }}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="bar-track"><div class="bar-fill" style="width:{{ stat.compliance_pct }}%;background:{% if stat.compliance_pct >= 70 %}#22c55e{% elif stat.compliance_pct >= 40 %}#f59e0b{% else %}#ef4444{% endif %}"></div></div>
+              <span class="pct-pill" style="{% if stat.compliance_pct >= 70 %}background:#f0fdf4;color:#16a34a{% elif stat.compliance_pct >= 40 %}background:#fffbeb;color:#d97706{% else %}background:#fef2f2;color:#dc2626{% endif %}">{{ stat.compliance_pct }}%</span>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" style="padding:32px;text-align:center;color:var(--text-muted)">No department data available.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="{% static 'js/charts.js' %}"></script>
 <script>
-(function () {
-  // Detect dark/light from CSS variable
-  var bg = getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim() || '#fff';
-  var textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#6b7280';
-  var borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#e5e7eb';
+document.addEventListener('DOMContentLoaded', function () {
+  var C = window.SIWESCharts;
+  var submitted   = {{ submitted_this_week }};
+  var activeCount = {{ active_count }};
+  var notSub = Math.max(0, activeCount - submitted);
+  var el = document.getElementById('notSubLabel');
+  if (el) el.textContent = notSub;
 
-  Chart.defaults.font.family = "'Inter', 'Segoe UI', Arial, sans-serif";
-  Chart.defaults.font.size = 12;
+  C.drawDonut('cDonut', [
+    { label: 'Submitted',     value: submitted, color: '#22c55e' },
+    { label: 'Not Submitted', value: notSub,    color: '#fca5a5' },
+  ], { centerLabel: '{{ compliance_pct }}%', centerSub: 'compliance' });
 
-  var PALETTE = ['#3b82f6','#14b8a6','#8b5cf6','#f59e0b','#ef4444','#22c55e','#ec4899','#06b6d4','#a3e635','#f97316'];
+  C.drawHBar('cFacultyBar', [
+    {% for s in faculty_stats %}{ label: '{{ s.faculty.name|escapejs }}', value: {{ s.compliance_pct }}, color: C.complianceColor({{ s.compliance_pct }}) },{% endfor %}
+  ], { max: 100, unit: '%' });
 
-  // 1. Compliance donut
-  var submitted = {{ submitted_this_week }};
-  var notSubmitted = {{ active_count }} - submitted;
-  new Chart(document.getElementById('complianceChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Submitted', 'Not Submitted'],
-      datasets: [{
-        data: [submitted > 0 ? submitted : 0, notSubmitted > 0 ? notSubmitted : 0],
-        backgroundColor: ['#22c55e', '#fca5a5'],
-        borderColor: ['#16a34a', '#ef4444'],
-        borderWidth: 2,
-        hoverOffset: 6,
-      }]
-    },
-    options: {
-      cutout: '68%',
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) {
-              var total = {{ active_count }};
-              var pct = total > 0 ? Math.round(ctx.raw / total * 100) : 0;
-              return ctx.label + ': ' + ctx.raw + ' (' + pct + '%)';
-            }
-          }
-        }
-      },
-    }
+  C.drawVBar('cLogVolume', [
+    { label: 'Today',      value: {{ logs_today }},  color: '#6366f1' },
+    { label: 'This Week',  value: {{ logs_week }},   color: '#3b82f6' },
+    { label: 'This Month', value: {{ logs_month }},  color: '#14b8a6' },
+  ]);
+
+  var pieSegs = [{% for s in faculty_stats %}{ label: '{{ s.faculty.name|escapejs }}', value: {{ s.student_count }}, color: C.resolveColor({{ forloop.counter0 }}) },{% endfor %}];
+  C.drawPie('cStudentPie', pieSegs);
+  pieSegs.forEach(function (seg, i) {
+    var dot = document.getElementById('pieDot' + i);
+    if (dot) dot.style.background = seg.color;
   });
-
-  // 2. Faculty compliance horizontal bar
-  var facNames = [{% for s in faculty_stats %}"{{ s.faculty.name|truncatechars:20 }}",{% endfor %}];
-  var facPcts  = [{% for s in faculty_stats %}{{ s.compliance_pct }},{% endfor %}];
-  var facColors = facPcts.map(function(p) {
-    return p >= 70 ? '#22c55e' : p >= 40 ? '#f59e0b' : '#ef4444';
-  });
-  new Chart(document.getElementById('facultyChart'), {
-    type: 'bar',
-    data: {
-      labels: facNames,
-      datasets: [{
-        label: 'Compliance %',
-        data: facPcts,
-        backgroundColor: facColors,
-        borderRadius: 6,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          min: 0, max: 100,
-          grid: { color: borderColor },
-          ticks: { color: textColor, callback: function(v) { return v + '%'; } },
-        },
-        y: {
-          grid: { display: false },
-          ticks: { color: textColor },
-        }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: function(ctx) { return ctx.raw + '% compliance'; } } }
-      }
-    }
-  });
-
-  // 3. Log volume grouped bar
-  new Chart(document.getElementById('logVolumeChart'), {
-    type: 'bar',
-    data: {
-      labels: ['Today', 'This Week', 'This Month'],
-      datasets: [{
-        label: 'Log Entries',
-        data: [{{ logs_today }}, {{ logs_week }}, {{ logs_month }}],
-        backgroundColor: ['#6366f1','#3b82f6','#14b8a6'],
-        borderRadius: 8,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { grid: { display: false }, ticks: { color: textColor } },
-        y: { grid: { color: borderColor }, ticks: { color: textColor } }
-      },
-      plugins: { legend: { display: false } }
-    }
-  });
-
-  // 4. Student distribution pie
-  var distNames  = [{% for s in faculty_stats %}"{{ s.faculty.name|truncatechars:20 }}",{% endfor %}];
-  var distCounts = [{% for s in faculty_stats %}{{ s.student_count }},{% endfor %}];
-  new Chart(document.getElementById('studentDistChart'), {
-    type: 'pie',
-    data: {
-      labels: distNames,
-      datasets: [{
-        data: distCounts,
-        backgroundColor: PALETTE.slice(0, distNames.length),
-        borderWidth: 2,
-        borderColor: bg,
-        hoverOffset: 6,
-      }]
-    },
-    options: {
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + ctx.raw + ' students'; } } }
-      }
-    }
-  });
-})();
+});
 </script>
 {% endblock %}
