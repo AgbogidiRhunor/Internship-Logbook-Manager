@@ -1,0 +1,71 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}{{ entry.work_title }} — SIWES{% endblock %}
+{% block nav_logbook %}active{% endblock %}
+{% block breadcrumb %}
+<span class="navbar-breadcrumb-sep">›</span>
+<a href="{% url 'logbook:log_list' %}" class="navbar-breadcrumb-item">Log Entries</a>
+<span class="navbar-breadcrumb-sep">›</span>
+<span class="navbar-breadcrumb-item active truncate" style="max-width:200px">{{ entry.work_title }}</span>
+{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto animate-fadeUp">
+  <div class="page-header">
+    <div>
+      <div class="d-flex gap-2 mb-3 flex-wrap">
+        <span class="badge badge-neutral">Month {{ entry.internship_month }}</span>
+        <span class="badge badge-neutral">Week {{ entry.internship_week }}</span>
+        <span class="badge badge-info">{{ entry.day_of_week }}</span>
+      </div>
+      <h1 class="page-title">{{ entry.work_title }}</h1>
+      <p class="page-subtitle">{{ entry.entry_date|date:"l, d F Y" }}</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'logbook:log_edit' entry.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+      <a href="{% url 'logbook:log_list' %}" class="btn btn-ghost btn-sm">← Back</a>
+    </div>
+  </div>
+
+  <div class="card mb-5">
+    <div class="card-body">
+      <div class="mb-6">
+        <p class="label-xs text-tertiary mb-3">Activity Description</p>
+        <p class="text-sm text-primary" style="line-height:var(--leading-loose)">{{ entry.activity_description|linebreaksbr }}</p>
+      </div>
+      <div class="divider mb-6"></div>
+      <div class="mb-6">
+        <p class="label-xs text-tertiary mb-3">Tools Used</p>
+        <p class="text-sm text-primary" style="line-height:var(--leading-loose)">{{ entry.tools_used|linebreaksbr }}</p>
+      </div>
+      {% if entry.challenges_encountered %}
+      <div class="divider mb-6"></div>
+      <div class="mb-6">
+        <p class="label-xs text-tertiary mb-3">Challenges Encountered</p>
+        <p class="text-sm text-primary" style="line-height:var(--leading-loose)">{{ entry.challenges_encountered|linebreaksbr }}</p>
+      </div>
+      {% endif %}
+      {% if entry.lessons_learned %}
+      <div class="divider mb-6"></div>
+      <div class="mb-6">
+        <p class="label-xs text-tertiary mb-3">Lessons Learned</p>
+        <p class="text-sm text-primary" style="line-height:var(--leading-loose)">{{ entry.lessons_learned|linebreaksbr }}</p>
+      </div>
+      {% endif %}
+      {% if entry.technical_photo %}
+      <div class="divider mb-6"></div>
+      <div>
+        <p class="label-xs text-tertiary mb-3">Technical Photo</p>
+        <img src="{{ entry.technical_photo.url }}" alt="Technical photo" style="width:100%;border-radius:var(--radius-xl);border:1px solid var(--border)">
+      </div>
+      {% endif %}
+    </div>
+    <div class="card-footer d-flex justify-between items-center">
+      <p class="text-xs text-tertiary">Logged {{ entry.created_at|date:"d M Y H:i" }}</p>
+      <button class="btn btn-ghost btn-sm" style="color:var(--clr-danger-text)"
+        onclick="Modal.confirm({title:'Delete this entry?',message:'This log entry will be permanently deleted.',confirmText:'Delete',danger:true,onConfirm:function(){window.location='{% url 'logbook:log_delete' entry.pk %}'}})">
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}

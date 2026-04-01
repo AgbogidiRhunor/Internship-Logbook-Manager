@@ -61,7 +61,6 @@ def _in_scope(student, lecturer_user):
 @_lecturer_required
 def student_list(request):
     students = _get_lecturer_students(request.user)
-
     q = request.GET.get('q', '').strip()[:_MAX_SEARCH_LEN]
     if q:
         students = students.filter(
@@ -69,7 +68,6 @@ def student_list(request):
             Q(other_names__icontains=q) |
             Q(matric_number__icontains=q)
         )
-
     graded_filter = request.GET.get('graded', '')
     if graded_filter not in _ALLOWED_GRADED_FILTERS:
         graded_filter = ''
@@ -77,8 +75,7 @@ def student_list(request):
         students = students.filter(grade_record__isnull=False)
     elif graded_filter == 'no':
         students = students.filter(grade_record__isnull=True)
-
-    return render(request, 'grading/student_list.html', {
+    return render(request, 'pages/grading/student_list.html', {
         'students': students, 'q': q, 'graded_filter': graded_filter,
     })
 
@@ -93,7 +90,7 @@ def student_profile_view(request, student_id):
         return HttpResponseForbidden('This student is outside your scope.')
     entries = DailyLogEntry.objects.filter(student=student.user).order_by('-entry_date')
     grade = getattr(student, 'grade_record', None)
-    return render(request, 'grading/student_profile.html', {
+    return render(request, 'pages/grading/student_profile.html', {
         'student': student, 'entries': entries, 'grade': grade,
     })
 
@@ -101,13 +98,12 @@ def student_profile_view(request, student_id):
 @login_required
 @_lecturer_required
 def student_entry_detail(request, student_id, entry_id):
-    """Lecturer views the full content of a single log entry."""
     student = get_object_or_404(StudentProfile, pk=student_id)
     if not _in_scope(student, request.user):
         _log_audit(request.user, 'idor_attempt_view_entry', 'DailyLogEntry', entry_id, request=request)
         return HttpResponseForbidden('This student is outside your scope.')
     entry = get_object_or_404(DailyLogEntry, pk=entry_id, student=student.user)
-    return render(request, 'grading/entry_detail.html', {
+    return render(request, 'pages/grading/entry_detail.html', {
         'student': student, 'entry': entry,
     })
 
@@ -118,30 +114,23 @@ def student_entry_detail(request, student_id, entry_id):
 def grade_student(request, student_id):
     student = get_object_or_404(StudentProfile, pk=student_id)
     if not _in_scope(student, request.user):
-        logger.warning('IDOR: lecturer %s tried to grade student %s', request.user.username, student_id)
         _log_audit(request.user, 'idor_attempt_grade_student', 'StudentProfile', student_id, request=request)
         return HttpResponseForbidden('This student is outside your scope.')
-
     existing_grade = getattr(student, 'grade_record', None)
     form = GradeRecordForm(request.POST or None, instance=existing_grade)
-
     if request.method == 'POST' and form.is_valid():
         is_new_grade = existing_grade is None
         grade = form.save(commit=False)
         grade.student   = student
         grade.graded_by = request.user
         grade.save()
-        _log_audit(
-            request.user, 'grade_submitted', 'StudentProfile', student_id,
-            details=f'score={grade.overall_score} letter={grade.letter_grade}',
-            request=request,
-        )
+        _log_audit(request.user, 'grade_submitted', 'StudentProfile', student_id,
+                   details=f'score={grade.overall_score} letter={grade.letter_grade}', request=request)
         if is_new_grade:
             notify_student_graded(student)
         messages.success(request, f'{student.full_name} graded successfully.')
         return redirect('grading:student_profile', student_id=student_id)
-
-    return render(request, 'grading/grade_form.html', {
+    return render(request, 'pages/grading/grade_form.html', {
         'form': form, 'student': student, 'existing_grade': existing_grade,
     })
 

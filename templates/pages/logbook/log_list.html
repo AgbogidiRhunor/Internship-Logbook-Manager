@@ -1,0 +1,90 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}Log Entries — SIWES{% endblock %}
+{% block nav_logbook %}active{% endblock %}
+{% block breadcrumb %}
+<span class="navbar-breadcrumb-sep">›</span>
+<span class="navbar-breadcrumb-item active">Log Entries</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header animate-fadeUp">
+  <div>
+    <h1 class="page-title">Log Entries</h1>
+    <p class="page-subtitle">{{ profile.days_logged }} entries &mdash; {{ profile.progress_percentage }}% of internship logged</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'logbook:log_create' %}" class="btn btn-primary">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      New Entry
+    </a>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-6 animate-fadeUp delay-1">
+  <div class="card-body" style="padding:var(--space-4) var(--space-5)">
+    <form method="get" class="d-flex gap-3 flex-wrap items-center">
+      <div class="search-input" style="flex:1;min-width:220px">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--text-tertiary);flex-shrink:0"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search entries...">
+      </div>
+      <select name="month" class="form-control" style="width:auto;height:36px">
+        <option value="">All months</option>
+        {% for m in months_range %}<option value="{{ m }}" {% if filter_month == m|stringformat:"s" %}selected{% endif %}>Month {{ m }}</option>{% endfor %}
+      </select>
+      <select name="week" class="form-control" style="width:auto;height:36px">
+        <option value="">All weeks</option>
+        {% for w in weeks_range %}<option value="{{ w }}" {% if filter_week == w|stringformat:"s" %}selected{% endif %}>Week {{ w }}</option>{% endfor %}
+      </select>
+      <select name="day" class="form-control" style="width:auto;height:36px">
+        <option value="">All days</option>
+        {% for val, label in day_choices %}<option value="{{ val }}" {% if filter_day == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+      {% if filter_month or filter_week or filter_day or request.GET.q %}
+      <a href="{% url 'logbook:log_list' %}" class="btn btn-ghost btn-sm">Clear</a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+<!-- Entries -->
+<div class="animate-fadeUp delay-2">
+  {% if entries %}
+  <div class="d-grid grid-auto gap-4" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))">
+    {% for entry in entries %}
+    <div class="log-entry-card" onclick="window.location='{% url 'logbook:log_detail' entry.pk %}'" style="animation:fadeUp var(--duration-base) var(--ease-out) {{ forloop.counter0|add:'1' }}00ms both">
+      <div class="log-entry-meta">
+        <span class="badge badge-neutral">Month {{ entry.internship_month }}</span>
+        <span class="badge badge-neutral">Week {{ entry.internship_week }}</span>
+        <span class="badge badge-info">{{ entry.day_of_week }}</span>
+        {% if entry.technical_photo %}<span class="badge badge-success">📷 Photo</span>{% endif %}
+      </div>
+      <p class="log-entry-date">{{ entry.entry_date|date:"l, d F Y" }}</p>
+      <h3 class="log-entry-title">{{ entry.work_title }}</h3>
+      <p class="log-entry-desc">{{ entry.activity_description }}</p>
+      <div class="d-flex gap-2 mt-4" style="border-top:1px solid var(--border);padding-top:var(--space-3)">
+        <a href="{% url 'logbook:log_edit' entry.pk %}" class="btn btn-ghost btn-sm" onclick="event.stopPropagation()">Edit</a>
+        <button class="btn btn-ghost btn-sm" style="color:var(--clr-danger-text)"
+          onclick="event.stopPropagation();Modal.confirm({title:'Delete entry?',message:'This log entry will be permanently deleted.',confirmText:'Delete',danger:true,onConfirm:function(){window.location='{% url 'logbook:log_delete' entry.pk %}'}})">
+          Delete
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card">
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="4" width="24" height="24" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M11 16h10M11 21h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <p class="empty-state-title">No entries found</p>
+      <p class="empty-state-desc">{% if filter_month or filter_week or filter_day %}No entries match your filters.{% else %}Start by creating your first log entry.{% endif %}</p>
+      <a href="{% url 'logbook:log_create' %}" class="btn btn-primary">Create first entry</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

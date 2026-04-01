@@ -1,0 +1,123 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}Students — SIWES{% endblock %}
+{% block nav_students %}active{% endblock %}
+{% block breadcrumb %}
+<span class="navbar-breadcrumb-sep">›</span>
+<span class="navbar-breadcrumb-item active">My Students</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header animate-fadeUp">
+  <div>
+    <h1 class="page-title">My Students</h1>
+    <p class="page-subtitle">{{ students|length }} student{{ students|length|pluralize }} in your department</p>
+  </div>
+  <div class="page-actions">
+    <a href="{% url 'grading:export_csv' %}" class="btn btn-secondary btn-sm">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3.5 6l3 3 3-3M1 10h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      CSV
+    </a>
+    <a href="{% url 'grading:export_pdf' %}" class="btn btn-secondary btn-sm">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3.5 6l3 3 3-3M1 10h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      PDF
+    </a>
+  </div>
+</div>
+
+<!-- Filter bar -->
+<div class="card mb-5 animate-fadeUp delay-1">
+  <div class="card-body" style="padding:var(--space-4) var(--space-5)">
+    <form method="get" class="d-flex gap-3 flex-wrap items-center">
+      <div class="search-input" style="flex:1;min-width:240px">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--text-tertiary);flex-shrink:0"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="text" name="q" value="{{ q }}" placeholder="Search by name or matric number...">
+      </div>
+      <select name="graded" class="form-control" onchange="this.form.submit()" style="width:auto;height:36px">
+        <option value="">All students</option>
+        <option value="yes" {% if graded_filter == 'yes' %}selected{% endif %}>Graded only</option>
+        <option value="no"  {% if graded_filter == 'no'  %}selected{% endif %}>Pending grade</option>
+      </select>
+      <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+      {% if q or graded_filter %}<a href="{% url 'grading:student_list' %}" class="btn btn-ghost btn-sm">Clear</a>{% endif %}
+    </form>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="card animate-fadeUp delay-2">
+  <div class="table-wrapper" style="border:none;border-radius:0">
+    <table class="table" id="students-table">
+      <thead>
+        <tr>
+          <th class="sortable">Student</th>
+          <th class="sortable">Matric No.</th>
+          <th class="sortable">Company</th>
+          <th class="sortable">Logs</th>
+          <th>Grade</th>
+          <th>Account</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr>
+          <td>
+            <div class="d-flex items-center gap-3">
+              <div class="avatar avatar-sm" style="background:linear-gradient(135deg,{{ student.pk|stringformat:'s' }}0deg,hsl({{ forloop.counter0|add:'0' }}00deg,60%,55%),hsl({{ forloop.counter0|add:'1' }}00deg,60%,45%))">{{ student.full_name|slice:":2"|upper }}</div>
+              <div>
+                <a href="{% url 'grading:student_profile' student.pk %}" class="font-semi text-primary text-sm" style="text-decoration:none">{{ student.full_name }}</a>
+                <p class="text-xs text-tertiary mt-0" style="margin-top:1px">{{ student.department.name }}</p>
+              </div>
+            </div>
+          </td>
+          <td><code class="mono text-xs" style="background:var(--bg-tertiary);padding:2px 6px;border-radius:var(--radius-sm)">{{ student.matric_number }}</code></td>
+          <td class="truncate" style="max-width:160px">{{ student.company_name }}</td>
+          <td><span class="font-semi">{{ student.days_logged }}</span></td>
+          <td>
+            {% if student.is_graded %}
+            <span class="badge badge-success">{{ student.grade_record.letter_grade }} — {{ student.grade_record.overall_score }}</span>
+            {% else %}
+            <span class="badge badge-neutral">Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if student.user.is_active %}
+            <span class="badge badge-success"><span class="badge-dot" style="background:var(--clr-success)"></span>Active</span>
+            {% else %}
+            <span class="badge badge-danger"><span class="badge-dot" style="background:var(--clr-danger)"></span>Suspended</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="table-actions">
+              <a href="{% url 'grading:student_profile' student.pk %}" class="btn btn-ghost btn-sm">View</a>
+              <a href="{% url 'grading:grade_student' student.pk %}" class="btn btn-secondary btn-sm">Grade</a>
+              {% if student.user.is_active %}
+              <button class="btn btn-ghost btn-sm" style="color:var(--clr-danger-text)"
+                onclick="Modal.confirm({title:'Suspend student?',message:'{{ student.full_name }} will be notified by email.',confirmText:'Suspend',danger:true,onConfirm:function(){window.location='{% url 'accounts:suspend_student' student.user.pk %}'}})">
+                Suspend
+              </button>
+              {% else %}
+              <a href="{% url 'accounts:reactivate_student' student.user.pk %}" class="btn btn-ghost btn-sm" style="color:var(--clr-success-text)">Reinstate</a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="table-empty">
+          <div class="table-empty-icon"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="4" y="4" width="40" height="40" rx="8" stroke="currentColor" stroke-width="1.5" opacity="0.3"/><circle cx="18" cy="19" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M8 38c0-5.523 4.477-10 10-10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <p style="font-size:14px;font-weight:600;margin-top:12px;color:var(--text-primary)">No students found</p>
+          <p style="font-size:13px;color:var(--text-tertiary);margin-top:4px">{% if q %}Try a different search term.{% else %}No students assigned to your department yet.{% endif %}</p>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  new SIWESTable('#students-table');
+});
+</script>
+{% endblock %}

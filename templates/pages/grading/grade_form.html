@@ -1,0 +1,123 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}{% if existing_grade %}Update Grade{% else %}Grade Student{% endif %} — SIWES{% endblock %}
+{% block breadcrumb %}
+<span class="navbar-breadcrumb-sep">›</span>
+<a href="{% url 'grading:student_list' %}" class="navbar-breadcrumb-item">Students</a>
+<span class="navbar-breadcrumb-sep">›</span>
+<a href="{% url 'grading:student_profile' student.pk %}" class="navbar-breadcrumb-item">{{ student.full_name }}</a>
+<span class="navbar-breadcrumb-sep">›</span>
+<span class="navbar-breadcrumb-item active">Grade</span>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto animate-fadeUp">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{% if existing_grade %}Update Grade{% else %}Grade Student{% endif %}</h1>
+      <p class="page-subtitle">{{ student.full_name }} &bull; {{ student.matric_number }}</p>
+    </div>
+    <a href="{% url 'grading:student_profile' student.pk %}" class="btn btn-secondary btn-sm">← Cancel</a>
+  </div>
+
+  <!-- Student summary -->
+  <div class="card mb-6">
+    <div class="card-body">
+      <div class="d-flex items-center gap-4">
+        <div class="avatar avatar-lg">{{ student.full_name|slice:":2"|upper }}</div>
+        <div>
+          <p class="font-bold text-lg text-primary">{{ student.full_name }}</p>
+          <p class="text-sm text-secondary">{{ student.company_name }}</p>
+          <div class="d-flex gap-2 mt-2">
+            <span class="badge badge-neutral badge-sm">{{ student.days_logged }} logs</span>
+            <span class="badge badge-neutral badge-sm">{{ student.progress_percentage }}% progress</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grade form -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">{% if existing_grade %}Update{% else %}Issue{% endif %} Grade</h2>
+    </div>
+    <div class="card-body">
+      <form method="post" novalidate id="grade-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="mb-4" style="padding:12px 14px;background:var(--clr-danger-bg);border:1px solid var(--clr-danger);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--clr-danger-text)">
+          {{ form.non_field_errors.0 }}
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.overall_score.id_for_label }}">Overall Score (0–100) <span class="required">*</span></label>
+          {{ form.overall_score }}
+          <span class="form-hint">Letter grade is automatically calculated from the score.</span>
+          {% if form.overall_score.errors %}<span class="form-error">{{ form.overall_score.errors.0 }}</span>{% endif %}
+        </div>
+
+        <!-- Live grade preview -->
+        <div class="mb-5 p-4" style="background:var(--bg-secondary);border-radius:var(--radius-lg);border:1px solid var(--border)">
+          <p class="text-xs text-tertiary mb-2 font-semi" style="text-transform:uppercase;letter-spacing:0.05em">Grade Preview</p>
+          <div class="d-flex items-center gap-4">
+            <div class="grade-circle grade-A" id="preview-circle" style="width:48px;height:48px;font-size:var(--text-xl)">—</div>
+            <div id="preview-text">
+              <p class="font-bold text-primary" id="preview-grade">Enter score above</p>
+              <p class="text-xs text-tertiary" id="preview-range"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.lecturer_comment.id_for_label }}">Lecturer Comment <span class="required">*</span></label>
+          {{ form.lecturer_comment }}
+          {% if form.lecturer_comment.errors %}<span class="form-error">{{ form.lecturer_comment.errors.0 }}</span>{% endif %}
+        </div>
+
+        <div class="d-flex gap-3 justify-end mt-6">
+          <a href="{% url 'grading:student_profile' student.pk %}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary" data-loading-text="Saving grade...">
+            {% if existing_grade %}Update Grade{% else %}Issue Grade{% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const scoreInput = document.querySelector('[name="overall_score"]');
+  const circle    = document.getElementById('preview-circle');
+  const gradeEl   = document.getElementById('preview-grade');
+  const rangeEl   = document.getElementById('preview-range');
+  const grades    = [
+    { min:70, letter:'A', label:'Excellent', class:'grade-A' },
+    { min:60, letter:'B', label:'Good',      class:'grade-B' },
+    { min:50, letter:'C', label:'Average',   class:'grade-C' },
+    { min:45, letter:'D', label:'Below Average', class:'grade-D' },
+    { min:40, letter:'E', label:'Pass',      class:'grade-E' },
+    { min:0,  letter:'F', label:'Fail',      class:'grade-F' },
+  ];
+  function updatePreview() {
+    const score = parseInt(scoreInput.value);
+    if (isNaN(score)) {
+      circle.textContent = '—';
+      circle.className = 'grade-circle';
+      gradeEl.textContent = 'Enter a score (0–100)';
+      rangeEl.textContent = '';
+      return;
+    }
+    const g = grades.find(g => score >= g.min);
+    circle.textContent = g.letter;
+    circle.className = 'grade-circle ' + g.class;
+    gradeEl.textContent = g.letter + ' — ' + g.label + ' (' + score + '/100)';
+    rangeEl.textContent = (g.letter === 'A') ? '70 and above' : g.min + '–' + (grades[grades.indexOf(g)-1]?.min - 1 || 100);
+  }
+  scoreInput?.addEventListener('input', updatePreview);
+  updatePreview();
+});
+</script>
+{% endblock %}

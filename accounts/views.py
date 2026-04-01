@@ -15,7 +15,10 @@ except ImportError:
             return func
         return decorator
 
-from .forms import StudentRegistrationForm, LecturerRegistrationForm, CoordinatorRegistrationForm, SIWESLoginForm
+from .forms import (
+    StudentRegistrationForm, LecturerRegistrationForm,
+    CoordinatorRegistrationForm, SIWESLoginForm,
+)
 from .models import CustomUser, UserRole, AuditLog, CoordinatorProfile
 from .emails import (
     notify_lecturer_registration_pending,
@@ -63,7 +66,7 @@ def _require_coordinator(view_func):
         if not request.user.is_authenticated or not request.user.is_coordinator:
             return HttpResponseForbidden('Access denied.')
         if not request.user.coordinator_approved:
-            return render(request, 'accounts/awaiting_approval.html')
+            return render(request, 'pages/auth/awaiting_approval.html')
         return view_func(request, *args, **kwargs)
     return wrapper
 
@@ -88,7 +91,7 @@ def login_view(request):
                 remaining = int((candidate.locked_until - timezone.now()).total_seconds() // 60)
                 messages.error(request, f'Account locked. Try again in {remaining} minute(s).')
                 _log_audit(None, 'login_blocked_locked', details=f'ip={_get_ip(request)}', request=request)
-                return render(request, 'accounts/login.html', {'form': form})
+                return render(request, 'pages/auth/login.html', {'form': form})
         except CustomUser.DoesNotExist:
             candidate = None
 
@@ -96,10 +99,10 @@ def login_view(request):
             user = form.get_user()
             if user.is_lecturer and not user.lecturer_approved:
                 _log_audit(user, 'login_blocked_unapproved', request=request)
-                return render(request, 'accounts/awaiting_approval.html', {'user': user})
+                return render(request, 'pages/auth/awaiting_approval.html', {'user': user})
             if user.is_coordinator and not user.coordinator_approved:
                 _log_audit(user, 'login_blocked_coordinator_unapproved', request=request)
-                return render(request, 'accounts/awaiting_approval.html', {'user': user})
+                return render(request, 'pages/auth/awaiting_approval.html', {'user': user})
             if not user.is_active:
                 _log_audit(user, 'login_blocked_suspended', request=request)
                 messages.error(request, 'Your account has been suspended.')
@@ -118,7 +121,7 @@ def login_view(request):
                 if candidate.is_locked:
                     _log_audit(None, 'account_locked', 'CustomUser', candidate.pk, details=f'ip={ip}', request=request)
             _log_audit(None, 'login_failed', details=f'ip={ip}', request=request)
-    return render(request, 'accounts/login.html', {'form': form})
+    return render(request, 'pages/auth/login.html', {'form': form})
 
 
 def logout_view(request):
@@ -139,7 +142,7 @@ def student_register(request):
         _log_audit(user, 'student_registered', request=request)
         messages.success(request, 'Account created successfully. Welcome!')
         return redirect('dashboard:home')
-    return render(request, 'accounts/student_register.html', {'form': form})
+    return render(request, 'pages/auth/student_register.html', {'form': form})
 
 
 @ratelimit(key='ip', rate='5/m', method='POST', block=True)
@@ -154,7 +157,7 @@ def lecturer_register(request):
         notify_coordinator_new_lecturer(lecturer_user)
         messages.info(request, 'Registration submitted. Your School Coordinator will review your account.')
         return redirect('accounts:awaiting_approval')
-    return render(request, 'accounts/lecturer_register.html', {'form': form})
+    return render(request, 'pages/auth/lecturer_register.html', {'form': form})
 
 
 @ratelimit(key='ip', rate='5/m', method='POST', block=True)
@@ -169,11 +172,11 @@ def coordinator_register(request):
         notify_admins_new_coordinator(coordinator_user)
         messages.info(request, 'Registration submitted. An administrator will review your account.')
         return redirect('accounts:awaiting_approval')
-    return render(request, 'accounts/coordinator_register.html', {'form': form})
+    return render(request, 'pages/auth/coordinator_register.html', {'form': form})
 
 
 def awaiting_approval_view(request):
-    return render(request, 'accounts/awaiting_approval.html')
+    return render(request, 'pages/auth/awaiting_approval.html')
 
 
 # Admin: Coordinator management 
@@ -183,7 +186,7 @@ def pending_coordinators(request):
     pending = CustomUser.objects.filter(
         role=UserRole.COORDINATOR, coordinator_approved=False, is_active=True,
     ).select_related('coordinator_profile__university')
-    return render(request, 'accounts/pending_coordinators.html', {'pending': pending})
+    return render(request, 'pages/accounts/pending_coordinators.html', {'pending': pending})
 
 
 @login_required
@@ -216,8 +219,12 @@ def reject_coordinator(request, user_id):
 def pending_lecturers(request):
     pending = CustomUser.objects.filter(
         role=UserRole.LECTURER, lecturer_approved=False, is_active=True,
-    ).select_related('lecturer_profile__university', 'lecturer_profile__faculty', 'lecturer_profile__department')
-    return render(request, 'accounts/pending_lecturers.html', {'pending': pending})
+    ).select_related(
+        'lecturer_profile__university',
+        'lecturer_profile__faculty',
+        'lecturer_profile__department',
+    )
+    return render(request, 'pages/accounts/pending_lecturers.html', {'pending': pending})
 
 
 @login_required
@@ -275,14 +282,20 @@ def reactivate_lecturer(request, user_id):
 def admin_lecturer_list(request):
     q = request.GET.get('q', '').strip()[:100]
     lecturers = CustomUser.objects.filter(role=UserRole.LECTURER).select_related(
-        'lecturer_profile__university', 'lecturer_profile__faculty', 'lecturer_profile__department',
+        'lecturer_profile__university',
+        'lecturer_profile__faculty',
+        'lecturer_profile__department',
     ).order_by('username')
     if q:
         lecturers = lecturers.filter(
-            Q(username__icontains=q) | Q(lecturer_profile__surname__icontains=q) |
-            Q(lecturer_profile__other_names__icontains=q) | Q(email__icontains=q)
+            Q(username__icontains=q) |
+            Q(lecturer_profile__surname__icontains=q) |
+            Q(lecturer_profile__other_names__icontains=q) |
+            Q(email__icontains=q)
         )
-    return render(request, 'accounts/admin_lecturer_list.html', {'lecturers': lecturers, 'q': q})
+    return render(request, 'pages/accounts/admin_lecturer_list.html', {
+        'lecturers': lecturers, 'q': q,
+    })
 
 
 # Coordinator: Lecturer approval 
@@ -293,8 +306,12 @@ def coordinator_pending_lecturers(request):
     pending = CustomUser.objects.filter(
         role=UserRole.LECTURER, lecturer_approved=False, is_active=True,
         lecturer_profile__university=cp.university,
-    ).select_related('lecturer_profile__university', 'lecturer_profile__faculty', 'lecturer_profile__department')
-    return render(request, 'accounts/coordinator_pending_lecturers.html', {'pending': pending})
+    ).select_related(
+        'lecturer_profile__university',
+        'lecturer_profile__faculty',
+        'lecturer_profile__department',
+    )
+    return render(request, 'pages/accounts/coordinator_pending_lecturers.html', {'pending': pending})
 
 
 @login_required
@@ -329,14 +346,17 @@ def coordinator_reject_lecturer(request, user_id):
     return redirect('accounts:coordinator_pending_lecturers')
 
 
-# Lecturer: Student suspension 
+# ── Lecturer: Student suspension ──────────────────────────────────
+
 def _lecturer_can_manage_student(lecturer_user, student_user):
     try:
         lp = lecturer_user.lecturer_profile
         sp = student_user.student_profile
-        return (lp.university_id == sp.university_id and
-                lp.faculty_id == sp.faculty_id and
-                lp.department_id == sp.department_id)
+        return (
+            lp.university_id == sp.university_id and
+            lp.faculty_id    == sp.faculty_id and
+            lp.department_id == sp.department_id
+        )
     except Exception:
         return False
 

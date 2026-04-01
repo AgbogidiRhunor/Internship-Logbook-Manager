@@ -1,0 +1,87 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}{{ action }} Log Entry — SIWES{% endblock %}
+{% block breadcrumb %}
+<span class="navbar-breadcrumb-sep">›</span>
+<a href="{% url 'logbook:log_list' %}" class="navbar-breadcrumb-item">Log Entries</a>
+<span class="navbar-breadcrumb-sep">›</span>
+<span class="navbar-breadcrumb-item active">{{ action }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto animate-fadeUp">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ action }} Entry</h1>
+      <p class="page-subtitle">{% if action == 'Create' %}Record your daily internship activities{% else %}Update this log entry{% endif %}</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data" novalidate id="log-form">
+        {% csrf_token %}
+
+        <div class="form-section">
+          <p class="form-section-title">Entry Details</p>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.entry_date.id_for_label }}">Date <span class="required">*</span></label>
+            {{ form.entry_date }}
+            {% if form.entry_date.errors %}<span class="form-error">{{ form.entry_date.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.work_title.id_for_label }}">Work Title <span class="required">*</span></label>
+            {{ form.work_title }}
+            {% if form.work_title.errors %}<span class="form-error">{{ form.work_title.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-section">
+          <p class="form-section-title">Activity Details</p>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.activity_description.id_for_label }}">Activity Description <span class="required">*</span></label>
+            {{ form.activity_description }}
+            {% if form.activity_description.errors %}<span class="form-error">{{ form.activity_description.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.tools_used.id_for_label }}">Tools Used <span class="required">*</span></label>
+            {{ form.tools_used }}
+            {% if form.tools_used.errors %}<span class="form-error">{{ form.tools_used.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.challenges_encountered.id_for_label }}">Challenges Encountered</label>
+            {{ form.challenges_encountered }}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.lessons_learned.id_for_label }}">Lessons Learned</label>
+            {{ form.lessons_learned }}
+          </div>
+        </div>
+
+        <div class="form-section">
+          <p class="form-section-title">Technical Photo</p>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.technical_photo.id_for_label }}">Upload Photo</label>
+            {{ form.technical_photo }}
+            <span class="form-hint">JPEG, PNG, GIF or WebP. Max 5MB.</span>
+            {% if form.technical_photo.errors %}<span class="form-error">{{ form.technical_photo.errors.0 }}</span>{% endif %}
+          </div>
+          {% if entry.technical_photo %}
+          <div style="margin-top:var(--space-3)">
+            <img src="{{ entry.technical_photo.url }}" alt="Current photo" style="max-height:200px;border-radius:var(--radius-lg);border:1px solid var(--border)">
+            <p class="caption mt-2">Current photo — upload a new one to replace</p>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="d-flex gap-3 justify-end mt-6">
+          <a href="{% url 'logbook:log_list' %}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary" id="submit-btn" data-loading-text="Saving...">
+            {{ action }} Entry
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

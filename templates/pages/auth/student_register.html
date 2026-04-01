@@ -1,0 +1,161 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Student Registration — SIWES{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block body %}
+<div class="auth-layout">
+  <div class="auth-left">
+    <div class="auth-bg auth-bg-student"></div>
+    <div class="auth-overlay"></div>
+    <div class="auth-left-content">
+      <a class="auth-brand" href="/">
+        <div class="auth-brand-logo">SL</div>
+        <div>
+          <div class="auth-brand-name">SIWES Logbook</div>
+          <div class="auth-brand-sub">Industrial Training Management</div>
+        </div>
+      </a>
+      <div class="auth-hero">
+        <h1 class="auth-hero-title">Start Your<br><span>SIWES</span><br>Journey</h1>
+        <p class="auth-hero-desc">Create your account to begin logging your industrial training experience. Track your progress and receive your grade all in one place.</p>
+      </div>
+      <div class="auth-features">
+        <div class="auth-feature"><div class="auth-feature-icon">📝</div>Log daily internship activities</div>
+        <div class="auth-feature"><div class="auth-feature-icon">📊</div>Track progress in real time</div>
+        <div class="auth-feature"><div class="auth-feature-icon">📸</div>Upload technical photos with entries</div>
+        <div class="auth-feature"><div class="auth-feature-icon">🎓</div>Receive grades from your lecturer</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right" style="padding-top:var(--space-8);padding-bottom:var(--space-8)">
+    <div class="auth-card animate-fadeUp" style="max-width:460px">
+      <div class="auth-logo-mark">SL</div>
+      <h1 class="auth-title">Create Account</h1>
+      <p class="auth-subtitle">Fill in your details to register as a student.</p>
+
+      <form method="post" novalidate id="student-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="mb-4" style="padding:12px 14px;background:var(--clr-danger-bg);border:1px solid var(--clr-danger);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--clr-danger-text)">
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Personal info -->
+        <p class="form-section-title" style="margin-bottom:var(--space-4)">Personal Information</p>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="{{ form.surname.id_for_label }}">Surname <span class="required">*</span></label>
+            {{ form.surname }}
+            {% if form.surname.errors %}<span class="form-error">{{ form.surname.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.other_names.id_for_label }}">Other Names <span class="required">*</span></label>
+            {{ form.other_names }}
+            {% if form.other_names.errors %}<span class="form-error">{{ form.other_names.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="{{ form.matric_number.id_for_label }}">Matric Number <span class="required">*</span></label>
+            {{ form.matric_number }}
+            {% if form.matric_number.errors %}<span class="form-error">{{ form.matric_number.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.year_of_study.id_for_label }}">Year of Study <span class="required">*</span></label>
+            {{ form.year_of_study }}
+            {% if form.year_of_study.errors %}<span class="form-error">{{ form.year_of_study.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <!-- Institution -->
+        <p class="form-section-title" style="margin:var(--space-5) 0 var(--space-4);padding-top:var(--space-4);border-top:1px solid var(--border)">Institution</p>
+        <div class="form-group">
+          <label class="form-label" for="{{ form.university.id_for_label }}">University <span class="required">*</span></label>
+          {{ form.university }}
+          {% if form.university.errors %}<span class="form-error">{{ form.university.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="{{ form.faculty.id_for_label }}">Faculty <span class="required">*</span></label>
+            {{ form.faculty }}
+            {% if form.faculty.errors %}<span class="form-error">{{ form.faculty.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.department.id_for_label }}">Department <span class="required">*</span></label>
+            {{ form.department }}
+            {% if form.department.errors %}<span class="form-error">{{ form.department.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <!-- Internship -->
+        <p class="form-section-title" style="margin:var(--space-5) 0 var(--space-4);padding-top:var(--space-4);border-top:1px solid var(--border)">Internship Details</p>
+        <div class="form-group">
+          <label class="form-label" for="{{ form.company_name.id_for_label }}">Company Name <span class="required">*</span></label>
+          {{ form.company_name }}
+          {% if form.company_name.errors %}<span class="form-error">{{ form.company_name.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="{{ form.industrial_supervisor_name.id_for_label }}">Industrial Supervisor <span class="required">*</span></label>
+          {{ form.industrial_supervisor_name }}
+          {% if form.industrial_supervisor_name.errors %}<span class="form-error">{{ form.industrial_supervisor_name.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="{{ form.internship_duration.id_for_label }}">Duration <span class="required">*</span></label>
+          {{ form.internship_duration }}
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="{{ form.internship_start_date.id_for_label }}">Start Date <span class="required">*</span></label>
+            {{ form.internship_start_date }}
+            {% if form.internship_start_date.errors %}<span class="form-error">{{ form.internship_start_date.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.internship_end_date.id_for_label }}">End Date <span class="required">*</span></label>
+            {{ form.internship_end_date }}
+            {% if form.internship_end_date.errors %}<span class="form-error">{{ form.internship_end_date.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <!-- Account -->
+        <p class="form-section-title" style="margin:var(--space-5) 0 var(--space-4);padding-top:var(--space-4);border-top:1px solid var(--border)">Account Credentials</p>
+        <div class="form-group">
+          <label class="form-label" for="{{ form.email.id_for_label }}">Email Address <span class="required">*</span></label>
+          {{ form.email }}
+          {% if form.email.errors %}<span class="form-error">{{ form.email.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="{{ form.username.id_for_label }}">Username <span class="required">*</span></label>
+          {{ form.username }}
+          {% if form.username.errors %}<span class="form-error">{{ form.username.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="{{ form.password.id_for_label }}">Password <span class="required">*</span></label>
+            {{ form.password }}
+            {% if form.password.errors %}<span class="form-error">{{ form.password.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.password_confirm.id_for_label }}">Confirm Password <span class="required">*</span></label>
+            {{ form.password_confirm }}
+            {% if form.password_confirm.errors %}<span class="form-error">{{ form.password_confirm.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full btn-lg mt-2" data-loading-text="Creating account...">
+          Create Account
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="{% static 'js/core/app.js' %}"></script>
+<script src="{% static 'js/components/toast.js' %}"></script>
+<script src="{% static 'js/utils/helpers.js' %}"></script>
+<script src="{% static 'js/cascade_selects.js' %}"></script>
+{% endblock %}

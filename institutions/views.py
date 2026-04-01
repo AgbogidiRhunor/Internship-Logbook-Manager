@@ -37,13 +37,12 @@ def _coordinator_required(view_func):
     return wrapper
 
 
-# Admin: University CRUD 
-
+# Admin 
 @login_required
 @_admin_required
 def university_list(request):
     universities = University.objects.prefetch_related('faculties__departments').order_by('name')
-    return render(request, 'institutions/university_list.html', {'universities': universities})
+    return render(request, 'pages/institutions/university_list.html', {'universities': universities})
 
 
 @login_required
@@ -55,8 +54,9 @@ def university_create(request):
         form.save()
         messages.success(request, 'University added.')
         return redirect('institutions:university_list')
-    return render(request, 'institutions/university_form.html', {
-        'form': form, 'action': 'Add University', 'cancel_url': 'institutions:university_list',
+    return render(request, 'pages/institutions/form.html', {
+        'form': form, 'action': 'Add University',
+        'cancel_url': 'institutions:university_list',
     })
 
 
@@ -70,8 +70,9 @@ def university_edit(request, pk):
         form.save()
         messages.success(request, 'University updated.')
         return redirect('institutions:university_list')
-    return render(request, 'institutions/university_form.html', {
-        'form': form, 'action': 'Edit University', 'cancel_url': 'institutions:university_list',
+    return render(request, 'pages/institutions/form.html', {
+        'form': form, 'action': 'Edit University',
+        'cancel_url': 'institutions:university_list',
     })
 
 
@@ -83,8 +84,9 @@ def university_delete(request, pk):
         university.delete()
         messages.success(request, 'University deleted.')
         return redirect('institutions:university_list')
-    return render(request, 'institutions/confirm_delete.html', {
-        'obj': university, 'type': 'University', 'cancel_url': 'institutions:university_list',
+    return render(request, 'pages/institutions/confirm_delete.html', {
+        'obj': university, 'type': 'University',
+        'cancel_url': 'institutions:university_list',
     })
 
 
@@ -93,14 +95,14 @@ def university_delete(request, pk):
 @ratelimit(key='ip', rate='30/m', method='POST', block=True)
 def faculty_create(request, university_id):
     university = get_object_or_404(University, pk=university_id)
-    form = FacultyForm(request.POST or None, initial={'university': university})
+    form = FacultyForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         faculty = form.save(commit=False)
         faculty.university = university
         faculty.save()
         messages.success(request, f'Faculty added to {university.name}.')
         return redirect('institutions:university_list')
-    return render(request, 'institutions/faculty_form.html', {
+    return render(request, 'pages/institutions/form.html', {
         'form': form, 'university': university, 'action': 'Add Faculty',
         'cancel_url': 'institutions:university_list',
     })
@@ -116,7 +118,7 @@ def faculty_edit(request, pk):
         form.save()
         messages.success(request, 'Faculty updated.')
         return redirect('institutions:university_list')
-    return render(request, 'institutions/faculty_form.html', {
+    return render(request, 'pages/institutions/form.html', {
         'form': form, 'university': faculty.university, 'action': 'Edit Faculty',
         'cancel_url': 'institutions:university_list',
     })
@@ -130,8 +132,9 @@ def faculty_delete(request, pk):
         faculty.delete()
         messages.success(request, 'Faculty deleted.')
         return redirect('institutions:university_list')
-    return render(request, 'institutions/confirm_delete.html', {
-        'obj': faculty, 'type': 'Faculty', 'cancel_url': 'institutions:university_list',
+    return render(request, 'pages/institutions/confirm_delete.html', {
+        'obj': faculty, 'type': 'Faculty',
+        'cancel_url': 'institutions:university_list',
     })
 
 
@@ -140,14 +143,14 @@ def faculty_delete(request, pk):
 @ratelimit(key='ip', rate='30/m', method='POST', block=True)
 def department_create(request, faculty_id):
     faculty = get_object_or_404(Faculty, pk=faculty_id)
-    form = DepartmentForm(request.POST or None, initial={'faculty': faculty})
+    form = DepartmentForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         dept = form.save(commit=False)
         dept.faculty = faculty
         dept.save()
         messages.success(request, f'Department added to {faculty.name}.')
         return redirect('institutions:university_list')
-    return render(request, 'institutions/department_form.html', {
+    return render(request, 'pages/institutions/form.html', {
         'form': form, 'faculty': faculty, 'action': 'Add Department',
         'cancel_url': 'institutions:university_list',
     })
@@ -163,7 +166,7 @@ def department_edit(request, pk):
         form.save()
         messages.success(request, 'Department updated.')
         return redirect('institutions:university_list')
-    return render(request, 'institutions/department_form.html', {
+    return render(request, 'pages/institutions/form.html', {
         'form': form, 'faculty': dept.faculty, 'action': 'Edit Department',
         'cancel_url': 'institutions:university_list',
     })
@@ -177,18 +180,17 @@ def department_delete(request, pk):
         dept.delete()
         messages.success(request, 'Department deleted.')
         return redirect('institutions:university_list')
-    return render(request, 'institutions/confirm_delete.html', {
-        'obj': dept, 'type': 'Department', 'cancel_url': 'institutions:university_list',
+    return render(request, 'pages/institutions/confirm_delete.html', {
+        'obj': dept, 'type': 'Department',
+        'cancel_url': 'institutions:university_list',
     })
 
 
-# AJAX cascade (public — used in registration forms) 
-
+# AJAX 
 @ratelimit(key='ip', rate='60/m', method='GET', block=True)
 def get_faculties(request):
-    raw_id = request.GET.get('university_id', '')
     try:
-        university_id = int(raw_id)
+        university_id = int(request.GET.get('university_id', ''))
         if university_id <= 0:
             raise ValueError
     except (ValueError, TypeError):
@@ -201,9 +203,8 @@ def get_faculties(request):
 
 @ratelimit(key='ip', rate='60/m', method='GET', block=True)
 def get_departments(request):
-    raw_id = request.GET.get('faculty_id', '')
     try:
-        faculty_id = int(raw_id)
+        faculty_id = int(request.GET.get('faculty_id', ''))
         if faculty_id <= 0:
             raise ValueError
     except (ValueError, TypeError):
@@ -214,16 +215,15 @@ def get_departments(request):
     return JsonResponse({'departments': list(departments)})
 
 
-# Coordinator: Institution management 
-
+# Coordinator 
 @login_required
 @_coordinator_required
 def coordinator_institution_view(request):
     university = request.user.coordinator_profile.university
-    faculties = Faculty.objects.filter(
+    faculties  = Faculty.objects.filter(
         university=university
     ).prefetch_related('departments').order_by('name')
-    return render(request, 'institutions/coordinator_institution.html', {
+    return render(request, 'pages/institutions/coordinator_institution.html', {
         'university': university, 'faculties': faculties,
     })
 
@@ -240,7 +240,7 @@ def coordinator_faculty_create(request):
         faculty.save()
         messages.success(request, f'Faculty "{faculty.name}" added.')
         return redirect('institutions:coordinator_institution_view')
-    return render(request, 'institutions/faculty_form.html', {
+    return render(request, 'pages/institutions/form.html', {
         'form': form, 'university': university, 'action': 'Add Faculty',
         'cancel_url': 'institutions:coordinator_institution_view',
     })
@@ -258,7 +258,7 @@ def coordinator_faculty_edit(request, pk):
         form.save()
         messages.success(request, 'Faculty updated.')
         return redirect('institutions:coordinator_institution_view')
-    return render(request, 'institutions/faculty_form.html', {
+    return render(request, 'pages/institutions/form.html', {
         'form': form, 'university': faculty.university, 'action': 'Edit Faculty',
         'cancel_url': 'institutions:coordinator_institution_view',
     })
@@ -274,7 +274,7 @@ def coordinator_faculty_delete(request, pk):
         faculty.delete()
         messages.success(request, 'Faculty deleted.')
         return redirect('institutions:coordinator_institution_view')
-    return render(request, 'institutions/confirm_delete.html', {
+    return render(request, 'pages/institutions/confirm_delete.html', {
         'obj': faculty, 'type': 'Faculty',
         'cancel_url': 'institutions:coordinator_institution_view',
     })
@@ -294,7 +294,7 @@ def coordinator_department_create(request, faculty_id):
         dept.save()
         messages.success(request, f'Department "{dept.name}" added.')
         return redirect('institutions:coordinator_institution_view')
-    return render(request, 'institutions/department_form.html', {
+    return render(request, 'pages/institutions/form.html', {
         'form': form, 'faculty': faculty, 'action': 'Add Department',
         'cancel_url': 'institutions:coordinator_institution_view',
     })
@@ -312,7 +312,7 @@ def coordinator_department_edit(request, pk):
         form.save()
         messages.success(request, 'Department updated.')
         return redirect('institutions:coordinator_institution_view')
-    return render(request, 'institutions/department_form.html', {
+    return render(request, 'pages/institutions/form.html', {
         'form': form, 'faculty': dept.faculty, 'action': 'Edit Department',
         'cancel_url': 'institutions:coordinator_institution_view',
     })
@@ -328,19 +328,16 @@ def coordinator_department_delete(request, pk):
         dept.delete()
         messages.success(request, 'Department deleted.')
         return redirect('institutions:coordinator_institution_view')
-    return render(request, 'institutions/confirm_delete.html', {
+    return render(request, 'pages/institutions/confirm_delete.html', {
         'obj': dept, 'type': 'Department',
         'cancel_url': 'institutions:coordinator_institution_view',
     })
 
 
-# Coordinator: Lecturer management 
-
 @login_required
 @_coordinator_required
 def coordinator_lecturer_list(request):
     from accounts.models import CustomUser, UserRole
-    from accounts.emails import notify_lecturer_suspended, notify_lecturer_reactivated
     university = request.user.coordinator_profile.university
     q = request.GET.get('q', '').strip()[:100]
     lecturers = CustomUser.objects.filter(
@@ -357,7 +354,7 @@ def coordinator_lecturer_list(request):
             Q(lecturer_profile__other_names__icontains=q) |
             Q(email__icontains=q)
         )
-    return render(request, 'institutions/coordinator_lecturer_list.html', {
+    return render(request, 'pages/institutions/coordinator_lecturer_list.html', {
         'lecturers': lecturers, 'q': q, 'university': university,
     })
 

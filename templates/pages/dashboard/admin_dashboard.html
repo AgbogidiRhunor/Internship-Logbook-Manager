@@ -1,0 +1,133 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}Admin Dashboard — SIWES{% endblock %}
+{% block nav_adash %}active{% endblock %}
+{% block breadcrumb %}<span class="navbar-breadcrumb-sep">›</span><span class="navbar-breadcrumb-item active">Dashboard</span>{% endblock %}
+
+{% block content %}
+<div class="page-header animate-fadeUp">
+  <div>
+    <h1 class="page-title">Platform Overview</h1>
+    <p class="page-subtitle">System-wide analytics and administration</p>
+  </div>
+  <div class="page-actions">
+    {% if pending_coordinators or pending_approvals %}
+    <a href="{% url 'accounts:pending_coordinators' %}" class="btn btn-primary">
+      Review {{ pending_coordinators|add:pending_approvals }} Pending
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-grid animate-fadeUp delay-1">
+  <div class="stat-card">
+    <div class="stat-card-accent" style="background:linear-gradient(90deg,#3b82f6,#6366f1)"></div>
+    <div class="stat-card-icon" style="background:#eff6ff;color:#1d4ed8">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 18c0-3.314 2.686-6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="15" cy="13" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+    </div>
+    <div class="stat-card-label">Total Students</div>
+    <div class="stat-card-value">{{ total_students }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-accent" style="background:linear-gradient(90deg,#14b8a6,#0d9488)"></div>
+    <div class="stat-card-icon" style="background:#f0fdfa;color:#0f766e">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12 14l9-5-9-5-9 5 9 5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="stat-card-label">Active Lecturers</div>
+    <div class="stat-card-value">{{ total_lecturers }}</div>
+    <a href="{% url 'accounts:admin_lecturer_list' %}" class="stat-card-sub" style="color:var(--clr-brand);text-decoration:none;font-size:var(--text-xs)">Manage →</a>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-accent" style="background:linear-gradient(90deg,#8b5cf6,#7c3aed)"></div>
+    <div class="stat-card-icon" style="background:#f5f3ff;color:#7c3aed">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M9 12l2 2 4-4M7 4H5a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="stat-card-label">Coordinators</div>
+    <div class="stat-card-value">{{ total_coordinators }}</div>
+  </div>
+  <div class="stat-card {% if pending_coordinators %}border-danger{% endif %}">
+    <div class="stat-card-accent" style="background:{% if pending_coordinators %}linear-gradient(90deg,#ef4444,#dc2626){% else %}linear-gradient(90deg,#22c55e,#16a34a){% endif %}"></div>
+    <div class="stat-card-icon" style="background:{% if pending_coordinators %}var(--clr-danger-bg);color:var(--clr-danger-text){% else %}var(--clr-success-bg);color:var(--clr-success-text){% endif %}">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M10 6v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <div class="stat-card-label">Pending Coordinators</div>
+    <div class="stat-card-value">{{ pending_coordinators }}</div>
+    {% if pending_coordinators %}<a href="{% url 'accounts:pending_coordinators' %}" class="stat-card-sub" style="color:var(--clr-brand);text-decoration:none;font-size:var(--text-xs)">Review now →</a>{% endif %}
+  </div>
+  <div class="stat-card {% if pending_approvals %}border-warning{% endif %}">
+    <div class="stat-card-accent" style="background:{% if pending_approvals %}linear-gradient(90deg,#f59e0b,#d97706){% else %}linear-gradient(90deg,#22c55e,#16a34a){% endif %}"></div>
+    <div class="stat-card-icon" style="background:{% if pending_approvals %}var(--clr-warning-bg);color:var(--clr-warning-text){% else %}var(--clr-success-bg);color:var(--clr-success-text){% endif %}">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M10 6v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <div class="stat-card-label">Pending Lecturers</div>
+    <div class="stat-card-value">{{ pending_approvals }}</div>
+    {% if pending_approvals %}<a href="{% url 'accounts:pending_lecturers' %}" class="stat-card-sub" style="color:var(--clr-brand);text-decoration:none;font-size:var(--text-xs)">Review now →</a>{% endif %}
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-accent" style="background:linear-gradient(90deg,#f97316,#ea580c)"></div>
+    <div class="stat-card-icon" style="background:#fff7ed;color:#c2410c">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <div class="stat-card-label">Total Log Entries</div>
+    <div class="stat-card-value">{{ total_logs }}</div>
+  </div>
+</div>
+
+<!-- Quick actions + recent activity -->
+<div class="d-grid grid-2 gap-6 animate-fadeUp delay-2">
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Quick Actions</h2></div>
+    <div class="card-body" style="padding:var(--space-3)">
+      {% for item in quick_actions %}
+      <a href="{{ item.url }}" class="d-flex items-center gap-4 p-3 rounded-lg transition-fast" style="text-decoration:none;border-radius:var(--radius-lg)" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
+        <div style="width:36px;height:36px;border-radius:var(--radius-md);background:{{ item.bg }};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">{{ item.icon }}</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semi text-primary">{{ item.label }}</p>
+          <p class="text-xs text-tertiary">{{ item.desc }}</p>
+        </div>
+        {% if item.badge %}<span class="badge badge-{{ item.badge_type }} badge-sm">{{ item.badge }}</span>{% endif %}
+      </a>
+      {% empty %}
+      <a href="{% url 'accounts:pending_coordinators' %}" class="d-flex items-center gap-4 p-3 rounded-lg" style="text-decoration:none" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
+        <div style="width:36px;height:36px;border-radius:var(--radius-md);background:#f5f3ff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🎓</div>
+        <div><p class="text-sm font-semi text-primary">Review Coordinators</p><p class="text-xs text-tertiary">Approve or reject registrations</p></div>
+        {% if pending_coordinators %}<span class="badge badge-danger badge-sm">{{ pending_coordinators }}</span>{% endif %}
+      </a>
+      <a href="{% url 'accounts:pending_lecturers' %}" class="d-flex items-center gap-4 p-3 rounded-lg" style="text-decoration:none" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
+        <div style="width:36px;height:36px;border-radius:var(--radius-md);background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👨‍🏫</div>
+        <div><p class="text-sm font-semi text-primary">Review Lecturers</p><p class="text-xs text-tertiary">Approve or reject registrations</p></div>
+        {% if pending_approvals %}<span class="badge badge-warning badge-sm">{{ pending_approvals }}</span>{% endif %}
+      </a>
+      <a href="{% url 'accounts:admin_lecturer_list' %}" class="d-flex items-center gap-4 p-3 rounded-lg" style="text-decoration:none" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
+        <div style="width:36px;height:36px;border-radius:var(--radius-md);background:#e0f2fe;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📋</div>
+        <div><p class="text-sm font-semi text-primary">Manage Lecturers</p><p class="text-xs text-tertiary">View, suspend, or reinstate accounts</p></div>
+      </a>
+      <a href="{% url 'institutions:university_list' %}" class="d-flex items-center gap-4 p-3 rounded-lg" style="text-decoration:none" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
+        <div style="width:36px;height:36px;border-radius:var(--radius-md);background:#f0fdf4;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🏛️</div>
+        <div><p class="text-sm font-semi text-primary">Manage Institutions</p><p class="text-xs text-tertiary">Universities, faculties, departments</p></div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Recent Log Activity</h2></div>
+    <div class="card-body" style="padding:0">
+      {% for entry in recent_logs %}
+      <div class="d-flex items-start gap-3 p-4" style="border-bottom:1px solid var(--border)">
+        <div class="avatar avatar-sm">{{ entry.student.get_full_name|slice:":2"|upper }}</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semi text-primary truncate">{{ entry.work_title }}</p>
+          <p class="text-xs text-tertiary">{{ entry.student.get_full_name }} &bull; {{ entry.entry_date|date:"d M Y" }}</p>
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state" style="padding:var(--space-8) var(--space-6)">
+        <p class="text-sm text-secondary">No log entries yet.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

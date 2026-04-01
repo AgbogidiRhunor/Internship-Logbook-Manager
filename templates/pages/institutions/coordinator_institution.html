@@ -1,0 +1,45 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}Institution Management — SIWES{% endblock %}
+{% block breadcrumb %}<span class="navbar-breadcrumb-sep">›</span><span class="navbar-breadcrumb-item active">Institutions</span>{% endblock %}
+{% block content %}
+<div class="page-header animate-fadeUp">
+  <div><h1 class="page-title">{{ university.name }}</h1><p class="page-subtitle">Manage faculties and departments</p></div>
+  <a href="{% url 'institutions:coordinator_faculty_create' %}" class="btn btn-primary">+ Add Faculty</a>
+</div>
+{% for faculty in faculties %}
+<div class="card mb-5 animate-fadeUp" style="animation-delay:{{ forloop.counter0 }}00ms">
+  <div class="card-header">
+    <div class="d-flex items-center gap-3">
+      <div style="width:36px;height:36px;border-radius:var(--radius-md);background:var(--clr-brand-muted);display:flex;align-items:center;justify-content:center;color:var(--clr-brand);font-weight:700;font-size:13px;flex-shrink:0">{{ faculty.name|slice:":2"|upper }}</div>
+      <div>
+        <h2 class="card-title">{{ faculty.name }}</h2>
+        <p class="card-subtitle">{{ faculty.departments.count }} department{{ faculty.departments.count|pluralize }}</p>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'institutions:coordinator_department_create' faculty.pk %}" class="btn btn-ghost btn-sm">+ Dept</a>
+      <a href="{% url 'institutions:coordinator_faculty_edit' faculty.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+      <button class="btn btn-ghost btn-sm" style="color:var(--clr-danger-text)"
+        onclick="Modal.confirm({title:'Delete {{ faculty.name }}?',message:'All departments will be removed.',confirmText:'Delete',danger:true,onConfirm:function(){window.location='{% url 'institutions:coordinator_faculty_delete' faculty.pk %}'}})">Delete</button>
+    </div>
+  </div>
+  {% if faculty.departments.all %}
+  <div class="card-body d-flex flex-wrap gap-2">
+    {% for dept in faculty.departments.all %}
+    <div class="d-flex items-center gap-1" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-full);padding:4px 12px 4px 10px">
+      <span class="text-sm text-secondary">{{ dept.name }}</span>
+      <a href="{% url 'institutions:coordinator_department_edit' dept.pk %}" style="color:var(--text-tertiary);display:flex;align-items:center;margin-left:4px;text-decoration:none">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 9l7-7M8 9V1H1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card-body"><p class="text-sm text-tertiary">No departments yet. <a href="{% url 'institutions:coordinator_department_create' faculty.pk %}">Add one →</a></p></div>
+  {% endif %}
+</div>
+{% empty %}
+<div class="card"><div class="empty-state"><div class="empty-state-icon"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M4 12l12-10 12 10v16H4V12z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></div><p class="empty-state-title">No faculties yet</p><a href="{% url 'institutions:coordinator_faculty_create' %}" class="btn btn-primary">Add First Faculty</a></div></div>
+{% endfor %}
+{% endblock %}

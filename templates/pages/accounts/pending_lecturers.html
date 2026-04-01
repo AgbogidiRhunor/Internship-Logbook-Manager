@@ -1,0 +1,38 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}Pending Lecturers — SIWES{% endblock %}
+{% block breadcrumb %}<span class="navbar-breadcrumb-sep">›</span><span class="navbar-breadcrumb-item active">Pending Lecturers</span>{% endblock %}
+{% block content %}
+<div class="page-header animate-fadeUp">
+  <div>
+    <h1 class="page-title">Pending Lecturer Approvals</h1>
+    <p class="page-subtitle">{{ pending.count }} registration{{ pending.count|pluralize }} awaiting review</p>
+  </div>
+</div>
+<div class="card animate-fadeUp delay-1">
+  <div class="table-wrapper" style="border:none;border-radius:0">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Username</th><th>University</th><th>Faculty</th><th>Department</th><th>Email</th><th>Registered</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for lecturer in pending %}
+        <tr>
+          <td><div class="d-flex items-center gap-3"><div class="avatar avatar-sm">{{ lecturer.lecturer_profile.full_name|slice:":2"|upper }}</div><span class="font-semi text-sm">{{ lecturer.lecturer_profile.full_name }}</span></div></td>
+          <td><code class="mono text-xs" style="background:var(--bg-tertiary);padding:2px 6px;border-radius:var(--radius-sm)">{{ lecturer.username }}</code></td>
+          <td class="text-sm">{{ lecturer.lecturer_profile.university }}</td>
+          <td class="text-sm text-secondary">{{ lecturer.lecturer_profile.faculty.name }}</td>
+          <td class="text-sm text-secondary">{{ lecturer.lecturer_profile.department.name }}</td>
+          <td class="text-sm text-secondary">{{ lecturer.email|default:"—" }}</td>
+          <td><span class="text-xs text-tertiary">{{ lecturer.created_at|date:"d M Y" }}</span></td>
+          <td><div class="table-actions">
+            <a href="{% url 'accounts:approve_lecturer' lecturer.pk %}" class="btn btn-success btn-sm" onclick="return confirm('Approve?')">Approve</a>
+            <a href="{% url 'accounts:reject_lecturer' lecturer.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Reject?')">Reject</a>
+          </div></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="table-empty"><p style="font-weight:600;color:var(--text-primary)">No pending approvals</p></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Awaiting Approval — SIWES{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block body %}
+<div class="auth-layout">
+  <div class="auth-left">
+    <div class="auth-bg auth-bg-lecturer"></div>
+    <div class="auth-overlay"></div>
+    <div class="auth-left-content">
+      <a class="auth-brand" href="/">
+        <div class="auth-brand-logo">SL</div>
+        <div>
+          <div class="auth-brand-name">SIWES Logbook</div>
+          <div class="auth-brand-sub">Industrial Training Management</div>
+        </div>
+      </a>
+      <div class="auth-hero">
+        <h1 class="auth-hero-title">Almost <span>There</span></h1>
+        <p class="auth-hero-desc">Your registration has been received and is being reviewed. Administrators ensure only verified educators access the platform.</p>
+      </div>
+      <div class="auth-features">
+        <div class="auth-feature"><div class="auth-feature-icon">✅</div>Your details have been submitted</div>
+        <div class="auth-feature"><div class="auth-feature-icon">🔍</div>Coordinator or admin will review</div>
+        <div class="auth-feature"><div class="auth-feature-icon">📧</div>You will be notified by email</div>
+        <div class="auth-feature"><div class="auth-feature-icon">⏱️</div>Usually reviewed within 48 hours</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-card animate-fadeUp">
+      <div class="auth-logo-mark" style="background:linear-gradient(135deg,#f59e0b,#d97706);font-size:22px">⏳</div>
+      <h1 class="auth-title">Account Pending</h1>
+      <p class="auth-subtitle">Your registration is currently under review.</p>
+
+      <div class="steps">
+        <div class="step done">
+          <div class="step-indicator">✓</div>
+          <div class="step-content">
+            <p class="step-title">Registration submitted</p>
+            <p class="step-desc">Your details have been received successfully</p>
+          </div>
+        </div>
+        <div class="step active">
+          <div class="step-indicator">2</div>
+          <div class="step-content">
+            <p class="step-title">Under review</p>
+            <p class="step-desc">An administrator is reviewing your account</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-indicator">3</div>
+          <div class="step-content">
+            <p class="step-title">Account activated</p>
+            <p class="step-desc">You'll receive an email notification</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 p-4" style="background:var(--bg-secondary);border-radius:var(--radius-lg);border:1px solid var(--border)">
+        <p class="text-sm text-secondary">If you have not heard back within <strong class="text-primary">48 hours</strong>, please contact your institution's SIWES coordinator.</p>
+      </div>
+
+      <div class="mt-6">
+        <a href="{% url 'accounts:login' %}" class="btn btn-secondary btn-full">Back to Login</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="{% static 'js/core/app.js' %}"></script>
+{% endblock %}

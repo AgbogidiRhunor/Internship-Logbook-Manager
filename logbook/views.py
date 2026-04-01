@@ -28,10 +28,7 @@ def _student_required(view_func):
 def _owned_entry(pk, user):
     entry = get_object_or_404(DailyLogEntry, pk=pk)
     if entry.student_id != user.pk:
-        logger.warning(
-            'IDOR attempt: user %s tried to access log entry %s owned by user_id %s',
-            user.username, pk, entry.student_id,
-        )
+        logger.warning('IDOR: user %s tried to access log entry %s', user.username, pk)
         _log_audit(user, 'idor_attempt_log_entry', 'DailyLogEntry', pk)
         return None, HttpResponseForbidden('You cannot access another student\'s log.')
     return entry, None
@@ -51,11 +48,9 @@ def _safe_int_param(value, min_val, max_val):
 @_student_required
 def log_list(request):
     entries = DailyLogEntry.objects.filter(student=request.user)
-
     month = _safe_int_param(request.GET.get('month', ''), 1, _MAX_INTERNSHIP_MONTHS)
-    week  = _safe_int_param(request.GET.get('week', ''),  1, _MAX_INTERNSHIP_WEEKS)
+    week  = _safe_int_param(request.GET.get('week', ''), 1, _MAX_INTERNSHIP_WEEKS)
     day   = request.GET.get('day', '').strip()
-
     if month:
         entries = entries.filter(internship_month=month)
     if week:
@@ -64,13 +59,11 @@ def log_list(request):
         day = ''
     if day:
         entries = entries.filter(day_of_week=day)
-
     profile = request.user.student_profile
     months_range = range(1, int(profile.internship_duration) + 1)
     weeks_range  = range(1, (int(profile.internship_duration) * 4) + 2)
-
     from .models import DayOfWeek
-    return render(request, 'logbook/log_list.html', {
+    return render(request, 'pages/logbook/log_list.html', {
         'entries': entries.order_by('-entry_date'),
         'profile': profile,
         'months_range': months_range,
@@ -86,9 +79,7 @@ def log_list(request):
 @_student_required
 def log_create(request):
     form = DailyLogEntryForm(
-        request.POST or None,
-        request.FILES or None,
-        student_user=request.user,
+        request.POST or None, request.FILES or None, student_user=request.user,
     )
     if request.method == 'POST' and form.is_valid():
         entry = form.save(commit=False)
@@ -96,7 +87,7 @@ def log_create(request):
         entry.save()
         messages.success(request, f'Log entry for {entry.entry_date} saved.')
         return redirect('logbook:log_list')
-    return render(request, 'logbook/log_form.html', {'form': form, 'action': 'Create'})
+    return render(request, 'pages/logbook/log_form.html', {'form': form, 'action': 'Create'})
 
 
 @login_required
@@ -106,16 +97,16 @@ def log_edit(request, pk):
     if err:
         return err
     form = DailyLogEntryForm(
-        request.POST or None,
-        request.FILES or None,
-        instance=entry,
-        student_user=request.user,
+        request.POST or None, request.FILES or None,
+        instance=entry, student_user=request.user,
     )
     if request.method == 'POST' and form.is_valid():
         form.save()
         messages.success(request, 'Log entry updated.')
         return redirect('logbook:log_list')
-    return render(request, 'logbook/log_form.html', {'form': form, 'action': 'Edit', 'entry': entry})
+    return render(request, 'pages/logbook/log_form.html', {
+        'form': form, 'action': 'Edit', 'entry': entry,
+    })
 
 
 @login_required
@@ -128,7 +119,7 @@ def log_delete(request, pk):
         entry.delete()
         messages.success(request, 'Log entry deleted.')
         return redirect('logbook:log_list')
-    return render(request, 'logbook/log_confirm_delete.html', {'entry': entry})
+    return redirect('logbook:log_list')
 
 
 @login_required
@@ -137,4 +128,4 @@ def log_detail(request, pk):
     entry, err = _owned_entry(pk, request.user)
     if err:
         return err
-    return render(request, 'logbook/log_detail.html', {'entry': entry})
+    return render(request, 'pages/logbook/log_detail.html', {'entry': entry})

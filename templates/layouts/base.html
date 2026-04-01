@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SIWES Logbook Manager — Industrial Training Management Platform">
+  <title>{% block title %}SIWES Logbook{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <link rel="stylesheet" href="{% static 'css/utilities.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+{% block body %}{% endblock %}
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Django messages as toasts -->
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  {% for message in messages %}
+  Toast.{{ message.tags|default:'info' }}(
+    '{{ message.tags|title|default:"Notice" }}',
+    '{{ message|escapejs }}'
+  );
+  {% endfor %}
+});
+</script>
+{% endif %}
+
+<!-- Core JS -->
+<script src="{% static 'js/core/app.js' %}"></script>
+<script src="{% static 'js/components/modal.js' %}"></script>
+<script src="{% static 'js/components/toast.js' %}"></script>
+<script src="{% static 'js/components/dropdown.js' %}"></script>
+<script src="{% static 'js/components/table.js' %}"></script>
+<script src="{% static 'js/utils/helpers.js' %}"></script>
+<script src="{% static 'js/utils/form.js' %}"></script>
+<script src="{% static 'js/utils/api.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

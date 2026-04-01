@@ -1,0 +1,49 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}Manage Lecturers — SIWES{% endblock %}
+{% block breadcrumb %}<span class="navbar-breadcrumb-sep">›</span><span class="navbar-breadcrumb-item active">Lecturers</span>{% endblock %}
+{% block content %}
+<div class="page-header animate-fadeUp">
+  <div><h1 class="page-title">Lecturer Management</h1><p class="page-subtitle">Search, suspend, and manage all lecturer accounts</p></div>
+</div>
+<div class="card animate-fadeUp delay-1">
+  <div class="table-filter-bar">
+    <form method="get" class="d-flex gap-3 flex-wrap items-center w-full">
+      <div class="search-input" style="flex:1;min-width:260px">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--text-tertiary);flex-shrink:0"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="text" name="q" value="{{ q }}" placeholder="Search by name, username, or email...">
+      </div>
+      <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+      {% if q %}<a href="{% url 'accounts:admin_lecturer_list' %}" class="btn btn-ghost btn-sm">Clear</a>{% endif %}
+      <span class="badge badge-neutral ml-auto">{{ lecturers.count }} total</span>
+    </form>
+  </div>
+  <div class="table-wrapper" style="border:none;border-radius:0">
+    <table class="table" id="lecturers-table">
+      <thead><tr><th class="sortable">Name</th><th>Username</th><th>University</th><th>Department</th><th>Approved</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for lecturer in lecturers %}
+        <tr>
+          <td><div class="d-flex items-center gap-3"><div class="avatar avatar-sm">{{ lecturer.lecturer_profile.full_name|slice:":2"|upper }}</div><div><p class="font-semi text-sm">{{ lecturer.lecturer_profile.full_name }}</p><p class="text-xs text-tertiary">{{ lecturer.email|default:"No email" }}</p></div></div></td>
+          <td><code class="mono text-xs" style="background:var(--bg-tertiary);padding:2px 6px;border-radius:var(--radius-sm)">{{ lecturer.username }}</code></td>
+          <td class="text-sm text-secondary">{{ lecturer.lecturer_profile.university }}</td>
+          <td class="text-sm text-secondary">{{ lecturer.lecturer_profile.department.name }}</td>
+          <td>{% if lecturer.lecturer_approved %}<span class="badge badge-success badge-sm">Yes</span>{% else %}<span class="badge badge-warning badge-sm">Pending</span>{% endif %}</td>
+          <td>{% if lecturer.is_active %}<span class="badge badge-success badge-sm">Active</span>{% else %}<span class="badge badge-danger badge-sm">Suspended</span>{% endif %}</td>
+          <td><div class="table-actions">
+            {% if lecturer.is_active %}
+            <a href="{% url 'accounts:suspend_lecturer' lecturer.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Suspend {{ lecturer.username }}? They will be notified.')">Suspend</a>
+            {% else %}
+            <a href="{% url 'accounts:reactivate_lecturer' lecturer.pk %}" class="btn btn-success btn-sm" onclick="return confirm('Reinstate {{ lecturer.username }}?')">Reinstate</a>
+            {% endif %}
+          </div></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="table-empty">{% if q %}No lecturers matching "{{ q }}"{% else %}No lecturers registered.{% endif %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>document.addEventListener('DOMContentLoaded',function(){new SIWESTable('#lecturers-table',{sortable:true});});</script>
+{% endblock %}

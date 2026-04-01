@@ -1,0 +1,22 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}Delete {{ type }} — SIWES{% endblock %}
+{% block breadcrumb %}<span class="navbar-breadcrumb-sep">›</span><span class="navbar-breadcrumb-item active">Delete</span>{% endblock %}
+{% block content %}
+<div class="animate-fadeUp" style="max-width:400px;margin:var(--space-16) auto">
+  <div class="card" style="text-align:center">
+    <div class="card-body" style="padding:var(--space-10) var(--space-8)">
+      <div style="width:56px;height:56px;border-radius:var(--radius-2xl);background:var(--clr-danger-bg);display:flex;align-items:center;justify-content:center;margin:0 auto var(--space-5)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:var(--clr-danger-text)"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h1 class="h3 text-primary mb-2">Delete {{ type }}</h1>
+      <p class="text-sm text-secondary mb-6">You are about to permanently delete <strong>{{ obj }}</strong>. This action cannot be undone.</p>
+      <form method="post" class="d-flex gap-3 justify-center">
+        {% csrf_token %}
+        <a href="{% url cancel_url %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-danger">Delete {{ type }}</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

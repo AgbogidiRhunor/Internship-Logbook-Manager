@@ -1,0 +1,117 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %}Lecturer Registration — SIWES{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block body %}
+<div class="auth-layout">
+  <div class="auth-left">
+    <div class="auth-bg auth-bg-lecturer"></div>
+    <div class="auth-overlay"></div>
+    <div class="auth-left-content">
+      <a class="auth-brand" href="/">
+        <div class="auth-brand-logo">SL</div>
+        <div>
+          <div class="auth-brand-name">SIWES Logbook</div>
+          <div class="auth-brand-sub">Industrial Training Management</div>
+        </div>
+      </a>
+      <div class="auth-hero">
+        <h1 class="auth-hero-title">Supervise &amp;<br><span>Guide</span><br>Your Students</h1>
+        <p class="auth-hero-desc">Review logbooks, issue grades, and track student progress — all from one platform. Your account will be reviewed by your university's School Coordinator.</p>
+      </div>
+      <div class="auth-features">
+        <div class="auth-feature"><div class="auth-feature-icon">👁️</div>View all students in your department</div>
+        <div class="auth-feature"><div class="auth-feature-icon">⭐</div>Issue holistic grades and feedback</div>
+        <div class="auth-feature"><div class="auth-feature-icon">📊</div>Analytics dashboard with submission trends</div>
+        <div class="auth-feature"><div class="auth-feature-icon">📤</div>Export grade reports as CSV or PDF</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right" style="padding-top:var(--space-8);padding-bottom:var(--space-8)">
+    <div class="auth-card animate-fadeUp">
+      <div class="auth-logo-mark">SL</div>
+      <h1 class="auth-title">Lecturer Registration</h1>
+      <p class="auth-subtitle">Your account will be reviewed by your School Coordinator before activation.</p>
+
+      <form method="post" novalidate id="lecturer-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="mb-4" style="padding:12px 14px;background:var(--clr-danger-bg);border:1px solid var(--clr-danger);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--clr-danger-text)">
+          {{ form.non_field_errors.0 }}
+        </div>
+        {% endif %}
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="{{ form.surname.id_for_label }}">Surname <span class="required">*</span></label>
+            {{ form.surname }}
+            {% if form.surname.errors %}<span class="form-error">{{ form.surname.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.other_names.id_for_label }}">Other Names <span class="required">*</span></label>
+            {{ form.other_names }}
+            {% if form.other_names.errors %}<span class="form-error">{{ form.other_names.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.university.id_for_label }}">University <span class="required">*</span></label>
+          {{ form.university }}
+          {% if form.university.errors %}<span class="form-error">{{ form.university.errors.0 }}</span>{% endif %}
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="{{ form.faculty.id_for_label }}">Faculty <span class="required">*</span></label>
+            {{ form.faculty }}
+            {% if form.faculty.errors %}<span class="form-error">{{ form.faculty.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.department.id_for_label }}">Department <span class="required">*</span></label>
+            {{ form.department }}
+            {% if form.department.errors %}<span class="form-error">{{ form.department.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.email.id_for_label }}">Email Address <span class="required">*</span></label>
+          {{ form.email }}
+          <span class="form-hint">You will receive approval/rejection notifications here.</span>
+          {% if form.email.errors %}<span class="form-error">{{ form.email.errors.0 }}</span>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.username.id_for_label }}">Username <span class="required">*</span></label>
+          {{ form.username }}
+          {% if form.username.errors %}<span class="form-error">{{ form.username.errors.0 }}</span>{% endif %}
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="{{ form.password.id_for_label }}">Password <span class="required">*</span></label>
+            {{ form.password }}
+            {% if form.password.errors %}<span class="form-error">{{ form.password.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.password_confirm.id_for_label }}">Confirm Password <span class="required">*</span></label>
+            {{ form.password_confirm }}
+            {% if form.password_confirm.errors %}<span class="form-error">{{ form.password_confirm.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full btn-lg" data-loading-text="Submitting...">
+          Submit Registration
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="{% static 'js/core/app.js' %}"></script>
+<script src="{% static 'js/components/toast.js' %}"></script>
+<script src="{% static 'js/utils/helpers.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}{{ action }} — SIWES{% endblock %}
+{% block breadcrumb %}<span class="navbar-breadcrumb-sep">›</span><a href="{% url cancel_url %}" class="navbar-breadcrumb-item">Back</a><span class="navbar-breadcrumb-sep">›</span><span class="navbar-breadcrumb-item active">{{ action }}</span>{% endblock %}
+{% block content %}
+<div class="max-w-sm mx-auto animate-fadeUp">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ action }}</h1>
+      {% if university %}<p class="page-subtitle">{{ university.name }}</p>{% endif %}
+      {% if faculty %}<p class="page-subtitle">{{ faculty.name }} &mdash; {{ faculty.university }}</p>{% endif %}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          {% if field.name != 'university' and field.name != 'faculty' %}
+          <div class="form-group">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<span class="form-error">{{ field.errors.0 }}</span>{% endif %}
+          </div>
+          {% endif %}
+        {% endfor %}
+        <div class="d-flex gap-3 justify-end mt-6">
+          <a href="{% url cancel_url %}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

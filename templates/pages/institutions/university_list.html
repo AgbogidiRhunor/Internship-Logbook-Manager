@@ -1,0 +1,86 @@
+{% extends "layouts/app.html" %}
+{% load static %}
+{% block title %}Institutions — SIWES{% endblock %}
+{% block breadcrumb %}<span class="navbar-breadcrumb-sep">›</span><span class="navbar-breadcrumb-item active">Institutions</span>{% endblock %}
+
+{% block content %}
+<div class="page-header animate-fadeUp">
+  <div>
+    <h1 class="page-title">Institutions</h1>
+    <p class="page-subtitle">{{ universities|length }} universit{{ universities|length|pluralize:"y,ies" }} registered</p>
+  </div>
+  <a href="{% url 'institutions:university_create' %}" class="btn btn-primary">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    Add University
+  </a>
+</div>
+
+{% for university in universities %}
+<div class="card mb-5 animate-fadeUp" style="animation-delay:{{ forloop.counter0 }}00ms">
+  <div class="card-header">
+    <div class="d-flex items-center gap-4">
+      <div style="width:40px;height:40px;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--clr-brand),#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:var(--weight-black);font-size:14px;color:white;flex-shrink:0">{{ university.abbreviation|default:university.name|slice:":2"|upper }}</div>
+      <div>
+        <h2 class="card-title">{{ university.name }}</h2>
+        <p class="card-subtitle">{{ university.state }}{% if university.state %} &bull; {% endif %}{{ university.faculties.count }} facult{{ university.faculties.count|pluralize:"y,ies" }}</p>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'institutions:university_edit' university.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+      <a href="{% url 'institutions:faculty_create' university.pk %}" class="btn btn-ghost btn-sm">+ Faculty</a>
+      <button class="btn btn-ghost btn-sm" style="color:var(--clr-danger-text)"
+        onclick="Modal.confirm({title:'Delete {{ university.name }}?',message:'All faculties and departments will be removed.',confirmText:'Delete',danger:true,onConfirm:function(){window.location='{% url 'institutions:university_delete' university.pk %}'}})">
+        Delete
+      </button>
+    </div>
+  </div>
+
+  {% for faculty in university.faculties.all %}
+  <div style="border-top:1px solid var(--border)">
+    <div class="d-flex items-center justify-between px-6 py-3">
+      <div class="d-flex items-center gap-3">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--text-tertiary);flex-shrink:0"><path d="M7 1l1.5 4H13l-4 2.9 1.5 4.6L7 9.8 3.5 12.5 5 7.9 1 5h4.5L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        <span class="font-semi text-sm text-primary">{{ faculty.name }}</span>
+        <span class="badge badge-neutral badge-sm">{{ faculty.departments.count }} dept{{ faculty.departments.count|pluralize }}</span>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{% url 'institutions:faculty_create_dept' faculty.pk %}" class="btn btn-ghost btn-sm">+ Dept</a>
+        <a href="{% url 'institutions:faculty_edit' faculty.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+        <button class="btn btn-ghost btn-sm" style="color:var(--clr-danger-text)"
+          onclick="Modal.confirm({title:'Delete {{ faculty.name }}?',message:'All departments will be removed.',confirmText:'Delete',danger:true,onConfirm:function(){window.location='{% url 'institutions:faculty_delete' faculty.pk %}'}})">
+          Delete
+        </button>
+      </div>
+    </div>
+    {% if faculty.departments.all %}
+    <div class="d-flex flex-wrap gap-2 px-6 pb-3">
+      {% for dept in faculty.departments.all %}
+      <div class="d-flex items-center gap-1" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-full);padding:3px 10px 3px 6px">
+        <span class="text-xs text-secondary">{{ dept.name }}</span>
+        <a href="{% url 'institutions:department_edit' dept.pk %}" style="color:var(--text-tertiary);display:flex;align-items:center;margin-left:2px;text-decoration:none">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 9l7-7M8 9V1H1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% empty %}
+  <div class="px-6 py-4" style="border-top:1px solid var(--border)">
+    <p class="text-sm text-tertiary">No faculties added yet. <a href="{% url 'institutions:faculty_create' university.pk %}">Add the first faculty →</a></p>
+  </div>
+  {% endfor %}
+</div>
+{% empty %}
+<div class="card">
+  <div class="empty-state">
+    <div class="empty-state-icon">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M4 12l12-10 12 10v16H4V12z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M11 28V19h10v9" stroke="currentColor" stroke-width="1.5"/></svg>
+    </div>
+    <p class="empty-state-title">No universities registered</p>
+    <p class="empty-state-desc">Add universities to allow students and lecturers to register.</p>
+    <a href="{% url 'institutions:university_create' %}" class="btn btn-primary">Add First University</a>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}
