@@ -5,19 +5,33 @@
 {% block breadcrumb %}<span class="navbar-breadcrumb-sep">›</span><span class="navbar-breadcrumb-item active">Dashboard</span>{% endblock %}
 
 {% block content %}
+<style>
+  .lec-alerts{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+  @media(max-width:900px){.lec-alerts{grid-template-columns:1fr}}
+  .lec-bar-chart{display:flex;align-items:flex-end;gap:6px;height:90px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:8px}
+  .lec-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .lec-bar-block{width:100%;border-radius:4px 4px 0 0;min-height:3px;transition:height .4s}
+  .lec-bar-label{font-size:10px;color:var(--text-tertiary);white-space:nowrap}
+  .lec-bar-val{font-size:10px;font-weight:700;color:var(--text-secondary)}
+  .lec-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .student-row{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border);text-decoration:none;transition:background var(--duration-fast)}
+  .student-row:hover{background:var(--bg-hover)}
+  .student-row:last-child{border-bottom:none}
+</style>
+
 <div class="page-header animate-fadeUp">
   <div>
     <h1 class="page-title">Welcome, {{ profile.surname }}</h1>
     <p class="page-subtitle">{{ department }} &mdash; {{ faculty }} &mdash; {{ university }}</p>
   </div>
   <div class="page-actions">
-    <a href="{% url 'grading:export_csv' %}" class="btn btn-secondary btn-sm">Export CSV</a>
-    <a href="{% url 'grading:export_pdf' %}" class="btn btn-secondary btn-sm">Export PDF</a>
+    <a href="{% url 'grading:export_csv' %}" class="btn btn-secondary btn-sm">CSV</a>
+    <a href="{% url 'grading:export_pdf' %}" class="btn btn-secondary btn-sm">PDF</a>
     <a href="{% url 'grading:student_list' %}" class="btn btn-primary btn-sm">View All Students</a>
   </div>
 </div>
 
-<!-- KPI Row -->
+<!-- KPI row -->
 <div class="kpi-grid animate-fadeUp delay-1">
   <div class="stat-card">
     <div class="stat-card-accent" style="background:linear-gradient(90deg,#3b82f6,#6366f1)"></div>
@@ -28,149 +42,116 @@
     <div class="stat-card-value">{{ total_students }}</div>
     <div class="stat-card-sub">in your department</div>
   </div>
-
   <div class="stat-card">
     <div class="stat-card-accent" style="background:linear-gradient(90deg,#22c55e,#16a34a)"></div>
     <div class="stat-card-icon" style="background:var(--clr-success-bg);color:var(--clr-success-text)">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10.5l4 4 10-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <div class="stat-card-label">Active Students</div>
-    <div class="stat-card-value">{{ active_count }}</div>
-    <div class="stat-card-sub">{{ inactive_count }} suspended</div>
+    <div class="stat-card-label">Submitted Today</div>
+    <div class="stat-card-value">{{ submitted_today_count }}</div>
+    <div class="stat-card-sub">{{ not_submitted_today }} did not submit</div>
   </div>
-
   <div class="stat-card">
     <div class="stat-card-accent" style="background:{% if alert_count > 0 %}linear-gradient(90deg,#ef4444,#dc2626){% else %}linear-gradient(90deg,#22c55e,#16a34a){% endif %}"></div>
     <div class="stat-card-icon" style="background:{% if alert_count > 0 %}var(--clr-danger-bg);color:var(--clr-danger-text){% else %}var(--clr-success-bg);color:var(--clr-success-text){% endif %}">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l1.5 4.5H16l-3.7 2.7 1.4 4.3L10 10.8l-3.7 2.7 1.4-4.3L4 6.5h4.5L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
     </div>
-    <div class="stat-card-label">Inactive Alerts</div>
+    <div class="stat-card-label">Inactive (3+ days)</div>
     <div class="stat-card-value">{{ alert_count }}</div>
-    <div class="stat-card-sub">no submission in 3+ days</div>
+    <div class="stat-card-sub">students flagged</div>
   </div>
-
   <div class="stat-card">
-    <div class="stat-card-accent" style="background:linear-gradient(90deg,#14b8a6,#0d9488)"></div>
-    <div class="stat-card-icon" style="background:#f0fdfa;color:#0f766e">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <div class="stat-card-accent" style="background:linear-gradient(90deg,#8b5cf6,#7c3aed)"></div>
+    <div class="stat-card-icon" style="background:#f5f3ff;color:#7c3aed">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l2 6h6l-5 3.6 1.9 5.8L10 14.2l-4.9 3.2L7 11.6 2 8h6L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
     </div>
-    <div class="stat-card-label">Submitted Today</div>
-    <div class="stat-card-value">{{ submitted_today_count }}</div>
-    <div class="stat-card-sub">{{ not_submitted_today }} did not submit</div>
+    <div class="stat-card-label">Active Students</div>
+    <div class="stat-card-value">{{ active_count }}</div>
+    <div class="stat-card-sub">{{ inactive_count }} suspended</div>
   </div>
 </div>
 
-<!-- Today's submission status bar -->
-<div class="card mb-6 animate-fadeUp delay-2">
+<!-- Today submission status -->
+<div class="card mb-5 animate-fadeUp delay-2">
   <div class="card-header">
-    <div>
-      <h2 class="card-title">Today's Submissions</h2>
-      <p class="card-subtitle">{{ today|date:"l, d F Y" }}</p>
-    </div>
-    <div class="d-flex items-center gap-3">
-      <div class="d-flex items-center gap-2">
-        <div style="width:10px;height:10px;border-radius:50%;background:var(--clr-success)"></div>
-        <span class="text-xs text-secondary">{{ submitted_today_count }} submitted</span>
-      </div>
-      <div class="d-flex items-center gap-2">
-        <div style="width:10px;height:10px;border-radius:50%;background:var(--clr-danger)"></div>
-        <span class="text-xs text-secondary">{{ not_submitted_today }} pending</span>
-      </div>
-    </div>
+    <div><h2 class="card-title">Today's Submissions</h2><p class="card-subtitle">{{ today|date:"l, d F Y" }}</p></div>
+    {% if active_count > 0 %}
+    <div style="font-size:22px;font-weight:900;letter-spacing:-.02em;color:{% if submitted_today_count >= active_count %}var(--clr-success-text){% elif submitted_today_count > 0 %}var(--clr-warning-text){% else %}var(--clr-danger-text){% endif %}">{% widthratio submitted_today_count active_count 100 %}%</div>
+    {% endif %}
   </div>
   <div class="card-body">
-    <div style="margin-bottom:var(--space-3)">
-      <div class="d-flex justify-between mb-2">
-        <span class="text-sm font-semi">Out of {{ active_count }} active students, <strong>{{ submitted_today_count }}</strong> submitted today</span>
-        <span class="text-sm font-black" style="color:{% if submitted_today_count >= active_count %}var(--clr-success-text){% elif submitted_today_count > active_count|add:'-5' %}var(--clr-warning-text){% else %}var(--clr-danger-text){% endif %}">
-          {% if active_count > 0 %}{% widthratio submitted_today_count active_count 100 %}%{% else %}0%{% endif %}
-        </span>
-      </div>
-      <div class="progress-bar progress-bar-lg">
-        {% if active_count > 0 %}
-        <div class="progress-fill {% if submitted_today_count == active_count %}progress-success{% elif not_submitted_today > 5 %}progress-warning{% endif %}"
-             style="width:{% widthratio submitted_today_count active_count 100 %}%"></div>
-        {% endif %}
-      </div>
+    <div style="margin-bottom:10px;font-size:14px;color:var(--text-secondary)">
+      Out of <strong style="color:var(--text-primary)">{{ active_count }}</strong> active students, <strong style="color:var(--clr-success-text)">{{ submitted_today_count }}</strong> submitted today and <strong style="color:var(--clr-danger-text)">{{ not_submitted_today }}</strong> did not.
+    </div>
+    <div class="progress-bar progress-bar-lg">
+      {% if active_count > 0 %}
+      <div class="progress-fill {% if submitted_today_count == active_count %}progress-success{% elif not_submitted_today > 5 %}progress-warning{% else %}progress-success{% endif %}"
+           style="width:{% widthratio submitted_today_count active_count 100 %}%"></div>
+      {% endif %}
     </div>
   </div>
 </div>
 
-<!-- Trend + Alerts row -->
-<div class="d-grid grid-2 gap-6 mb-6 animate-fadeUp delay-3">
-
-  <!-- 7-day trend -->
+<!-- 7-day trend + alerts -->
+<div class="lec-alerts animate-fadeUp delay-3">
   <div class="card">
-    <div class="card-header">
-      <h2 class="card-title">Daily Trend</h2>
-      <span class="badge badge-neutral badge-sm">Last 7 days</span>
-    </div>
+    <div class="card-header"><h2 class="card-title">7-Day Trend</h2><span class="badge badge-neutral badge-sm">Daily submissions</span></div>
     <div class="card-body">
       {% if daily_trend %}
-      {% with max_val=daily_trend.0.count %}
-      <div class="d-flex gap-2 items-end" style="height:100px;border-bottom:1px solid var(--border);padding-bottom:var(--space-2);margin-bottom:var(--space-2)">
+      <div class="lec-bar-chart">
         {% for day in daily_trend %}
-        <div class="d-flex flex-col items-center" style="flex:1;gap:4px">
-          <span class="text-xs text-tertiary">{{ day.count }}</span>
-          <div style="width:100%;border-radius:4px 4px 0 0;background:{% if day.date == today %}var(--clr-brand){% else %}var(--clr-info-bg){% endif %};
-            min-height:4px;height:{% if active_count > 0 and day.count > 0 %}{% widthratio day.count active_count 80 %}px{% else %}4px{% endif %};
-            {% if day.date == today %}box-shadow:0 0 8px var(--clr-brand-ring){% endif %}">
+        <div class="lec-bar-col">
+          <span class="lec-bar-val">{{ day.count }}</span>
+          <div class="lec-bar-block" style="background:{% if day.date == today %}var(--clr-brand){% else %}var(--clr-info-bg){% endif %};
+            height:{% if active_count > 0 and day.count > 0 %}{{ day.count|add:'0' }}px{% else %}3px{% endif %};
+            max-height:72px;
+            {% if day.date == today %}opacity:1{% else %}opacity:0.7{% endif %}">
           </div>
         </div>
         {% endfor %}
       </div>
-      <div class="d-flex gap-2">
+      <div style="display:flex;gap:6px">
         {% for day in daily_trend %}
-        <div class="text-xs text-center" style="flex:1;color:{% if day.date == today %}var(--clr-brand){% else %}var(--text-tertiary){% endif %};font-weight:{% if day.date == today %}600{% else %}400{% endif %}">
-          {{ day.label }}
-        </div>
+        <div style="flex:1;text-align:center;font-size:10px;color:{% if day.date == today %}var(--clr-brand){% else %}var(--text-tertiary){% endif %};font-weight:{% if day.date == today %}700{% else %}400{% endif %}">{{ day.label }}</div>
         {% endfor %}
       </div>
-      {% endwith %}
       {% endif %}
     </div>
   </div>
 
-  <!-- Alert panel -->
   <div class="card" style="{% if alert_count > 0 %}border-left:3px solid var(--clr-danger){% endif %}">
     <div class="card-header">
-      <h2 class="card-title" style="{% if alert_count > 0 %}color:var(--clr-danger-text){% endif %}">
-        {% if alert_count > 0 %}⚠️ Inactive Students{% else %}✅ All Students Active{% endif %}
-      </h2>
+      <div><h2 class="card-title" style="{% if alert_count > 0 %}color:var(--clr-danger-text){% endif %}">{% if alert_count > 0 %}⚠️ Inactive Students{% else %}✅ All Active{% endif %}</h2></div>
       {% if alert_count > 0 %}<span class="badge badge-danger">{{ alert_count }}</span>{% endif %}
     </div>
-    <div class="card-body" style="padding:0">
-      {% for s in flagged_students %}
-      <a href="{% url 'grading:student_profile' s.profile.pk %}" class="d-flex items-center gap-3 p-4" style="border-bottom:1px solid var(--border);text-decoration:none;transition:background var(--duration-fast)" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
-        <div class="avatar avatar-sm">{{ s.profile.full_name|slice:":2"|upper }}</div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-semi text-primary">{{ s.profile.full_name }}</p>
-          <p class="text-xs text-tertiary">{% if s.last_log_date %}Last: {{ s.last_log_date|date:"d M" }}{% else %}Never submitted{% endif %}</p>
-        </div>
-        <span class="badge badge-danger badge-sm">{{ s.days_since_log|default:"∞" }}d ago</span>
-      </a>
-      {% empty %}
-      <div class="empty-state" style="padding:var(--space-8) var(--space-6)">
-        <p class="text-sm text-secondary">All students are logging regularly.</p>
+    {% for s in flagged_students %}
+    <a href="{% url 'grading:student_profile' s.profile.pk %}" class="student-row">
+      <div class="avatar avatar-sm">{{ s.profile.full_name|slice:":2"|upper }}</div>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:13px;font-weight:600;color:var(--text-primary);margin:0 0 1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.profile.full_name }}</p>
+        <p style="font-size:11px;color:var(--text-tertiary);margin:0">{% if s.last_log_date %}{{ s.last_log_date|date:"d M" }}{% else %}Never submitted{% endif %}</p>
       </div>
-      {% endfor %}
-    </div>
+      <span class="badge badge-danger badge-sm">{{ s.days_since_log|default:"∞" }}d</span>
+    </a>
+    {% empty %}
+    <div style="padding:24px 20px;text-align:center"><p style="font-size:13px;color:var(--text-tertiary);margin:0">All students are logging regularly.</p></div>
+    {% endfor %}
   </div>
 </div>
 
 <!-- Student insights table -->
 <div class="card animate-fadeUp delay-4">
   <div class="card-header">
-    <h2 class="card-title">Individual Student Insights</h2>
-    <span class="text-xs text-tertiary">{{ student_insights|length }} students</span>
+    <h2 class="card-title">Student Insights</h2>
+    <span style="font-size:12px;color:var(--text-tertiary)">{{ student_insights|length }} students</span>
   </div>
-  <div class="table-wrapper" style="border:none;border-radius:0">
+  <div class="lec-table-wrap">
     <table class="table" id="insights-table">
       <thead>
         <tr>
           <th class="sortable">Student</th>
-          <th class="sortable">Total Logs</th>
-          <th class="sortable">Last Submission</th>
+          <th class="sortable hide-mobile">Logs</th>
+          <th class="hide-mobile">Last</th>
           <th>Today</th>
           <th>Status</th>
           <th>Actions</th>
@@ -180,43 +161,25 @@
         {% for s in student_insights %}
         <tr>
           <td>
-            <div class="d-flex items-center gap-3">
+            <div style="display:flex;align-items:center;gap:10px">
               <div class="avatar avatar-sm">{{ s.profile.full_name|slice:":2"|upper }}</div>
               <div>
-                <a href="{% url 'grading:student_profile' s.profile.pk %}" class="font-semi text-sm text-primary" style="text-decoration:none">{{ s.profile.full_name }}</a>
-                <p class="text-xs text-tertiary">{{ s.profile.matric_number }}</p>
+                <a href="{% url 'grading:student_profile' s.profile.pk %}" style="font-size:13px;font-weight:600;color:var(--text-primary);text-decoration:none">{{ s.profile.full_name }}</a>
+                <p style="font-size:11px;color:var(--text-tertiary);margin:0">{{ s.profile.matric_number }}</p>
               </div>
             </div>
           </td>
-          <td><span class="font-semi">{{ s.total_logs }}</span></td>
-          <td>
+          <td class="hide-mobile"><strong>{{ s.total_logs }}</strong></td>
+          <td class="hide-mobile">
             {% if s.last_log_date %}
-            <div>
-              <span class="text-sm">{{ s.last_log_date|date:"d M Y" }}</span>
-              {% if s.days_since_log is not None %}
-              <p class="text-xs mt-0" style="margin-top:1px;color:{% if s.days_since_log >= 3 %}var(--clr-danger-text){% else %}var(--text-tertiary){% endif %}">{{ s.days_since_log }}d ago</p>
-              {% endif %}
-            </div>
-            {% else %}
-            <span class="text-tertiary text-sm">Never</span>
+            <span style="font-size:12px;color:var(--text-secondary)">{{ s.last_log_date|date:"d M" }}</span>
+            {% if s.days_since_log is not None %}
+            <span style="font-size:11px;color:{% if s.days_since_log >= 3 %}var(--clr-danger-text){% else %}var(--text-tertiary){% endif %};margin-left:4px">({{ s.days_since_log }}d)</span>
             {% endif %}
+            {% else %}<span style="font-size:12px;color:var(--text-tertiary)">Never</span>{% endif %}
           </td>
-          <td>
-            {% if s.submitted_today %}
-            <span class="badge badge-success badge-sm">✓ Yes</span>
-            {% else %}
-            <span class="badge badge-warning badge-sm">✗ No</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if s.is_flagged %}
-            <span class="badge badge-danger badge-sm">Inactive</span>
-            {% elif s.has_irregular %}
-            <span class="badge badge-warning badge-sm">Irregular</span>
-            {% else %}
-            <span class="badge badge-success badge-sm">On track</span>
-            {% endif %}
-          </td>
+          <td>{% if s.submitted_today %}<span class="badge badge-success badge-sm">✓</span>{% else %}<span class="badge badge-warning badge-sm">✗</span>{% endif %}</td>
+          <td>{% if s.is_flagged %}<span class="badge badge-danger badge-sm">Inactive</span>{% elif s.has_irregular %}<span class="badge badge-warning badge-sm">Irregular</span>{% else %}<span class="badge badge-success badge-sm">OK</span>{% endif %}</td>
           <td>
             <div class="table-actions">
               <a href="{% url 'grading:student_profile' s.profile.pk %}" class="btn btn-ghost btn-sm">View</a>
@@ -225,16 +188,12 @@
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="6" class="table-empty">No students assigned to your department.</td></tr>
+        <tr><td colspan="6" class="table-empty">No students in your department.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  new SIWESTable('#insights-table', { sortable: true });
-});
-</script>
+<script>document.addEventListener('DOMContentLoaded',function(){new SIWESTable('#insights-table',{sortable:true});});</script>
 {% endblock %}

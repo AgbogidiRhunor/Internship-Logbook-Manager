@@ -5,6 +5,17 @@
 {% block breadcrumb %}<span class="navbar-breadcrumb-sep">›</span><span class="navbar-breadcrumb-item active">Dashboard</span>{% endblock %}
 
 {% block content %}
+<style>
+  .s-progress-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:20px 24px;margin-bottom:24px}
+  .s-entries-grid{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+  @media(max-width:1024px){.s-entries-grid{grid-template-columns:1fr}}
+  .s-entry-link{display:block;padding:14px 20px;border-bottom:1px solid var(--border);text-decoration:none;transition:background var(--duration-fast)}
+  .s-entry-link:hover{background:var(--bg-hover)}
+  .s-entry-link:last-child{border-bottom:none}
+  .s-detail-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:480px){.s-detail-row{grid-template-columns:1fr}}
+</style>
+
 <div class="page-header animate-fadeUp">
   <div>
     <h1 class="page-title">Good {{ time_of_day }}, {{ profile.surname }} 👋</h1>
@@ -13,12 +24,12 @@
   <div class="page-actions">
     <a href="{% url 'logbook:log_create' %}" class="btn btn-primary">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      New Log Entry
+      New Entry
     </a>
   </div>
 </div>
 
-<!-- KPI Row -->
+<!-- KPI row -->
 <div class="kpi-grid animate-fadeUp delay-1">
   <div class="stat-card">
     <div class="stat-card-accent" style="background:linear-gradient(90deg,#3b82f6,#6366f1)"></div>
@@ -29,7 +40,6 @@
     <div class="stat-card-value">{{ days_logged }}</div>
     <div class="stat-card-sub">of {{ total_days }} internship days</div>
   </div>
-
   <div class="stat-card">
     <div class="stat-card-accent" style="background:linear-gradient(90deg,#22c55e,#16a34a)"></div>
     <div class="stat-card-icon" style="background:var(--clr-success-bg);color:var(--clr-success-text)">
@@ -39,7 +49,6 @@
     <div class="stat-card-value">{{ progress }}%</div>
     <div class="stat-card-sub">internship completion</div>
   </div>
-
   <div class="stat-card">
     <div class="stat-card-accent" style="background:linear-gradient(90deg,#f59e0b,#d97706)"></div>
     <div class="stat-card-icon" style="background:var(--clr-warning-bg);color:var(--clr-warning-text)">
@@ -49,7 +58,6 @@
     <div class="stat-card-value">{{ days_remaining }}</div>
     <div class="stat-card-sub">until internship ends</div>
   </div>
-
   <div class="stat-card">
     <div class="stat-card-accent" style="background:{% if grade %}linear-gradient(90deg,#22c55e,#16a34a){% else %}linear-gradient(90deg,#e94560,#c73652){% endif %}"></div>
     <div class="stat-card-icon" style="background:{% if grade %}var(--clr-success-bg);color:var(--clr-success-text){% else %}var(--clr-brand-muted);color:var(--clr-brand){% endif %}">
@@ -61,108 +69,81 @@
   </div>
 </div>
 
-<!-- Progress Bar -->
-<div class="card mb-6 animate-fadeUp delay-2">
-  <div class="card-body">
-    <div class="d-flex items-center justify-between mb-3">
-      <div>
-        <p class="font-semi text-sm">Internship Progress</p>
-        <p class="text-xs text-secondary mt-1">{{ profile.internship_start_date|date:"d M Y" }} — {{ profile.internship_end_date|date:"d M Y" }}</p>
-      </div>
-      <div class="text-right">
-        <p class="font-black text-2xl" style="color:{% if progress >= 70 %}var(--clr-success-text){% elif progress >= 40 %}var(--clr-warning-text){% else %}var(--clr-brand){% endif %}">{{ progress }}%</p>
-        <p class="text-xs text-secondary">{{ days_logged }} / {{ total_days }} days</p>
-      </div>
+<!-- Progress bar card -->
+<div class="s-progress-wrap animate-fadeUp delay-2">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+    <div>
+      <p style="font-size:14px;font-weight:600;color:var(--text-primary);margin:0 0 2px">Internship Progress</p>
+      <p style="font-size:12px;color:var(--text-tertiary);margin:0">{{ profile.internship_start_date|date:"d M Y" }} — {{ profile.internship_end_date|date:"d M Y" }}</p>
     </div>
-    <div class="progress-bar progress-bar-lg">
-      <div class="progress-fill {% if progress >= 70 %}progress-success{% elif progress >= 40 %}progress-warning{% else %}{% endif %}" style="width:{{ progress }}%"></div>
-    </div>
-    <div class="d-flex justify-between mt-2">
-      <span class="text-xs text-tertiary">Start</span>
-      <span class="text-xs text-tertiary">{{ days_remaining }} days remaining</span>
-    </div>
+    <p style="font-size:28px;font-weight:900;letter-spacing:-.03em;line-height:1;margin:0;color:{% if progress >= 70 %}var(--clr-success-text){% elif progress >= 40 %}var(--clr-warning-text){% else %}var(--clr-brand){% endif %}">{{ progress }}<span style="font-size:16px;font-weight:500;color:var(--text-tertiary)">%</span></p>
+  </div>
+  <div class="progress-bar progress-bar-lg">
+    <div class="progress-fill {% if progress >= 70 %}progress-success{% elif progress >= 40 %}progress-warning{% endif %}" style="width:{{ progress }}%"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-top:8px">
+    <span style="font-size:11px;color:var(--text-tertiary)">{{ days_logged }} days logged</span>
+    <span style="font-size:11px;color:var(--text-tertiary)">{{ days_remaining }} days remaining</span>
   </div>
 </div>
 
-<!-- Recent entries + Grade card -->
-<div class="d-grid grid-2 gap-6 animate-fadeUp delay-3">
-  <!-- Recent entries -->
+<!-- Entries + details -->
+<div class="s-entries-grid animate-fadeUp delay-3">
   <div class="card">
     <div class="card-header">
-      <div>
-        <h2 class="card-title">Recent Entries</h2>
-        <p class="card-subtitle">Your last {{ recent_entries|length }} log entries</p>
-      </div>
+      <div><h2 class="card-title">Recent Entries</h2><p class="card-subtitle">Last {{ recent_entries|length }} log entries</p></div>
       <a href="{% url 'logbook:log_list' %}" class="btn btn-ghost btn-sm">View all →</a>
     </div>
-    <div class="card-body" style="padding:0">
+    <div>
       {% for entry in recent_entries %}
-      <a href="{% url 'logbook:log_detail' entry.pk %}" style="display:block;padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--border);text-decoration:none;transition:background var(--duration-fast)" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
-        <div class="d-flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <p class="font-semi text-sm text-primary truncate">{{ entry.work_title }}</p>
-            <p class="text-xs text-tertiary mt-1">{{ entry.entry_date|date:"d M Y" }} &bull; {{ entry.day_of_week }}</p>
+      <a href="{% url 'logbook:log_detail' entry.pk %}" class="s-entry-link">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div style="min-width:0">
+            <p style="font-size:14px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 0 3px">{{ entry.work_title }}</p>
+            <p style="font-size:12px;color:var(--text-tertiary);margin:0">{{ entry.entry_date|date:"d M Y" }} &bull; {{ entry.day_of_week }}</p>
           </div>
           {% if entry.technical_photo %}<span class="badge badge-info badge-sm">Photo</span>{% endif %}
         </div>
       </a>
       {% empty %}
-      <div class="empty-state" style="padding:var(--space-10) var(--space-6)">
-        <div class="empty-state-icon">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="4" y="4" width="20" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M9 13h10M9 17h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </div>
-        <p class="empty-state-title" style="font-size:var(--text-sm)">No entries yet</p>
-        <p class="empty-state-desc" style="font-size:var(--text-xs)">Start logging your daily activities</p>
-        <a href="{% url 'logbook:log_create' %}" class="btn btn-primary btn-sm mt-4">Create first entry</a>
+      <div style="padding:40px 20px;text-align:center">
+        <p style="font-size:13px;color:var(--text-tertiary);margin:0 0 12px">No entries yet</p>
+        <a href="{% url 'logbook:log_create' %}" class="btn btn-primary btn-sm">Create first entry</a>
       </div>
       {% endfor %}
     </div>
     {% if recent_entries %}
     <div class="card-footer">
-      <a href="{% url 'logbook:log_create' %}" class="btn btn-primary btn-sm w-full">+ New Entry</a>
+      <a href="{% url 'logbook:log_create' %}" class="btn btn-primary btn-sm" style="width:100%">+ New Entry</a>
     </div>
     {% endif %}
   </div>
 
-  <!-- Grade & Info -->
-  <div class="d-flex flex-col gap-4">
+  <div style="display:flex;flex-direction:column;gap:16px">
     {% if grade %}
     <div class="card">
       <div class="card-header"><h2 class="card-title">Grade Record</h2></div>
-      <div class="card-body d-flex items-start gap-5">
+      <div class="card-body" style="display:flex;align-items:flex-start;gap:16px">
         <div class="grade-circle grade-{{ grade.letter_grade }}">{{ grade.letter_grade }}</div>
         <div>
-          <p class="font-black text-3xl text-primary" style="letter-spacing:-0.03em">{{ grade.overall_score }}<span class="text-lg text-secondary font-normal">/100</span></p>
-          <p class="text-xs text-secondary mt-1">Graded by {{ grade.graded_by.get_full_name }}</p>
-          <p class="text-xs text-secondary">{{ grade.graded_at|date:"d M Y" }}</p>
+          <p style="font-size:30px;font-weight:900;letter-spacing:-.03em;color:var(--text-primary);line-height:1;margin:0 0 4px">{{ grade.overall_score }}<span style="font-size:16px;color:var(--text-tertiary);font-weight:400">/100</span></p>
+          <p style="font-size:12px;color:var(--text-secondary);margin:0 0 2px">{{ grade.graded_by.get_full_name }}</p>
+          <p style="font-size:11px;color:var(--text-tertiary);margin:0">{{ grade.graded_at|date:"d M Y" }}</p>
           {% if grade.lecturer_comment %}
-          <p class="text-sm text-secondary mt-3 leading-normal" style="font-style:italic">"{{ grade.lecturer_comment|truncatechars:120 }}"</p>
+          <p style="font-size:13px;color:var(--text-secondary);margin-top:10px;font-style:italic;line-height:1.5">"{{ grade.lecturer_comment|truncatechars:100 }}"</p>
           {% endif %}
         </div>
       </div>
     </div>
     {% endif %}
-
     <div class="card">
       <div class="card-header"><h2 class="card-title">Internship Details</h2></div>
       <div class="card-body">
-        <div class="detail-grid">
-          <div class="detail-item">
-            <div class="detail-label">Company</div>
-            <div class="detail-value">{{ profile.company_name }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">Supervisor</div>
-            <div class="detail-value">{{ profile.industrial_supervisor_name }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">Duration</div>
-            <div class="detail-value">{{ profile.get_internship_duration_display }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">University</div>
-            <div class="detail-value truncate">{{ profile.university }}</div>
-          </div>
+        <div class="s-detail-row">
+          <div><p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-tertiary);margin:0 0 4px">Company</p><p style="font-size:13px;font-weight:500;color:var(--text-primary);margin:0">{{ profile.company_name }}</p></div>
+          <div><p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-tertiary);margin:0 0 4px">Supervisor</p><p style="font-size:13px;font-weight:500;color:var(--text-primary);margin:0">{{ profile.industrial_supervisor_name }}</p></div>
+          <div><p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-tertiary);margin:0 0 4px">Duration</p><p style="font-size:13px;font-weight:500;color:var(--text-primary);margin:0">{{ profile.get_internship_duration_display }}</p></div>
+          <div><p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-tertiary);margin:0 0 4px">University</p><p style="font-size:13px;font-weight:500;color:var(--text-primary);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ profile.university }}</p></div>
         </div>
       </div>
     </div>
