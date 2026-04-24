@@ -5,286 +5,273 @@
 
 {% block content %}
 
-<!-- ══════════════════════════════════════════════
-     HERO
-═══════════════════════════════════════════════ -->
-<section class="relative min-h-screen flex items-center pt-[62px] overflow-hidden">
-
-  <!-- Background layers -->
-  <div class="absolute inset-0 bg-gradient-to-br from-[#f5f6fa] via-white to-[#fef2f2] dark:from-[#080e1d] dark:via-[#0c1228] dark:to-[#12091a]"></div>
-  <div class="dot-grid absolute inset-0 opacity-60 dark:opacity-100"></div>
+<!-- HERO -->
+<section class="lp-hero">
+  <div class="lp-hero-bg"></div>
+  <div class="lp-hero-grid dot-grid"></div>
 
   <!-- Glow blobs -->
-  <div class="blob w-[520px] h-[520px] bg-cr-400/20 dark:bg-cr-600/15 -top-24 -right-32 animate-float-slow"></div>
-  <div class="blob w-[360px] h-[360px] bg-ink-400/15 dark:bg-ink-600/10 bottom-12 -left-24 animate-float-med"></div>
+  <div class="blob" style="width:500px;height:500px;background:#e94560;top:-120px;right:-150px"></div>
+  <div class="blob" style="width:360px;height:360px;background:#6d28d9;bottom:60px;left:-100px"></div>
 
-  <!-- Floating status card (desktop only) -->
-  <div class="absolute top-32 right-12 xl:right-20 hidden lg:block animate-float-slow z-10" style="animation-delay:1s">
-    <div class="bg-white dark:bg-[#111827] rounded-2xl shadow-xl border border-slate-100 dark:border-white/5 p-4 min-w-[200px]">
-      <div class="flex items-center gap-2.5 mb-3">
-        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-        <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Entry submitted</span>
+  <!-- Floating status card -->
+  <div class="lp-float-card lp-float-1">
+    <div class="lp-float-card-inner">
+      <div class="lp-fc-row">
+        <div class="lp-fc-dot"></div>
+        <div>
+          <div class="lp-fc-label">Entry submitted</div>
+          <div class="lp-fc-sub">Week 3 · Civil Engineering</div>
+        </div>
       </div>
-      <p class="text-[12px] font-medium text-slate-800 dark:text-white mb-0.5 truncate">Week 3 · Civil Engineering</p>
-      <p class="text-[11px] text-slate-400">2 minutes ago</p>
-      <div class="mt-3 h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
-        <div class="h-full w-[68%] bg-gradient-to-r from-cr-500 to-cr-400 rounded-full"></div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">2 minutes ago</div>
+      <div class="lp-fc-prog-track">
+        <div class="lp-fc-prog-fill"></div>
       </div>
-      <div class="flex justify-between mt-1.5">
-        <span class="text-[10px] text-slate-400">Progress</span>
-        <span class="text-[10px] font-semibold text-cr-500">68%</span>
+      <div class="lp-fc-prog-row">
+        <span class="lp-fc-prog-label">Progress</span>
+        <span class="lp-fc-prog-pct">68%</span>
       </div>
     </div>
   </div>
 
-  <!-- Floating grade card (desktop only) -->
-  <div class="absolute bottom-24 right-20 xl:right-36 hidden lg:block animate-float-med z-10" style="animation-delay:2.5s">
-    <div class="bg-white dark:bg-[#111827] rounded-2xl shadow-xl border border-slate-100 dark:border-white/5 px-5 py-4 flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-display font-black text-base shadow-lg">A</div>
+  <!-- Floating grade card -->
+  <div class="lp-float-card lp-float-2">
+    <div class="lp-float-card-inner" style="display:flex;align-items:center;gap:12px">
+      <div class="lp-grade-badge">A</div>
       <div>
-        <p class="text-[12px] font-semibold text-slate-800 dark:text-white">Grade issued</p>
-        <p class="text-[11px] text-slate-400">86/100 · Excellent</p>
+        <div class="lp-fc-label">Grade issued</div>
+        <div class="lp-fc-sub">86/100 · Excellent</div>
       </div>
     </div>
   </div>
 
-  <!-- Hero content -->
-  <div class="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 py-24 sm:py-32 w-full">
-    <div class="max-w-[720px]">
+  <div class="lp-hero-inner">
 
-      <!-- Eyebrow pill -->
-      <div data-reveal class="inline-flex items-center gap-2.5 bg-white dark:bg-white/5 border border-cr-200/60 dark:border-cr-500/20 rounded-full pl-1.5 pr-4 py-1.5 mb-8 shadow-sm">
-        <span class="bg-cr-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">New</span>
-        <span class="text-[12.5px] font-medium text-slate-600 dark:text-slate-300">Coordinator dashboards with live analytics</span>
-        <svg class="w-3 h-3 text-cr-400" viewBox="0 0 12 12" fill="none"><path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <!-- Eyebrow -->
+    <div data-reveal>
+      <div class="lp-eyebrow">
+        <span class="lp-eyebrow-badge">New</span>
+        <span class="lp-eyebrow-text">Coordinator dashboards now live</span>
+        <svg class="lp-eyebrow-arrow" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 6h7M7 3.5l3 2.5-3 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </div>
+    </div>
 
-      <!-- Headline -->
-      <h1 data-reveal class="d1 font-display text-5xl sm:text-6xl md:text-7xl font-black leading-[1.05] tracking-tight text-slate-900 dark:text-white mb-6">
-        Track your<br>
-        <span class="text-grad">industrial training</span><br>
-        the smart way.
-      </h1>
+    <!-- Headline -->
+    <h1 class="lp-hero-title" data-reveal style="transition-delay:80ms">
+      Track your<br>
+      <span class="grad-text">industrial training</span><br>
+      the smart way.
+    </h1>
 
-      <!-- Subheadline -->
-      <p data-reveal class="d2 text-[17px] sm:text-lg text-slate-500 dark:text-slate-400 leading-relaxed mb-10 max-w-[540px]">
-        SIWES Logbook replaces paper forms with a digital platform students love, supervisors trust, and universities rely on — built specifically for Nigerian institutions.
-      </p>
+    <!-- Sub -->
+    <p class="lp-hero-sub" data-reveal style="transition-delay:160ms">
+      SIWES Logbook replaces paper forms with a digital platform students love, supervisors trust, and universities rely on — built specifically for Nigerian institutions.
+    </p>
 
-      <!-- CTA buttons -->
-      <div data-reveal class="d3 flex flex-col sm:flex-row gap-3 mb-14">
-        <a href="{% url 'accounts:student_register' %}" class="btn-primary text-[15px] !py-[13px] !px-7">
-          Get Started Free
-          <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <a href="{% url 'accounts:login' %}" class="btn-ghost text-[15px] !py-[13px] !px-7">
-          <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none"><path d="M10 3H5a2 2 0 00-2 2v6a2 2 0 002 2h5M13 8H6M10 5l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Sign in
-        </a>
+    <!-- CTA -->
+    <div class="lp-hero-cta" data-reveal style="transition-delay:240ms">
+      <a href="{% url 'accounts:student_register' %}" class="lp-btn-primary">
+        Get Started Free
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <a href="{% url 'accounts:login' %}" class="lp-btn-ghost">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M10 3H5a2 2 0 00-2 2v6a2 2 0 002 2h5M13 8H6M10 5l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Sign in
+      </a>
+    </div>
+
+    <!-- Social proof -->
+    <div class="lp-proof" data-reveal style="transition-delay:320ms">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="lp-proof-avatars">
+          <div class="lp-proof-avatar" style="background:linear-gradient(135deg,#f472b6,#ec4899)"></div>
+          <div class="lp-proof-avatar" style="background:linear-gradient(135deg,#818cf8,#6366f1)"></div>
+          <div class="lp-proof-avatar" style="background:linear-gradient(135deg,#fbbf24,#f97316)"></div>
+          <div class="lp-proof-avatar" style="background:linear-gradient(135deg,#34d399,#10b981)"></div>
+        </div>
+        <span class="lp-proof-text">2,400+ students enrolled</span>
       </div>
-
-      <!-- Social proof -->
-      <div data-reveal class="d4 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-        <div class="flex items-center gap-2.5">
-          <div class="flex -space-x-2.5">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 border-2 border-white dark:border-[#080e1d]"></div>
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-indigo-500 border-2 border-white dark:border-[#080e1d]"></div>
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-400 border-2 border-white dark:border-[#080e1d]"></div>
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 border-2 border-white dark:border-[#080e1d]"></div>
-          </div>
-          <span class="text-[13px] text-slate-500 dark:text-slate-400">2,400+ students enrolled</span>
+      <div class="lp-proof-sep"></div>
+      <div style="display:flex;align-items:center">
+        <div class="lp-proof-stars">
+          <svg class="lp-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
         </div>
-        <div class="hidden sm:block w-px h-5 bg-slate-200 dark:bg-white/10"></div>
-        <div class="flex items-center gap-1.5">
-          <div class="flex">
-            {% for i in "12345" %}<svg class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>{% endfor %}
-          </div>
-          <span class="text-[13px] text-slate-500 dark:text-slate-400">4.9/5 across all institutions</span>
-        </div>
+        <span class="lp-proof-rating">4.9/5 across all institutions</span>
       </div>
     </div>
   </div>
 
-  <!-- Bottom edge fade -->
-  <div class="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white dark:from-[#0c1228] to-transparent pointer-events-none"></div>
+  <div class="lp-hero-fade"></div>
 </section>
+
 
 <!-- ══════════════════════════════════════════════
      FEATURES
 ═══════════════════════════════════════════════ -->
-<section id="features" class="relative py-24 sm:py-32 bg-white dark:bg-[#0c1228]">
+<section id="features" class="lp-section lp-section-white">
+  <div class="lp-container">
 
-  <!-- Subtle top separator blob -->
-  <div class="blob w-[600px] h-[300px] bg-cr-100/60 dark:bg-cr-900/10 -top-16 left-1/2 -translate-x-1/2"></div>
-
-  <div class="relative z-10 max-w-6xl mx-auto px-5 sm:px-8">
-
-    <!-- Section header -->
-    <div class="text-center mb-16 sm:mb-20">
-      <div data-reveal class="inline-block text-[11px] font-bold uppercase tracking-[0.12em] text-cr-600 dark:text-cr-400 mb-3">Platform features</div>
-      <h2 data-reveal class="d1 font-display text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
-        Every tool your<br>institution needs
-      </h2>
-      <p data-reveal class="d2 text-slate-500 dark:text-slate-400 text-lg max-w-xl mx-auto leading-relaxed">From the first log entry to the final grade report — SIWES Logbook handles every step, for every role.</p>
+    <div class="lp-section-header">
+      <div class="lp-section-label" data-reveal>Platform features</div>
+      <h2 class="lp-section-title" data-reveal style="transition-delay:80ms">Every tool your<br>institution needs</h2>
+      <p class="lp-section-sub" data-reveal style="transition-delay:160ms">From the first log entry to the final grade report — SIWES Logbook handles every step, for every role.</p>
     </div>
 
-    <!-- Features grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div class="lp-features-grid">
 
       <!-- Daily log tracking -->
-      <div data-reveal class="feat-card rounded-2xl p-7">
-        <div class="w-11 h-11 rounded-xl bg-cr-50 dark:bg-cr-900/25 border border-cr-100 dark:border-cr-800/30 flex items-center justify-center mb-5">
-          <svg class="w-5 h-5 text-cr-500" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+      <div class="lp-feat-card" data-reveal>
+        <div class="lp-feat-icon lp-feat-icon-brand">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <rect x="4" y="2" width="12" height="16" rx="2" stroke-linecap="round"/>
             <path d="M8 7h5M8 10h5M8 13h3" stroke-linecap="round"/>
-            <circle cx="6" cy="7" r="0.5" fill="currentColor"/>
-            <circle cx="6" cy="10" r="0.5" fill="currentColor"/>
-            <circle cx="6" cy="13" r="0.5" fill="currentColor"/>
           </svg>
         </div>
-        <h3 class="font-display font-bold text-[15px] text-slate-900 dark:text-white mb-2">Daily Log Tracking</h3>
-        <p class="text-[13.5px] text-slate-500 dark:text-slate-400 leading-relaxed">Record activities, tools, challenges, and lessons daily. Upload technical photos directly from your device. Logs are organised by week and month automatically.</p>
+        <h3 class="lp-feat-title">Daily Log Tracking</h3>
+        <p class="lp-feat-desc">Record activities, tools, challenges, and lessons daily. Upload technical photos from your device. Logs organised by week and month automatically.</p>
       </div>
 
       <!-- Supervisor approvals -->
-      <div data-reveal class="d1 feat-card rounded-2xl p-7">
-        <div class="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/30 flex items-center justify-center mb-5">
-          <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="10" cy="7" r="3"/>
-            <path d="M3 18c0-3.87 3.13-7 7-7s7 3.13 7 7" stroke-linecap="round"/>
-            <path d="M14 4l1.5 1.5L18 3" stroke-linecap="round" stroke-linejoin="round"/>
+      <div class="lp-feat-card" data-reveal style="transition-delay:80ms">
+        <div class="lp-feat-icon lp-feat-icon-green">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="9" cy="6" r="3"/>
+            <path d="M3 18c0-3.31 2.69-6 6-6" stroke-linecap="round"/>
+            <path d="M13 13l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <h3 class="font-display font-bold text-[15px] text-slate-900 dark:text-white mb-2">Supervisor Approvals</h3>
-        <p class="text-[13.5px] text-slate-500 dark:text-slate-400 leading-relaxed">Lecturers review every entry, issue grades with written comments, track submission compliance, and receive email alerts when students fall behind.</p>
+        <h3 class="lp-feat-title">Supervisor Approvals</h3>
+        <p class="lp-feat-desc">Lecturers review every entry, issue grades with written comments, track submission compliance, and receive alerts when students fall behind.</p>
       </div>
 
-      <!-- Secure authentication -->
-      <div data-reveal class="d2 feat-card rounded-2xl p-7">
-        <div class="w-11 h-11 rounded-xl bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/30 flex items-center justify-center mb-5">
-          <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+      <!-- Secure auth -->
+      <div class="lp-feat-card" data-reveal style="transition-delay:160ms">
+        <div class="lp-feat-icon lp-feat-icon-violet">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M10 2L4 5v5c0 3.87 2.61 7.19 6 8 3.39-.81 6-4.13 6-8V5L10 2z" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M7.5 10l1.5 1.5 3-3" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <h3 class="font-display font-bold text-[15px] text-slate-900 dark:text-white mb-2">Secure Authentication</h3>
-        <p class="text-[13.5px] text-slate-500 dark:text-slate-400 leading-relaxed">Argon2 password hashing, account lockout after 10 failed attempts, role-based access control, and rate limiting on all sensitive endpoints.</p>
+        <h3 class="lp-feat-title">Secure Authentication</h3>
+        <p class="lp-feat-desc">Argon2 password hashing, account lockout after failed attempts, role-based access control, and rate limiting on all sensitive endpoints.</p>
       </div>
 
-      <!-- Progress tracking -->
-      <div data-reveal class="feat-card rounded-2xl p-7">
-        <div class="w-11 h-11 rounded-xl bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800/30 flex items-center justify-center mb-5">
-          <svg class="w-5 h-5 text-sky-600 dark:text-sky-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M2 14l4-5 3 3 4-6 5 8H2z" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Progress analytics -->
+      <div class="lp-feat-card" data-reveal>
+        <div class="lp-feat-icon lp-feat-icon-sky">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2 15l4-5 3 3 4-6 5 7H2z" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <h3 class="font-display font-bold text-[15px] text-slate-900 dark:text-white mb-2">Progress Analytics</h3>
-        <p class="text-[13.5px] text-slate-500 dark:text-slate-400 leading-relaxed">Students see internship completion percentages. Lecturers track daily submission trends. Coordinators get faculty-wide compliance charts updated live.</p>
+        <h3 class="lp-feat-title">Progress Analytics</h3>
+        <p class="lp-feat-desc">Students see completion percentages. Lecturers track daily submission trends. Coordinators get faculty-wide compliance charts updated live.</p>
       </div>
 
       <!-- Report generation -->
-      <div data-reveal class="d1 feat-card rounded-2xl p-7">
-        <div class="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/30 flex items-center justify-center mb-5">
-          <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M4 4h12v12H4z" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M10 16V8M7 13l3 3 3-3" stroke-linecap="round" stroke-linejoin="round"/>
+      <div class="lp-feat-card" data-reveal style="transition-delay:80ms">
+        <div class="lp-feat-icon lp-feat-icon-amber">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="4" y="3" width="12" height="14" rx="2" stroke-linecap="round"/>
+            <path d="M10 16V9M7 12l3 4 3-4" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <h3 class="font-display font-bold text-[15px] text-slate-900 dark:text-white mb-2">Report Generation</h3>
-        <p class="text-[13.5px] text-slate-500 dark:text-slate-400 leading-relaxed">Export complete grade summaries as PDF or CSV in one click. Professional formatting, ready for submission to your university's SIWES office.</p>
+        <h3 class="lp-feat-title">Report Generation</h3>
+        <p class="lp-feat-desc">Export complete grade summaries as PDF or CSV in one click. Professional formatting ready for your university's SIWES office.</p>
       </div>
 
       <!-- Cloud storage -->
-      <div data-reveal class="d2 feat-card rounded-2xl p-7">
-        <div class="w-11 h-11 rounded-xl bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800/30 flex items-center justify-center mb-5">
-          <svg class="w-5 h-5 text-teal-600 dark:text-teal-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+      <div class="lp-feat-card" data-reveal style="transition-delay:160ms">
+        <div class="lp-feat-icon lp-feat-icon-teal">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M5 15a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a3 3 0 010 6H5z" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <h3 class="font-display font-bold text-[15px] text-slate-900 dark:text-white mb-2">Cloud Storage</h3>
-        <p class="text-[13.5px] text-slate-500 dark:text-slate-400 leading-relaxed">Logs, photos, and records are stored securely in the cloud. Access your entire internship history from any device, at any time, from anywhere.</p>
+        <h3 class="lp-feat-title">Cloud Storage</h3>
+        <p class="lp-feat-desc">Logs, photos, and records stored securely in the cloud. Access your entire internship history from any device, at any time, anywhere.</p>
       </div>
 
     </div>
   </div>
 </section>
+
 
 <!-- ══════════════════════════════════════════════
      HOW IT WORKS
 ═══════════════════════════════════════════════ -->
-<section id="how-it-works" class="relative py-24 sm:py-32 bg-[#f5f6fa] dark:bg-[#080e1d] overflow-hidden">
+<section id="how-it-works" class="lp-section lp-section-alt">
+  <!-- Blob -->
+  <div class="blob" style="width:400px;height:400px;background:#e94560;top:-60px;right:-60px"></div>
 
-  <div class="blob w-[500px] h-[500px] bg-cr-100/50 dark:bg-cr-900/10 top-0 right-0"></div>
+  <div class="lp-container" style="position:relative;z-index:1">
 
-  <div class="relative z-10 max-w-6xl mx-auto px-5 sm:px-8">
-
-    <div class="text-center mb-16">
-      <div data-reveal class="inline-block text-[11px] font-bold uppercase tracking-[0.12em] text-cr-600 dark:text-cr-400 mb-3">Simple process</div>
-      <h2 data-reveal class="d1 font-display text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4">Up and running<br>in minutes</h2>
-      <p data-reveal class="d2 text-slate-500 dark:text-slate-400 text-lg max-w-lg mx-auto leading-relaxed">Four steps from registration to a graded, exported internship report.</p>
+    <div class="lp-section-header">
+      <div class="lp-section-label" data-reveal>Simple process</div>
+      <h2 class="lp-section-title" data-reveal style="transition-delay:80ms">Up and running<br>in minutes</h2>
+      <p class="lp-section-sub" data-reveal style="transition-delay:160ms">Four steps from registration to a graded, exported internship report.</p>
     </div>
 
-    <!-- Steps -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
-
-      <div data-reveal class="bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-100 dark:border-white/5 shadow-sm relative">
-        <div class="step-num mb-5">01</div>
-        <h3 class="font-display font-bold text-[15px] text-slate-900 dark:text-white mb-2">Sign Up</h3>
-        <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">Register as a student, lecturer, or coordinator. Your role determines your dashboard and permissions instantly.</p>
-        <!-- Connector line (desktop) -->
-        <div class="hidden lg:block absolute top-[38px] left-full w-6 h-px bg-gradient-to-r from-cr-300/60 to-transparent dark:from-cr-700/40 z-10"></div>
+    <div class="lp-steps-grid">
+      <div class="lp-step-card" data-reveal>
+        <div class="lp-step-num lp-step-num-1">01</div>
+        <h3 class="lp-step-title">Sign Up</h3>
+        <p class="lp-step-desc">Register as a student, lecturer, or coordinator. Your role determines your dashboard and permissions instantly.</p>
       </div>
-
-      <div data-reveal class="d1 bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-100 dark:border-white/5 shadow-sm relative">
-        <div class="step-num mb-5" style="background:linear-gradient(135deg,#6d28d9,#5b21b6)">02</div>
-        <h3 class="font-display font-bold text-[15px] text-slate-900 dark:text-white mb-2">Log Activities</h3>
-        <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">Submit daily work logs with your title, description, tools, challenges, and photos. Organised automatically by week and month.</p>
-        <div class="hidden lg:block absolute top-[38px] left-full w-6 h-px bg-gradient-to-r from-violet-300/60 to-transparent dark:from-violet-700/40 z-10"></div>
+      <div class="lp-step-card" data-reveal style="transition-delay:80ms">
+        <div class="lp-step-num lp-step-num-2">02</div>
+        <h3 class="lp-step-title">Log Activities</h3>
+        <p class="lp-step-desc">Submit daily work logs with title, description, tools, challenges, and photos. Organised by week and month automatically.</p>
       </div>
-
-      <div data-reveal class="d2 bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-100 dark:border-white/5 shadow-sm relative">
-        <div class="step-num mb-5" style="background:linear-gradient(135deg,#059669,#047857)">03</div>
-        <h3 class="font-display font-bold text-[15px] text-slate-900 dark:text-white mb-2">Supervisor Reviews</h3>
-        <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">Your lecturer reads every entry, tracks your submission streak, and issues a holistic grade with detailed written feedback.</p>
-        <div class="hidden lg:block absolute top-[38px] left-full w-6 h-px bg-gradient-to-r from-emerald-300/60 to-transparent dark:from-emerald-700/40 z-10"></div>
+      <div class="lp-step-card" data-reveal style="transition-delay:160ms">
+        <div class="lp-step-num lp-step-num-3">03</div>
+        <h3 class="lp-step-title">Supervisor Reviews</h3>
+        <p class="lp-step-desc">Your lecturer reads every entry, tracks your submission streak, and issues a holistic grade with detailed written feedback.</p>
       </div>
-
-      <div data-reveal class="d3 bg-white dark:bg-[#111827] rounded-2xl p-6 border border-slate-100 dark:border-white/5 shadow-sm">
-        <div class="step-num mb-5" style="background:linear-gradient(135deg,#d97706,#b45309)">04</div>
-        <h3 class="font-display font-bold text-[15px] text-slate-900 dark:text-white mb-2">Generate Report</h3>
-        <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">Export a professionally formatted PDF or CSV grade report with one click — ready for your university's SIWES office.</p>
+      <div class="lp-step-card" data-reveal style="transition-delay:240ms">
+        <div class="lp-step-num lp-step-num-4">04</div>
+        <h3 class="lp-step-title">Generate Report</h3>
+        <p class="lp-step-desc">Export a professionally formatted PDF or CSV report with one click — ready for your university's SIWES office.</p>
       </div>
-
     </div>
 
     <!-- Progress demo card -->
-    <div data-reveal class="bg-white dark:bg-[#111827] rounded-2xl p-7 sm:p-8 border border-slate-100 dark:border-white/5 shadow-md max-w-2xl mx-auto">
-      <div class="flex items-center justify-between mb-2">
+    <div class="lp-demo-card" data-reveal>
+      <div class="lp-demo-header">
         <div>
-          <p class="text-[13px] font-semibold text-slate-800 dark:text-white">SIWES Progress Tracker</p>
-          <p class="text-[11px] text-slate-400">Adaeze C. · Computer Science · UNILAG</p>
+          <div class="lp-demo-name">SIWES Progress Tracker</div>
+          <div class="lp-demo-meta">Adaeze C. · Computer Science · UNILAG</div>
         </div>
-        <span class="text-[22px] font-display font-black text-cr-500">73%</span>
+        <span class="lp-demo-pct">73%</span>
       </div>
-      <div class="h-2.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden mb-3">
-        <div class="prog-fill h-full rounded-full bg-gradient-to-r from-cr-500 via-cr-400 to-amber-400"></div>
+      <div class="lp-demo-track">
+        <div class="lp-demo-fill"></div>
       </div>
-      <div class="flex justify-between text-[11px] text-slate-400 mb-5">
+      <div class="lp-demo-dates">
         <span>Week 1 (Mar 2025)</span>
         <span>Week 24 (Aug 2025)</span>
       </div>
-      <div class="grid grid-cols-3 gap-3">
-        <div class="bg-slate-50 dark:bg-white/3 rounded-xl p-3 text-center">
-          <p class="text-[19px] font-display font-black text-slate-900 dark:text-white">87</p>
-          <p class="text-[10px] text-slate-400 mt-0.5">Days logged</p>
+      <div class="lp-demo-stats">
+        <div class="lp-demo-stat">
+          <span class="lp-demo-stat-val">87</span>
+          <span class="lp-demo-stat-lbl">Days logged</span>
         </div>
-        <div class="bg-slate-50 dark:bg-white/3 rounded-xl p-3 text-center">
-          <p class="text-[19px] font-display font-black text-slate-900 dark:text-white">32</p>
-          <p class="text-[10px] text-slate-400 mt-0.5">Days remaining</p>
+        <div class="lp-demo-stat">
+          <span class="lp-demo-stat-val">32</span>
+          <span class="lp-demo-stat-lbl">Days remaining</span>
         </div>
-        <div class="bg-cr-50 dark:bg-cr-900/20 rounded-xl p-3 text-center border border-cr-100 dark:border-cr-800/30">
-          <p class="text-[19px] font-display font-black text-cr-600 dark:text-cr-400">A</p>
-          <p class="text-[10px] text-cr-400 mt-0.5">Current grade</p>
+        <div class="lp-demo-stat lp-demo-stat-brand">
+          <span class="lp-demo-stat-val">A</span>
+          <span class="lp-demo-stat-lbl">Current grade</span>
         </div>
       </div>
     </div>
@@ -292,63 +279,62 @@
   </div>
 </section>
 
+
 <!-- ══════════════════════════════════════════════
      BENEFITS
 ═══════════════════════════════════════════════ -->
-<section id="benefits" class="relative py-24 sm:py-32 bg-white dark:bg-[#0c1228] overflow-hidden">
+<section id="benefits" class="lp-section lp-section-white">
+  <!-- Blob -->
+  <div class="blob" style="width:350px;height:350px;background:#6d28d9;bottom:-40px;right:-40px"></div>
 
-  <div class="blob w-[400px] h-[400px] bg-ink-100/40 dark:bg-ink-900/10 bottom-0 right-0"></div>
+  <div class="lp-container" style="position:relative;z-index:1">
+    <div class="lp-benefits-grid">
 
-  <div class="relative z-10 max-w-6xl mx-auto px-5 sm:px-8">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
-
-      <!-- Left -->
+      <!-- Left: checklist -->
       <div>
-        <div data-reveal class="inline-block text-[11px] font-bold uppercase tracking-[0.12em] text-cr-600 dark:text-cr-400 mb-3">Why choose us</div>
-        <h2 data-reveal class="d1 font-display text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-6 leading-[1.1]">
-          Paper logbooks<br>can't do this.
-        </h2>
-        <p data-reveal class="d2 text-slate-500 dark:text-slate-400 text-lg leading-relaxed mb-10">Everything that makes SIWES Logbook genuinely better than the old way — for students, lecturers, and institutions alike.</p>
+        <div class="lp-benefits-label" data-reveal>Why choose us</div>
+        <h2 class="lp-benefits-title" data-reveal style="transition-delay:80ms">Paper logbooks<br>can't do this.</h2>
+        <p class="lp-benefits-desc" data-reveal style="transition-delay:160ms">Everything that makes SIWES Logbook genuinely better than the old way — for students, lecturers, and institutions.</p>
 
-        <div class="space-y-6">
+        <div class="lp-benefit-items">
 
-          <div data-reveal class="d2 flex items-start gap-4">
-            <div class="w-9 h-9 rounded-xl bg-cr-50 dark:bg-cr-900/25 border border-cr-100 dark:border-cr-800/30 flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-cr-500" viewBox="0 0 16 16" fill="none"><path d="M2.5 8.5l3 3 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="lp-benefit-item" data-reveal style="transition-delay:160ms">
+            <div class="lp-benefit-check">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M2.5 8.5l3 3 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <div>
-              <p class="font-semibold text-[14px] text-slate-800 dark:text-white mb-1">Saves hours every week</p>
-              <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">No printing, no manual collation, no lost submissions. Everything is captured digitally and instantly visible to supervisors.</p>
+              <p class="lp-benefit-text-title">Saves hours every week</p>
+              <p class="lp-benefit-text-desc">No printing, no manual collation, no lost submissions. Everything captured digitally and instantly visible to supervisors.</p>
             </div>
           </div>
 
-          <div data-reveal class="d3 flex items-start gap-4">
-            <div class="w-9 h-9 rounded-xl bg-cr-50 dark:bg-cr-900/25 border border-cr-100 dark:border-cr-800/30 flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-cr-500" viewBox="0 0 16 16" fill="none"><path d="M2.5 8.5l3 3 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="lp-benefit-item" data-reveal style="transition-delay:240ms">
+            <div class="lp-benefit-check">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M2.5 8.5l3 3 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <div>
-              <p class="font-semibold text-[14px] text-slate-800 dark:text-white mb-1">Organised, searchable records</p>
-              <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">Every entry is filterable by week, month, or day. Students can reference their own history. Lecturers can query across all students instantly.</p>
+              <p class="lp-benefit-text-title">Organised, searchable records</p>
+              <p class="lp-benefit-text-desc">Every entry filterable by week, month, or day. Students reference their own history. Lecturers query across all students instantly.</p>
             </div>
           </div>
 
-          <div data-reveal class="d4 flex items-start gap-4">
-            <div class="w-9 h-9 rounded-xl bg-cr-50 dark:bg-cr-900/25 border border-cr-100 dark:border-cr-800/30 flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-cr-500" viewBox="0 0 16 16" fill="none"><path d="M2.5 8.5l3 3 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="lp-benefit-item" data-reveal style="transition-delay:320ms">
+            <div class="lp-benefit-check">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M2.5 8.5l3 3 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <div>
-              <p class="font-semibold text-[14px] text-slate-800 dark:text-white mb-1">Accessible from any device</p>
-              <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">Fully responsive on mobile, tablet, and desktop. Students log from the field on their phones. Lecturers grade from anywhere.</p>
+              <p class="lp-benefit-text-title">Accessible from any device</p>
+              <p class="lp-benefit-text-desc">Fully responsive on mobile, tablet, and desktop. Students log from the field on their phones. Lecturers grade from anywhere.</p>
             </div>
           </div>
 
-          <div data-reveal class="d5 flex items-start gap-4">
-            <div class="w-9 h-9 rounded-xl bg-cr-50 dark:bg-cr-900/25 border border-cr-100 dark:border-cr-800/30 flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-cr-500" viewBox="0 0 16 16" fill="none"><path d="M2.5 8.5l3 3 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="lp-benefit-item" data-reveal style="transition-delay:400ms">
+            <div class="lp-benefit-check">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M2.5 8.5l3 3 8-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <div>
-              <p class="font-semibold text-[14px] text-slate-800 dark:text-white mb-1">Built for Nigerian institutions</p>
-              <p class="text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed">Multi-university support, faculty and department structures, coordinator roles, and SIWES-specific workflows are built into the core — not added as an afterthought.</p>
+              <p class="lp-benefit-text-title">Built for Nigerian institutions</p>
+              <p class="lp-benefit-text-desc">Multi-university support, faculty and department structures, coordinator roles, and SIWES-specific workflows built into the core.</p>
             </div>
           </div>
 
@@ -356,91 +342,115 @@
       </div>
 
       <!-- Right: role cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <div class="lp-role-cards">
 
-        <div data-reveal class="feat-card rounded-2xl p-6">
-          <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 14l9-5-9-5-9 5 9 5z" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 9v6" stroke-linecap="round"/></svg>
+          <div class="lp-role-card" data-reveal>
+            <div class="lp-role-icon lp-role-icon-blue">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 14l9-5-9-5-9 5 9 5z" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M3 9v6" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h4 class="lp-role-title">For Students</h4>
+            <p class="lp-role-desc">Log daily, track your progress bar, view your grade, and reference your full internship history any time.</p>
           </div>
-          <h4 class="font-display font-bold text-[14px] text-slate-900 dark:text-white mb-1.5">For Students</h4>
-          <p class="text-[12.5px] text-slate-500 dark:text-slate-400 leading-relaxed">Log daily, track your progress bar, view your grade, and reference your full internship history any time.</p>
-        </div>
 
-        <div data-reveal class="d1 feat-card rounded-2xl p-6">
-          <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/30 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="6" r="3"/><path d="M2 18c0-3.31 2.69-6 6-6" stroke-linecap="round"/><circle cx="15" cy="13" r="3"/></svg>
+          <div class="lp-role-card" data-reveal style="transition-delay:80ms">
+            <div class="lp-role-icon lp-role-icon-green">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="8" cy="6" r="3"/>
+                <path d="M2 18c0-3.31 2.69-6 6-6" stroke-linecap="round"/>
+                <circle cx="15" cy="13" r="3"/>
+              </svg>
+            </div>
+            <h4 class="lp-role-title">For Lecturers</h4>
+            <p class="lp-role-desc">Monitor all students, read every log, issue grades with feedback, export reports, and flag inactive students instantly.</p>
           </div>
-          <h4 class="font-display font-bold text-[14px] text-slate-900 dark:text-white mb-1.5">For Lecturers</h4>
-          <p class="text-[12.5px] text-slate-500 dark:text-slate-400 leading-relaxed">Monitor all students, read every log, issue grades with feedback, export reports, and flag inactive students instantly.</p>
-        </div>
 
-        <div data-reveal class="d2 feat-card rounded-2xl p-6 sm:col-span-2">
-          <div class="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/30 flex items-center justify-center mb-4">
-            <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l7-7 7 7v9H3V9z" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 18V13h4v5" stroke-linecap="round"/></svg>
+          <div class="lp-role-card lp-role-card-wide" data-reveal style="transition-delay:160ms">
+            <div class="lp-role-icon lp-role-icon-violet">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M3 9l7-7 7 7v9H3V9z" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 18V13h4v5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h4 class="lp-role-title">For School Coordinators</h4>
+            <p class="lp-role-desc">Manage your full university — approve lecturers, add faculties and departments, monitor compliance rates per department, suspend accounts, and see live analytics across every faculty in real time.</p>
           </div>
-          <h4 class="font-display font-bold text-[14px] text-slate-900 dark:text-white mb-1.5">For School Coordinators</h4>
-          <p class="text-[12.5px] text-slate-500 dark:text-slate-400 leading-relaxed">Manage your full university — approve lecturers, add faculties and departments, monitor compliance rates per department, suspend accounts, and see live analytics across every faculty in real time.</p>
-        </div>
 
+        </div>
       </div>
     </div>
   </div>
 </section>
+
 
 <!-- ══════════════════════════════════════════════
      TESTIMONIALS
 ═══════════════════════════════════════════════ -->
-<section id="testimonials" class="relative py-24 sm:py-32 bg-[#f5f6fa] dark:bg-[#080e1d] overflow-hidden">
+<section id="testimonials" class="lp-section lp-section-alt">
+  <div class="blob" style="width:400px;height:400px;background:#e94560;bottom:-80px;left:-80px"></div>
 
-  <div class="blob w-[450px] h-[450px] bg-cr-100/40 dark:bg-cr-900/10 -bottom-16 -left-16"></div>
+  <div class="lp-container" style="position:relative;z-index:1">
 
-  <div class="relative z-10 max-w-6xl mx-auto px-5 sm:px-8">
-
-    <div class="text-center mb-14">
-      <div data-reveal class="inline-block text-[11px] font-bold uppercase tracking-[0.12em] text-cr-600 dark:text-cr-400 mb-3">Testimonials</div>
-      <h2 data-reveal class="d1 font-display text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">Loved by students<br>and institutions</h2>
+    <div class="lp-section-header">
+      <div class="lp-section-label" data-reveal>Testimonials</div>
+      <h2 class="lp-section-title" data-reveal style="transition-delay:80ms">Loved by students<br>and institutions</h2>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div class="lp-testi-grid">
 
-      <div data-reveal class="testi-card rounded-2xl p-7">
-        <div class="flex gap-0.5 mb-5">
-          {% for i in "12345" %}<svg class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>{% endfor %}
+      <div class="lp-testi-card" data-reveal>
+        <div class="lp-testi-stars">
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
         </div>
-        <p class="text-[13.5px] text-slate-600 dark:text-slate-300 leading-relaxed italic mb-6">"I used to dread the paper logbook. With SIWES Logbook I actually enjoy logging my daily work — the interface is clean and it takes less than 3 minutes per day."</p>
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">AC</div>
+        <p class="lp-testi-quote">"I used to dread the paper logbook. With SIWES Logbook I actually enjoy logging my daily work — the interface is clean and it takes less than 3 minutes per day."</p>
+        <div class="lp-testi-author">
+          <div class="lp-testi-avatar" style="background:linear-gradient(135deg,#f472b6,#ec4899)">AC</div>
           <div>
-            <p class="text-[13px] font-semibold text-slate-800 dark:text-white">Adaeze C.</p>
-            <p class="text-[11px] text-slate-400">Computer Science · UNILAG</p>
+            <div class="lp-testi-name">Adaeze C.</div>
+            <div class="lp-testi-role">Computer Science · UNILAG</div>
           </div>
         </div>
       </div>
 
-      <div data-reveal class="d1 testi-card rounded-2xl p-7">
-        <div class="flex gap-0.5 mb-5">
-          {% for i in "12345" %}<svg class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>{% endfor %}
+      <div class="lp-testi-card" data-reveal style="transition-delay:80ms">
+        <div class="lp-testi-stars">
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
         </div>
-        <p class="text-[13.5px] text-slate-600 dark:text-slate-300 leading-relaxed italic mb-6">"The analytics dashboard shows me exactly which students are behind across all my faculties. I used to spend hours chasing paper — now everything is live and in one place."</p>
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-violet-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">KO</div>
+        <p class="lp-testi-quote">"The analytics dashboard shows me exactly which students are behind across all my faculties. I used to spend hours chasing paper — now everything is live and in one place."</p>
+        <div class="lp-testi-author">
+          <div class="lp-testi-avatar" style="background:linear-gradient(135deg,#818cf8,#6366f1)">KO</div>
           <div>
-            <p class="text-[13px] font-semibold text-slate-800 dark:text-white">Dr. Kehinde O.</p>
-            <p class="text-[11px] text-slate-400">School Coordinator · OAU</p>
+            <div class="lp-testi-name">Dr. Kehinde O.</div>
+            <div class="lp-testi-role">School Coordinator · OAU</div>
           </div>
         </div>
       </div>
 
-      <div data-reveal class="d2 testi-card rounded-2xl p-7">
-        <div class="flex gap-0.5 mb-5">
-          {% for i in "12345" %}<svg class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>{% endfor %}
+      <div class="lp-testi-card" data-reveal style="transition-delay:160ms">
+        <div class="lp-testi-stars">
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          <svg class="lp-testi-star" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
         </div>
-        <p class="text-[13.5px] text-slate-600 dark:text-slate-300 leading-relaxed italic mb-6">"Grading 40 students used to take a full week. Now I review logs and export PDFs in a couple of hours. The one-click report export alone is worth everything."</p>
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">BI</div>
+        <p class="lp-testi-quote">"Grading 40 students used to take a full week. Now I review logs and export PDFs in a couple of hours. The one-click report export alone is worth everything."</p>
+        <div class="lp-testi-author">
+          <div class="lp-testi-avatar" style="background:linear-gradient(135deg,#34d399,#10b981)">BI</div>
           <div>
-            <p class="text-[13px] font-semibold text-slate-800 dark:text-white">Mr. Babatunde I.</p>
-            <p class="text-[11px] text-slate-400">Lecturer · FUTA</p>
+            <div class="lp-testi-name">Mr. Babatunde I.</div>
+            <div class="lp-testi-role">Lecturer · FUTA</div>
           </div>
         </div>
       </div>
@@ -449,26 +459,25 @@
   </div>
 </section>
 
+
 <!-- ══════════════════════════════════════════════
      CTA BANNER
 ═══════════════════════════════════════════════ -->
-<section class="cta-section py-20 sm:py-28">
-  <div class="blob w-[400px] h-[400px] bg-white/10 -top-20 -right-20"></div>
-  <div class="blob w-[300px] h-[300px] bg-black/10 bottom-0 left-0"></div>
-
-  <div class="relative z-10 max-w-4xl mx-auto px-5 sm:px-8 text-center">
-    <h2 data-reveal class="font-display text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tight mb-5 leading-[1.08]">
-      Start your internship<br>journey the right way.
-    </h2>
-    <p data-reveal class="d1 text-red-100 text-lg leading-relaxed mb-10 max-w-xl mx-auto">
+<section class="lp-cta">
+  <div class="lp-cta-glow"></div>
+  <div class="lp-container" style="position:relative;z-index:1">
+    <h2 class="lp-cta-title" data-reveal>Start your internship<br>journey the right way.</h2>
+    <p class="lp-cta-sub" data-reveal style="transition-delay:80ms">
       Join thousands of Nigerian students and institutions already on SIWES Logbook. No paperwork. No headaches. Set up in minutes.
     </p>
-    <div data-reveal class="d2 flex flex-col sm:flex-row items-center justify-center gap-4">
-      <a href="{% url 'accounts:student_register' %}" class="w-full sm:w-auto bg-white text-cr-600 font-display font-bold text-[15px] px-8 py-4 rounded-2xl shadow-2xl hover:shadow-white/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
+    <div class="lp-cta-actions" data-reveal style="transition-delay:160ms">
+      <a href="{% url 'accounts:student_register' %}" class="lp-cta-btn-white">
         Create student account
-        <svg class="w-4 h-4" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </a>
-      <a href="{% url 'accounts:coordinator_register' %}" class="w-full sm:w-auto border border-white/30 text-white font-semibold text-[15px] px-8 py-4 rounded-2xl hover:bg-white/10 transition-all flex items-center justify-center gap-2 backdrop-blur-sm">
+      <a href="{% url 'accounts:coordinator_register' %}" class="lp-cta-btn-outline">
         Register your institution
       </a>
     </div>

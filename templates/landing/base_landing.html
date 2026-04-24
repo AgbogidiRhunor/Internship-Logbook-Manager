@@ -1,403 +1,140 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="SIWES Logbook System — Track your industrial training the smart way. Built for Nigerian university students, lecturers, and coordinators.">
-<title>{% block title %}SIWES Logbook — Track Your Industrial Training{% endblock %}</title>
+<title>{% block title %}SIWES Logbook System{% endblock %}</title>
 
-<!-- Tailwind CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- Fonts: Fraunces (display) + Outfit (body) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-<!-- Tailwind config -->
-<script>
-tailwind.config = {
-  darkMode: 'class',
-  theme: {
-    extend: {
-      fontFamily: {
-        display: ['Fraunces', 'Georgia', 'serif'],
-        body:    ['Outfit', 'sans-serif'],
-      },
-      colors: {
-        cr: {
-          50:  '#fff1f2', 100: '#ffe1e4', 200: '#ffc8ce',
-          300: '#ff9da7', 400: '#ff6474', 500: '#e9364f',
-          600: '#d41e3a', 700: '#b2172f', 800: '#94172c',
-          900: '#7c192c', 950: '#43080f',
-        },
-        ink: {
-          50:'#f5f3ff', 100:'#ede9fe', 200:'#ddd6fe',
-          300:'#c4b5fd', 400:'#a78bfa', 500:'#8b5cf6',
-          600:'#7c3aed', 700:'#6d28d9', 800:'#5b21b6', 900:'#4c1d95',
-        },
-      },
-      animation: {
-        'float-slow': 'floatSlow 7s ease-in-out infinite',
-        'float-med':  'floatMed 5s ease-in-out infinite',
-        'fade-up':    'fadeUp 0.8s cubic-bezier(0.16,1,0.3,1) both',
-        'glow-pulse': 'glowPulse 3s ease-in-out infinite',
-      },
-      keyframes: {
-        floatSlow: { '0%,100%': {transform:'translateY(0px)'}, '50%': {transform:'translateY(-14px)'} },
-        floatMed:  { '0%,100%': {transform:'translateY(0px)'}, '50%': {transform:'translateY(-8px)'} },
-        fadeUp:    { '0%': {opacity:'0',transform:'translateY(28px)'}, '100%': {opacity:'1',transform:'translateY(0)'} },
-        glowPulse: { '0%,100%': {opacity:'0.4'}, '50%': {opacity:'0.8'} },
-      },
-    }
-  }
-}
-</script>
-
-<style>
-  /* ── Base ───────────────────────────────────────── */
-  *, *::before, *::after { box-sizing: border-box; }
-  html { font-family: 'Outfit', sans-serif; }
-  body { overflow-x: hidden; }
-
-  /* ── Noise texture ──────────────────────────────── */
-  .texture::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1;
-    border-radius: inherit;
-  }
-
-  /* ── Gradient text ──────────────────────────────── */
-  .text-grad {
-    background: linear-gradient(125deg, #e9364f 0%, #f97b5a 55%, #fbbf24 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* ── Scroll reveal ──────────────────────────────── */
-  [data-reveal] {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.75s cubic-bezier(0.16,1,0.3,1),
-                transform 0.75s cubic-bezier(0.16,1,0.3,1);
-  }
-  [data-reveal].in {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  [data-reveal].d1 { transition-delay: 80ms; }
-  [data-reveal].d2 { transition-delay: 160ms; }
-  [data-reveal].d3 { transition-delay: 240ms; }
-  [data-reveal].d4 { transition-delay: 320ms; }
-  [data-reveal].d5 { transition-delay: 400ms; }
-
-  /* ── Glow blobs ─────────────────────────────────── */
-  .blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(90px);
-    pointer-events: none;
-  }
-
-  /* ── Feature card hover ─────────────────────────── */
-  .feat-card {
-    background: rgba(255,255,255,0.7);
-    border: 1px solid rgba(255,255,255,0.9);
-    backdrop-filter: blur(12px);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-  }
-  .dark .feat-card {
-    background: rgba(17,24,46,0.7);
-    border-color: rgba(255,255,255,0.06);
-  }
-  .feat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 24px 48px -12px rgba(233,54,79,0.16), 0 8px 16px -4px rgba(0,0,0,0.08);
-    border-color: rgba(233,54,79,0.3);
-  }
-
-  /* ── Primary button ─────────────────────────────── */
-  .btn-primary {
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(135deg, #e9364f, #d41e3a);
-    color: white;
-    font-weight: 600;
-    font-family: 'Outfit', sans-serif;
-    border-radius: 14px;
-    padding: 13px 28px;
-    font-size: 15px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 16px rgba(233,54,79,0.35);
-  }
-  .btn-primary::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
-    pointer-events: none;
-  }
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(233,54,79,0.45);
-  }
-  .btn-primary:active { transform: translateY(0); }
-
-  /* ── Ghost button ───────────────────────────────── */
-  .btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 28px;
-    border-radius: 14px;
-    font-weight: 600;
-    font-family: 'Outfit', sans-serif;
-    font-size: 15px;
-    border: 1.5px solid rgba(233,54,79,0.3);
-    color: #e9364f;
-    background: rgba(233,54,79,0.04);
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-  .btn-ghost:hover {
-    background: rgba(233,54,79,0.08);
-    border-color: rgba(233,54,79,0.5);
-    transform: translateY(-2px);
-  }
-  .dark .btn-ghost {
-    color: #f97b5a;
-    border-color: rgba(249,123,90,0.3);
-    background: rgba(249,123,90,0.05);
-  }
-
-  /* ── Step number ring ───────────────────────────── */
-  .step-num {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #e9364f, #d41e3a);
-    color: white;
-    font-family: 'Fraunces', serif;
-    font-weight: 900;
-    font-size: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 14px rgba(233,54,79,0.35);
-    flex-shrink: 0;
-  }
-
-  /* ── Testimonial card ───────────────────────────── */
-  .testi-card {
-    background: white;
-    border: 1px solid #f1f1f4;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .dark .testi-card {
-    background: #111827;
-    border-color: rgba(255,255,255,0.05);
-  }
-  .testi-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.1);
-  }
-
-  /* ── Navbar ─────────────────────────────────────── */
-  #nav-bar {
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-    transition: box-shadow 0.3s ease, background 0.3s ease;
-  }
-  #nav-bar.scrolled {
-    box-shadow: 0 1px 0 rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.05);
-  }
-
-  /* ── Hamburger lines ────────────────────────────── */
-  .ham span {
-    display: block;
-    width: 20px;
-    height: 1.5px;
-    background: currentColor;
-    border-radius: 2px;
-    transition: transform 0.25s ease, opacity 0.25s ease;
-  }
-  .ham.open span:nth-child(1) { transform: translateY(5px) rotate(45deg); }
-  .ham.open span:nth-child(2) { opacity: 0; }
-  .ham.open span:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
-
-  /* ── Progress pill ──────────────────────────────── */
-  @keyframes progWidth { from { width: 0% } to { width: 73% } }
-  .prog-fill { animation: progWidth 1.4s cubic-bezier(0.16,1,0.3,1) 0.4s both; }
-
-  /* ── Dot grid pattern ───────────────────────────── */
-  .dot-grid {
-    background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
-    background-size: 24px 24px;
-  }
-  .dark .dot-grid {
-    background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
-  }
-
-  /* ── CTA gradient section ───────────────────────── */
-  .cta-section {
-    background: linear-gradient(130deg, #e9364f 0%, #d41e3a 40%, #9f1239 100%);
-    position: relative;
-    overflow: hidden;
-  }
-  .cta-section::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-  }
-
-  /* ── Dark mode body ─────────────────────────────── */
-  html.dark body { background: #080e1d; color: #e2e8f0; }
-
-  /* ── Scrollbar ──────────────────────────────────── */
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #e9364f; border-radius: 99px; }
-</style>
+<link rel="stylesheet" href="{% static 'css/landing.css' %}">
 
 {% block extra_head %}{% endblock %}
 </head>
 
-<body class="font-body bg-[#f5f6fa] dark:bg-[#080e1d] text-slate-800 dark:text-slate-200 antialiased">
+<body>
 
-<!-- ══════════════════════════════════════════════
-     NAVBAR
-═══════════════════════════════════════════════ -->
-<header class="fixed top-0 left-0 right-0 z-50">
-  <div id="nav-bar" class="bg-white/80 dark:bg-[#080e1d]/85 border-b border-slate-200/50 dark:border-white/[0.04]">
-    <div class="max-w-6xl mx-auto px-5 sm:px-8 h-[62px] flex items-center justify-between gap-6">
+<!-- NAVBAR -->
+<header>
+  <nav class="lp-nav" id="lp-nav">
+    <div class="lp-nav-inner">
 
       <!-- Logo -->
-      <a href="{% url 'home' %}" class="flex items-center gap-2.5 flex-shrink-0">
-        <div class="w-8 h-8 rounded-[10px] bg-gradient-to-br from-cr-500 to-cr-700 flex items-center justify-center shadow-lg shadow-cr-500/30 text-white font-display font-black text-[13px]">SL</div>
-        <span class="font-display text-[15px] font-semibold text-slate-900 dark:text-white tracking-tight">SIWES<span class="text-cr-500">.</span></span>
+      <a href="{% url 'home' %}" class="lp-logo">
+        <div class="lp-logo-mark">SL</div>
+        <span class="lp-logo-text">SIWES<span class="lp-logo-dot">.</span></span>
       </a>
 
-      <!-- Desktop nav -->
-      <nav class="hidden md:flex items-center gap-1">
-        <a href="#features"    class="text-[13.5px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-3.5 py-2 rounded-lg hover:bg-slate-100/70 dark:hover:bg-white/5 transition-all">Features</a>
-        <a href="#how-it-works" class="text-[13.5px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-3.5 py-2 rounded-lg hover:bg-slate-100/70 dark:hover:bg-white/5 transition-all">How it works</a>
-        <a href="#benefits"    class="text-[13.5px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-3.5 py-2 rounded-lg hover:bg-slate-100/70 dark:hover:bg-white/5 transition-all">Benefits</a>
-      </nav>
+      <!-- Desktop links -->
+      <div class="lp-nav-links">
+        <a href="#features"     class="lp-nav-link">Features</a>
+        <a href="#how-it-works" class="lp-nav-link">How it works</a>
+        <a href="#benefits"     class="lp-nav-link">Benefits</a>
+        <a href="#testimonials" class="lp-nav-link">Reviews</a>
+      </div>
 
       <!-- Actions -->
-      <div class="flex items-center gap-2 ml-auto">
+      <div class="lp-nav-actions">
         <!-- Theme toggle -->
-        <button id="theme-btn" aria-label="Toggle theme"
-          class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-800 dark:hover:text-white transition-all">
-          <svg id="icon-sun" class="hidden dark:block w-[17px] h-[17px]" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/>
-          </svg>
-          <svg id="icon-moon" class="block dark:hidden w-[17px] h-[17px]" viewBox="0 0 20 20" fill="currentColor">
+        <button class="lp-theme-btn" id="theme-btn" aria-label="Toggle dark mode">
+          <svg class="icon-moon" width="17" height="17" viewBox="0 0 20 20" fill="currentColor">
             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+          </svg>
+          <svg class="icon-sun" width="17" height="17" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/>
           </svg>
         </button>
 
-        <a href="{% url 'accounts:login' %}" class="hidden sm:block text-[13.5px] font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-3.5 py-2 rounded-lg hover:bg-slate-100/70 dark:hover:bg-white/5 transition-all">Sign in</a>
-
-        <a href="{% url 'accounts:student_register' %}" class="btn-primary text-[13.5px] !py-[9px] !px-5 !rounded-[11px]">
-          Get Started
-          <svg class="w-3.5 h-3.5" viewBox="0 0 14 14" fill="none"><path d="M3 7h8M7.5 3.5 11 7l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
+        <a href="{% url 'accounts:login' %}" class="lp-signin">Sign in</a>
+        <a href="{% url 'accounts:student_register' %}" class="lp-btn-primary sm">Get Started</a>
 
         <!-- Hamburger -->
-        <button id="ham-btn" aria-label="Menu" class="ham md:hidden ml-1 w-9 h-9 flex flex-col items-center justify-center gap-[5px] rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+        <button class="lp-ham" id="ham-btn" aria-label="Open menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
       </div>
     </div>
 
     <!-- Mobile menu -->
-    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200/50 dark:border-white/[0.04]">
-      <nav class="px-5 py-4 flex flex-col gap-1">
-        <a href="#features"    onclick="closeMobile()" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-cr-500 px-3 py-2.5 rounded-xl hover:bg-cr-50 dark:hover:bg-cr-900/20 transition-all">Features</a>
-        <a href="#how-it-works" onclick="closeMobile()" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-cr-500 px-3 py-2.5 rounded-xl hover:bg-cr-50 dark:hover:bg-cr-900/20 transition-all">How it works</a>
-        <a href="#benefits"    onclick="closeMobile()" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-cr-500 px-3 py-2.5 rounded-xl hover:bg-cr-50 dark:hover:bg-cr-900/20 transition-all">Benefits</a>
-        <div class="h-px bg-slate-200/60 dark:bg-white/5 my-1"></div>
-        <a href="{% url 'accounts:login' %}" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-cr-500 px-3 py-2.5 rounded-xl hover:bg-cr-50 dark:hover:bg-cr-900/20 transition-all">Sign in</a>
-        <a href="{% url 'accounts:student_register' %}" class="btn-primary text-sm !py-2.5 !px-4 !rounded-xl text-center justify-center mt-1">Get Started Free</a>
-      </nav>
+    <div class="lp-mobile-menu" id="mobile-menu" role="navigation">
+      <a href="#features"     class="lp-mobile-link" onclick="closeMobile()">Features</a>
+      <a href="#how-it-works" class="lp-mobile-link" onclick="closeMobile()">How it works</a>
+      <a href="#benefits"     class="lp-mobile-link" onclick="closeMobile()">Benefits</a>
+      <a href="#testimonials" class="lp-mobile-link" onclick="closeMobile()">Reviews</a>
+      <div class="lp-mobile-divider"></div>
+      <a href="{% url 'accounts:login' %}"           class="lp-mobile-link">Sign in</a>
+      <a href="{% url 'accounts:student_register' %}" class="lp-btn-primary" style="justify-content:center;margin-top:4px">Get Started Free</a>
     </div>
-  </div>
+  </nav>
 </header>
 
-<!-- ══════════════════════════════════════════════
-     PAGE CONTENT
-═══════════════════════════════════════════════ -->
 {% block content %}{% endblock %}
 
 <!-- ══════════════════════════════════════════════
      FOOTER
 ═══════════════════════════════════════════════ -->
-<footer class="bg-slate-900 dark:bg-[#040810] text-slate-400 pt-16 pb-10">
-  <div class="max-w-6xl mx-auto px-5 sm:px-8">
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-12">
+<footer class="lp-footer">
+  <div class="lp-container">
+    <div class="lp-footer-grid">
 
-      <div class="col-span-2 sm:col-span-1">
-        <div class="flex items-center gap-2.5 mb-4">
-          <div class="w-8 h-8 rounded-[10px] bg-gradient-to-br from-cr-500 to-cr-700 flex items-center justify-center text-white font-display font-black text-[13px]">SL</div>
-          <span class="font-display text-[15px] font-semibold text-white tracking-tight">SIWES<span class="text-cr-500">.</span></span>
-        </div>
-        <p class="text-[13px] leading-relaxed max-w-[180px] mb-5">Built for Nigerian universities and their industrial training programmes.</p>
-        <div class="flex gap-2">
-          <a href="#" aria-label="GitHub" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+      <!-- Brand -->
+      <div class="lp-footer-brand">
+        <a href="{% url 'home' %}" class="lp-footer-logo">
+          <div class="lp-footer-logo-mark">SL</div>
+          <span class="lp-footer-logo-text">SIWES<span style="color:var(--clr-brand)">.</span></span>
+        </a>
+        <p class="lp-footer-tagline">Built for Nigerian universities and their industrial training programmes.</p>
+        <div class="lp-footer-socials">
+          <a href="#" class="lp-footer-social" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
           </a>
-          <a href="mailto:hello@siweslogbook.ng" aria-label="Email" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+          <a href="mailto:hello@siweslogbook.ng" class="lp-footer-social" aria-label="Email">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
           </a>
         </div>
       </div>
 
+      <!-- Product -->
       <div>
-        <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-4">Product</p>
-        <ul class="space-y-2.5 text-[13px]">
-          <li><a href="#features"    class="hover:text-white transition-colors">Features</a></li>
-          <li><a href="#how-it-works" class="hover:text-white transition-colors">How it works</a></li>
-          <li><a href="#benefits"    class="hover:text-white transition-colors">Benefits</a></li>
-          <li><a href="{% url 'accounts:login' %}" class="hover:text-white transition-colors">Sign in</a></li>
-        </ul>
+        <p class="lp-footer-col-title">Product</p>
+        <div class="lp-footer-links">
+          <a href="#features"     class="lp-footer-link">Features</a>
+          <a href="#how-it-works" class="lp-footer-link">How it works</a>
+          <a href="#benefits"     class="lp-footer-link">Benefits</a>
+          <a href="{% url 'accounts:login' %}" class="lp-footer-link">Sign in</a>
+        </div>
       </div>
 
+      <!-- Register as -->
       <div>
-        <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-4">Register as</p>
-        <ul class="space-y-2.5 text-[13px]">
-          <li><a href="{% url 'accounts:student_register' %}"     class="hover:text-white transition-colors">Student</a></li>
-          <li><a href="{% url 'accounts:lecturer_register' %}"    class="hover:text-white transition-colors">Lecturer</a></li>
-          <li><a href="{% url 'accounts:coordinator_register' %}" class="hover:text-white transition-colors">Coordinator</a></li>
-        </ul>
+        <p class="lp-footer-col-title">Register as</p>
+        <div class="lp-footer-links">
+          <a href="{% url 'accounts:student_register' %}"     class="lp-footer-link">Student</a>
+          <a href="{% url 'accounts:lecturer_register' %}"    class="lp-footer-link">Lecturer</a>
+          <a href="{% url 'accounts:coordinator_register' %}" class="lp-footer-link">Coordinator</a>
+        </div>
       </div>
 
+      <!-- Company -->
       <div>
-        <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-4">Company</p>
-        <ul class="space-y-2.5 text-[13px]">
-          <li><a href="#" class="hover:text-white transition-colors">About</a></li>
-          <li><a href="mailto:hello@siweslogbook.ng" class="hover:text-white transition-colors">Contact</a></li>
-          <li><a href="#" class="hover:text-white transition-colors">Privacy</a></li>
-        </ul>
+        <p class="lp-footer-col-title">Company</p>
+        <div class="lp-footer-links">
+          <a href="#" class="lp-footer-link">About</a>
+          <a href="mailto:hello@siweslogbook.ng" class="lp-footer-link">Contact</a>
+          <a href="#" class="lp-footer-link">Privacy</a>
+        </div>
       </div>
+
     </div>
 
-    <div class="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px]">
-      <span>© {% now "Y" %} SIWES Logbook System. All rights reserved.</span>
-      <div class="flex items-center gap-2">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+    <div class="lp-footer-bottom">
+      <span class="lp-footer-copy">© {% now "Y" %} SIWES Logbook System. All rights reserved.</span>
+      <div class="lp-footer-status">
+        <span class="lp-footer-status-dot"></span>
         <span>All systems operational</span>
       </div>
     </div>
@@ -405,61 +142,66 @@ tailwind.config = {
 </footer>
 
 <!-- ══════════════════════════════════════════════
-     SCRIPTS
+     SCRIPTS — zero external dependencies
 ═══════════════════════════════════════════════ -->
 <script>
-// ── Theme ───────────────────────────────────────
-(function() {
-  const saved = localStorage.getItem('siwes-theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (saved === 'dark' || (!saved && prefersDark)) document.documentElement.classList.add('dark');
+// ── Theme: apply saved preference before paint ───────────
+(function(){
+  var saved = localStorage.getItem('siwes-theme');
+  var dark  = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (dark) document.documentElement.setAttribute('data-theme','dark');
 })();
 
-document.getElementById('theme-btn').addEventListener('click', function() {
-  const isDark = document.documentElement.classList.toggle('dark');
-  localStorage.setItem('siwes-theme', isDark ? 'dark' : 'light');
-});
+document.addEventListener('DOMContentLoaded', function() {
 
-// ── Hamburger ───────────────────────────────────
-const hamBtn  = document.getElementById('ham-btn');
-const mobileMenu = document.getElementById('mobile-menu');
+  // ── Theme toggle ───────────────────────────────────────
+  document.getElementById('theme-btn').addEventListener('click', function() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next    = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('siwes-theme', next);
+  });
 
-hamBtn.addEventListener('click', function() {
-  const open = mobileMenu.classList.toggle('hidden');
-  hamBtn.classList.toggle('open', !mobileMenu.classList.contains('hidden'));
+  // ── Hamburger ──────────────────────────────────────────
+  var ham  = document.getElementById('ham-btn');
+  var menu = document.getElementById('mobile-menu');
+  ham.addEventListener('click', function() {
+    var open = menu.classList.toggle('open');
+    ham.classList.toggle('open', open);
+    ham.setAttribute('aria-expanded', open.toString());
+  });
+
+  // ── Navbar scroll shadow ───────────────────────────────
+  var nav = document.getElementById('lp-nav');
+  window.addEventListener('scroll', function() {
+    nav.classList.toggle('scrolled', window.scrollY > 16);
+  }, { passive: true });
+
+  // ── Smooth scroll ──────────────────────────────────────
+  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  });
+
+  // ── Scroll reveal ──────────────────────────────────────
+  var ro = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        ro.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('[data-reveal]').forEach(function(el) { ro.observe(el); });
+
 });
 
 function closeMobile() {
-  mobileMenu.classList.add('hidden');
-  hamBtn.classList.remove('open');
+  document.getElementById('mobile-menu').classList.remove('open');
+  document.getElementById('ham-btn').classList.remove('open');
 }
-
-// ── Navbar scroll shadow ─────────────────────────
-const navBar = document.getElementById('nav-bar');
-window.addEventListener('scroll', function() {
-  navBar.classList.toggle('scrolled', window.scrollY > 16);
-}, { passive: true });
-
-// ── Smooth scroll ───────────────────────────────
-document.querySelectorAll('a[href^="#"]').forEach(function(a) {
-  a.addEventListener('click', function(e) {
-    const id = this.getAttribute('href');
-    const el = document.querySelector(id);
-    if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  });
-});
-
-// ── Scroll reveal ───────────────────────────────
-const ro = new IntersectionObserver(function(entries) {
-  entries.forEach(function(entry) {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('in');
-      ro.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-document.querySelectorAll('[data-reveal]').forEach(function(el) { ro.observe(el); });
 </script>
 
 {% block extra_js %}{% endblock %}
