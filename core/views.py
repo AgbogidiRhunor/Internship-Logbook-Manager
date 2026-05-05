@@ -6,8 +6,8 @@ def landing(request):
     Public landing page.
     Authenticated users are redirected directly to their dashboard.
     """
-    if request.user.is_authenticated:
-        return redirect('dashboard:home')
+    # if request.user.is_authenticated:
+    #     return redirect('dashboard:home')
     return render(request, 'landing/landing.html')
 
 
