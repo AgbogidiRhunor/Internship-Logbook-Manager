@@ -137,7 +137,6 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = f'SIWES Logbook <{config("EMAIL_HOST_USER", default="")}>'
 
-SITE_URL = config('SITE_URL', default='http://localhost:8000')
 
 # Session
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
