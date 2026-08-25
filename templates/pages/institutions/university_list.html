@@ -44,7 +44,7 @@
         <span class="badge badge-neutral badge-sm">{{ faculty.departments.count }} dept{{ faculty.departments.count|pluralize }}</span>
       </div>
       <div class="d-flex gap-2">
-        <a href="{% url 'institutions:faculty_create_dept' faculty.pk %}" class="btn btn-ghost btn-sm">+ Dept</a>
+        <a href="{% url 'institutions:department_create' faculty.pk %}" class="btn btn-ghost btn-sm">+ Dept</a>
         <a href="{% url 'institutions:faculty_edit' faculty.pk %}" class="btn btn-ghost btn-sm">Edit</a>
         <button class="btn btn-ghost btn-sm" style="color:var(--clr-danger-text)"
           onclick="Modal.confirm({title:'Delete {{ faculty.name }}?',message:'All departments will be removed.',confirmText:'Delete',danger:true,onConfirm:function(){window.location='{% url 'institutions:faculty_delete' faculty.pk %}'}})">

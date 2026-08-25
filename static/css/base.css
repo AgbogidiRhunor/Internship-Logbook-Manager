@@ -224,7 +224,27 @@ img, picture, video, canvas, svg { display: block; max-width: 100%; }
 input, button, textarea, select { font: inherit; }
 p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
 a { color: var(--text-brand); text-decoration: none; }
-a:hover { text-decoration: underline; }
+/* ── COMPLETELY REMOVE ALL UNDERLINES ON HOVER ── */
+a,
+a:hover,
+a:focus,
+a:active,
+a:visited,
+* a,
+* a:hover,
+* a:focus,
+* a:active,
+* a:visited {
+  text-decoration: none !important;
+}
+
+/* Also remove any border-bottom that looks like an underline */
+a:hover,
+a:focus,
+a:active {
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
 ol, ul { list-style: none; }
 button { cursor: pointer; border: none; background: none; }
 
